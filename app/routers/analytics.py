@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from redis.commands.search.query import Query
 
 router = APIRouter()
 
@@ -8,7 +7,7 @@ router = APIRouter()
 async def analytics():
     return {"message": "Hello World"}
 
-@router.get("/analytics/friends_top_games")
+@router.get("/friends_top_games")
 async def friends_top_games():
     return {"message": "Hello World"}
 

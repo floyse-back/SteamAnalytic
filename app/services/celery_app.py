@@ -10,7 +10,7 @@ app.conf.broker_connection_retry_on_startup=True
 app.conf.beat_schedule = {
     "update_every_night":{
         'task':'app.services.tasks.update_steam_games',
-        'schedule':crontab(hour=12,minute=53)
+        'schedule':crontab(hour=11,minute=10)
     }
 }
 

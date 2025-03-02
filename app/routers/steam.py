@@ -4,6 +4,7 @@ from ..database.crud import CRUD
 from ..database.database import engine
 from steam_web_api import Steam
 from ..config import STEAM_API_KEY
+import asyncio
 router = APIRouter()
 
 session = async_sessionmaker(bind=engine,expire_on_commit=False)
@@ -20,10 +21,29 @@ async def best_sallers(page:int=Query(default=1,gt=0),limit:int=Query(default=10
     return result
 
 @router.get("/users_full_stats/{user_id}")
-async def user_stats(user_id:int=Path(gt=-1)):
-    result =steam.users.get_user_details(f"{user_id}")
+async def user_stats(user_id:str):
+    try:
+        my_int = int(user_id)
+        user_data =steam.users.get_user_details(f"{my_int}")
+    except Exception as ex:
+        user_data = steam.users.search_user(f"{user_id}")
+        user_id = user_data["player"]["steamid"]
 
-    return result
+    user_friends_list = steam.users.get_user_friends_list(f"{user_id}")
+    print(user_friends_list)
+    user_badges = steam.users.get_user_badges(f"{user_id}")
+    print(user_badges)
+    user_games = steam.users.get_owned_games(f"{user_id}")
+    print(user_games)
+    #user_whish_list = steam.users.get_profile_wishlist(f"{user_id}")
+
+    data_dict = {
+        "user_data":user_data,
+        "user_friends_list":user_friends_list,
+        "user_badges":user_badges,
+        "user_games":user_games,
+    }
+    return data_dict
 
 @router.get("/game_stats/{steam_id}")
 async def game_stats(steam_id:int =Path(gt=-1)):
