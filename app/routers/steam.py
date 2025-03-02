@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Query,Path
 from sqlalchemy.ext.asyncio import async_sessionmaker
-from ..database.crud import CRUD
+from ..database.orm import ORM
 from ..database.database import engine
 from steam_web_api import Steam
 from ..config import STEAM_API_KEY
@@ -9,7 +9,7 @@ router = APIRouter()
 
 session = async_sessionmaker(bind=engine,expire_on_commit=False)
 steam = Steam(STEAM_API_KEY)
-db = CRUD()
+db = ORM()
 
 @router.get("/get_top_games")
 async def get_top_games():
@@ -30,11 +30,8 @@ async def user_stats(user_id:str):
         user_id = user_data["player"]["steamid"]
 
     user_friends_list = steam.users.get_user_friends_list(f"{user_id}")
-    print(user_friends_list)
     user_badges = steam.users.get_user_badges(f"{user_id}")
-    print(user_badges)
     user_games = steam.users.get_owned_games(f"{user_id}")
-    print(user_games)
     #user_whish_list = steam.users.get_profile_wishlist(f"{user_id}")
 
     data_dict = {
@@ -52,7 +49,9 @@ async def game_stats(steam_id:int =Path(gt=-1)):
 
 @router.get("/upcoming_release")
 async def upcoming_release():
-    return {"message": "Upcoming Release"}
+    result = await db.left_join_where_games(session)
+
+    return {"message": f"{result}"}
 
 @router.get("/api/most_played_games/")
 async def most_played_games(limit:int=Query(default=100,gt=-1),page:int=Query(default=1,gt=0)):

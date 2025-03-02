@@ -68,15 +68,27 @@ class Game(Base):
         back_populates="publisher_games"
     )
 
+    game_categories = relationship(
+        "Category",
+        secondary="category_to_many",
+        back_populates="category_games"
+    )
+
 class Category(Base):
     __tablename__ = 'categories'
     category_id = Column(Integer, primary_key=True, index=True)
-    category_name = Column(String)
+    category_name = Column(String,unique=True)
+
+    category_games = relationship(
+        "Game",
+        secondary="category_to_many",
+        back_populates = "game_categories"
+    )
 
 class Ganres(Base):
     __tablename__ = 'ganres'
     ganres_id = Column(Integer, primary_key=True, index=True)
-    ganres_name = Column(String)
+    ganres_name = Column(String,unique=True)
 
     ganre_games = relationship(
         "Game",
@@ -87,7 +99,7 @@ class Ganres(Base):
 class Publisher(Base):
     __tablename__ = 'publishers'
     publisher_id = Column(Integer, primary_key=True, index=True)
-    publisher_name = Column(String)
+    publisher_name = Column(String,unique=True)
 
     publisher_games = relationship(
         "Game",
@@ -106,3 +118,9 @@ class PublisherToMany(Base):
 
     game_id = Column(ForeignKey("gamesdetails.steam_appid", ondelete="CASCADE"), primary_key=True)
     publisher_id = Column(ForeignKey("publishers.publisher_id", ondelete="CASCADE"), primary_key=True)
+
+class CategoryToMany(Base):
+    __tablename__ = 'category_to_many'
+
+    game_id = Column(ForeignKey("gamesdetails.steam_appid", ondelete="CASCADE"), primary_key = True)
+    category_id = Column(ForeignKey("categories.category_id", ondelete="CASCADE"), primary_key = True)

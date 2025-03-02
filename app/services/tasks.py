@@ -5,9 +5,13 @@ from ..database.models import SteamBase,HistoricalSteamBase
 from .utils.steam_parser import SteamParser
 from sqlalchemy import text
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 @app.task
 def update_steam_games():
-    print("Start task update_steam_games!")
+    logger.info("Starting task update_steam_games!")
     session = next(get_db())
 
     parser = SteamParser()
@@ -28,5 +32,6 @@ def update_steam_games():
     return "Finished task update_steam_games!"
 
 @app.task
-def update_game_details():
+def get_game_details():
     session = next(get_db())
+    logger.info("Starting task get_game_details!")

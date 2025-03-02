@@ -14,7 +14,7 @@ class SteamDetailsParser:
         for i in self.game_list_appid:
             result = self.steam.apps.get_app_details(int(i),filters=self.filters)
             new_list.append(result)
-            time.sleep(1)
+            time.sleep(2)
 
         return new_list
 

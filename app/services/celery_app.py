@@ -11,6 +11,10 @@ app.conf.beat_schedule = {
     "update_every_night":{
         'task':'app.services.tasks.update_steam_games',
         'schedule':crontab(hour=11,minute=10)
+    },
+    "get_thousand_gamedetails":{
+        'task':'app.services.tasks.get_game_details',
+        'schedule':crontab(minute=0,hour="3,5,7")
     }
 }
 
