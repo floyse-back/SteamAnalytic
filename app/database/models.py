@@ -33,24 +33,20 @@ class HistoricalSteamBase(Base):
 class Game(Base):
     __tablename__ = 'gamesdetails'
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    steam_appid = Column(Integer, nullable=False,unique=True)
-    publisher = Column(String)
-    developer = Column(String)
+    steam_appid = Column(Integer, primary_key=True, index=True, unique=True)
+    name = Column(String)
     is_free = Column(Boolean)
     short_description = Column(String)
     requirements = Column(JSONB)
     initial_price = Column(Integer)
     final_price = Column(Integer)
+    final_formatted_price = Column(String)
     metacritic = Column(String)
     discount = Column(Integer)
-    release_date = Column(Date)
-    categories = Column(JSONB)
-    ganres = Column(JSONB)
     achievements = Column(JSONB)
-    release_data = Column(JSONB)
     recomendations = Column(Integer)
+    img_url = Column(String)
+    last_updated = Column(Date,default = sqlalchemy.func.current_date())
 
     __table_args__ = (
         UniqueConstraint('steam_appid', name='uq_gamesdetails_steam_appid'),

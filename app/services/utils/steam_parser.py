@@ -7,6 +7,7 @@ class SteamParser:
         self.startpage:int = 0
         self.__current_page = self.startpage
         self.__empty_data_score = 0
+        self.__count_error = 0
 
     @staticmethod
     def create_data_list(data: dict):
@@ -50,20 +51,27 @@ class SteamParser:
 
     def page_parse(self):
         while self.current_page <80 and self.__empty_data_score < 3:
-            data = self.request_steampipy()
-            if data != {}:
-                self.__empty_data_score = 0
-                new_data = self.create_data_list(data)
-                yield new_data
-            elif data == {}:
-                print("Empty data")
-                print(data)
-                self.__empty_data_score += 1
+            try:
+                data = self.request_steampipy()
+                if data != {}:
+                    self.__empty_data_score = 0
+                    new_data = self.create_data_list(data)
+                    yield new_data
+                elif data == {}:
+                    print("Empty data")
+                    print(data)
+                    self.__empty_data_score += 1
 
-            self.current_page += 1
-            time.sleep(70)
+                self.current_page += 1
+                self.__count_error = 0
+                time.sleep(70)
+            except Exception as ex:
+                print(f"Error info: {ex}")
+                if self.__count_error >= 3:
+                    return "Server don`t respond"
+                self.__count_error += 1
+                time.sleep(200)
 
-            print(f"Empty data score: {self.__empty_data_score}")
             print(f"Current page: {self.current_page}")
 
 
