@@ -1,9 +1,10 @@
-from fastapi import APIRouter,Query,Path
+from fastapi import APIRouter,Query,Path,HTTPException
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from ..database.orm import ORM
 from ..database.database import engine
 from steam_web_api import Steam
 from ..config import STEAM_API_KEY
+from ..services.tasks import update_or_add_game
 import asyncio
 router = APIRouter()
 
@@ -29,10 +30,17 @@ async def user_stats(user_id:str):
         user_data = steam.users.search_user(f"{user_id}")
         user_id = user_data["player"]["steamid"]
 
-    user_friends_list = steam.users.get_user_friends_list(f"{user_id}")
-    user_badges = steam.users.get_user_badges(f"{user_id}")
-    user_games = steam.users.get_owned_games(f"{user_id}")
-    #user_whish_list = steam.users.get_profile_wishlist(f"{user_id}")
+    try:
+        user_friends_list = steam.users.get_user_friends_list(f"{user_id}")
+        user_badges = steam.users.get_user_badges(f"{user_id}")
+        user_games = steam.users.get_owned_games(f"{user_id}")
+    except Exception as ex:
+        return HTTPException(
+            status_code = 404,
+            detail = f"User {user_id} not found",
+            headers = {"WWW-Authenticate": "Bearer"},
+        )
+
 
     data_dict = {
         "user_data":user_data,
@@ -44,7 +52,10 @@ async def user_stats(user_id:str):
 
 @router.get("/game_stats/{steam_id}")
 async def game_stats(steam_id:int =Path(gt=-1)):
-    result = steam.apps.get_app_details(steam_id)
+    filters ='basic,controller_support,dlc,fullgame,developers,demos,price_overview,metacritic,categories,genres,recommendations,achievements'
+    result = steam.apps.get_app_details(steam_id,filters=filters)
+
+    update_or_add_game.apply_async(args=[result,steam_id])
     return {"message": f"Game Stats {result}"}
 
 @router.get("/upcoming_release")

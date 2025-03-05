@@ -41,13 +41,13 @@ def get_game_details():
     session = next(get_db())
 
     try:
-        statement = select(SteamBase.appid).join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).filter(Game.steam_appid.is_(None)).order_by(SteamBase.positive).limit(100)
+        statement = select(SteamBase.appid).join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).filter(Game.steam_appid.is_(None)).order_by(SteamBase.positive).limit(10)
         result = session.execute(statement)
         result = result.scalars().all()
-        parser = SteamDetailsParser(result,session=session)
+        parser = SteamDetailsParser(session=session)
 
         logger.info(f"Get games")
-        games = parser.parse()
+        parser.parse(game_list_appid=result)
 
     except Exception as e:
         session.rollback()
@@ -55,3 +55,18 @@ def get_game_details():
     finally:
         session.close()
     logger.info("Finished task get_game_details!")
+
+
+@app.task
+def update_or_add_game(game,steam_id):
+    logger.info("Starting task update_or_add_game!")
+    session = next(get_db())
+
+    if game.get(f"{steam_id}").get("success")==False:
+        return logger.info(f"Game not found")
+    game = game.get(f"{steam_id}").get("data")
+
+    steamparser=SteamDetailsParser(session=session)
+    steamparser.create_gamesdetails_model([game])
+
+    logger.info(f"Game update or add {steam_id}")

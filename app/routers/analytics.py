@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-
+import steam_web_api
 router = APIRouter()
 
 
