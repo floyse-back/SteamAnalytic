@@ -30,6 +30,16 @@ class HistoricalSteamBase(Base):
     data = Column(JSONB,nullable=False)
     snapshot_date = Column(Date,nullable=False,default=sqlalchemy.func.current_date())
 
+class UserModel(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key = True, autoincrement=True)
+    username = Column(String,nullable=False,unique=True)
+    hashed_password = Column(String,nullable=False)
+    email = Column(String,default = None)
+    steamid = Column(String,default = "")
+    steamname = Column(String,default="")
+
 class Game(Base):
     __tablename__ = 'gamesdetails'
 
