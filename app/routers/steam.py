@@ -1,14 +1,11 @@
 from fastapi import APIRouter,Query,Path,HTTPException
-from sqlalchemy.ext.asyncio import async_sessionmaker
 from ..database.orm import ORM
-from ..database.database import engine
+from ..database.database import session
 from steam_web_api import Steam
 from ..config import STEAM_API_KEY
 from ..services.tasks import update_or_add_game
-import asyncio
 router = APIRouter()
 
-session = async_sessionmaker(bind=engine,expire_on_commit=False)
 steam = Steam(STEAM_API_KEY)
 db = ORM()
 

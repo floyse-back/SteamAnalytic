@@ -1,17 +1,20 @@
 import jwt
 import bcrypt
+from ...config import TokenConfig
+
+token_config = TokenConfig()
 
 def decode_jwt(
         encoded_jwt:str,
-        public_key:str,
-        algorithm:str="RS256"
+        public_key:str = token_config.public_key_link.read_text(),
+        algorithm:str=token_config.algorithm
 ):
     return jwt.decode(encoded_jwt, public_key,algorithms=[algorithm])
 
 def encode_jwt(
         payload:dict,
-        private_key:str,
-        algorithm:str="RS256"
+        private_key:str = token_config.private_key_link.read_text(),
+        algorithm:str=token_config.algorithm
 ):
     return jwt.encode(payload, private_key, algorithm=algorithm)
 

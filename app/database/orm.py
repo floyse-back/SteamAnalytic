@@ -31,7 +31,8 @@ class ORM:
 class UsersORM:
     async def get_user(self,async_session:async_sessionmaker[AsyncSession],username:str):
         async with async_session() as session:
-            return await session.execute(select(UserModel).filter(UserModel.username == username))
+            result = await session.execute(select(UserModel).filter(UserModel.username == username))
+            return result.scalars().first()
 
     async def create_user(self,async_session:async_sessionmaker[AsyncSession],user:User):
         async with async_session() as session:

@@ -1,5 +1,9 @@
 from load_dotenv import load_dotenv
+from pathlib import Path
+from pydantic import BaseModel
 from os import getenv
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
 
@@ -11,3 +15,12 @@ CELERY_RESULT_BACKEND = getenv("CELERY_RESULT_BACKEND")
 
 STEAM_API_KEY = getenv("STEAM_API_KEY")
 STEAMDB_URL = getenv("STEAMDB_URL")
+
+class TokenConfig(BaseModel):
+    private_key_link:Path = BASE_DIR  / "app" / "certs" / "jwt-private.pem"
+    public_key_link:Path = BASE_DIR / "app" / "certs" / "jwt-public.pem"
+    token_type: str = "bearer"
+    algorithm: str = "RS256"
+
+    access_token_expires: int = 15
+    refresh_token_expires: int = 60
