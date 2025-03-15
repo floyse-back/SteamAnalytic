@@ -1,24 +1,24 @@
 from fastapi import APIRouter,Request,Form,HTTPException,Depends,Response
 from app.routers.auth.utils import *
 from ...database.orm import UsersORM
-from ...database.database import session
+from ...database.database import get_async_db
 from ...schemas import User
 from datetime import datetime,timedelta,timezone
 from app.config import TokenConfig
 from ...schemas import TokenType
+from starlette import status
 
 token_config = TokenConfig()
 
 router = APIRouter(prefix="/auth",tags=["auth"])
 users = UsersORM()
 
-async def verify_user(username:str = Form(),password:str = Form()) -> User:
+async def verify_user(session = Depends(get_async_db),username:str = Form(),password:str = Form()) -> User:
     user  = await users.get_user(session,username)
     if not user:
         raise HTTPException(status_code=404,detail = "User not found")
 
-    if not  verify_password(password,user.hashed_password.encode("utf-8")):
-        print(password)
+    if not verify_password(password,user.hashed_password.encode("utf-8")):
         raise HTTPException(status_code=404,detail = "Incorrect password")
 
     return user
@@ -78,7 +78,7 @@ async def logout_user(response:Response):
     return {"message":"Logout successful"}
 
 @router.post("/register_user/")
-async def register_user(user:User=User):
+async def register_user(session=Depends(get_async_db),user:User=User):
     user.hashed_password = hashed_password(user.hashed_password).decode("utf-8")
     await users.create_user(session,user)
     return {"message":"Register successful"}
@@ -94,3 +94,23 @@ async def user_me(request:Request):
 
     user = decode_jwt(token)
     return user
+
+@router.delete("/delete_user/",status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(request:Request,response:Response,session = Depends(get_async_db)):
+    access_token = request.cookies.get("access_token")
+    print(access_token)
+    if not access_token:
+        raise HTTPException(
+            status_code=401,
+            detail = "No autorization user"
+        )
+    user = decode_jwt(access_token)
+    print(user)
+    await users.delete_user(session,user.get("username"))
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+
+@router.get("/test")
+async def user_test():
+    return {}

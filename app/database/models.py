@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Boolean, Integer, String, JSON, Date, ForeignKey,UniqueConstraint
-from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy import Column, Boolean, Integer, String, Date,UniqueConstraint
+from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 import sqlalchemy

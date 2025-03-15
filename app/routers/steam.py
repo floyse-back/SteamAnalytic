@@ -1,6 +1,6 @@
-from fastapi import APIRouter,Query,Path,HTTPException
+from fastapi import APIRouter, Query, Path, HTTPException, Depends
 from ..database.orm import ORM
-from ..database.database import session
+from ..database.database import get_async_db
 from steam_web_api import Steam
 from ..config import STEAM_API_KEY
 from ..services.tasks import update_or_add_game
@@ -14,7 +14,7 @@ async def get_top_games():
     return {"message": "Top Games"}
 
 @router.get("/best_sallers/")
-async def best_sallers(page:int=Query(default=1,gt=0),limit:int=Query(default=100,gt=-1)):
+async def best_sallers(session = Depends(get_async_db),page:int=Query(default=1,gt=0),limit:int=Query(default=100,gt=-1)):
     result = await db.get_most_discount_games(session,page,limit)
     return result
 
@@ -56,13 +56,13 @@ async def game_stats(steam_id:int =Path(gt=-1)):
     return {"message": f"Game Stats {result}"}
 
 @router.get("/upcoming_release")
-async def upcoming_release():
+async def upcoming_release(session=Depends(get_async_db)):
     result = await db.left_join_where_games(session)
 
     return {"message": f"{result}"}
 
 @router.get("/api/most_played_games/")
-async def most_played_games(limit:int=Query(default=100,gt=-1),page:int=Query(default=1,gt=0)):
+async def most_played_games(session=Depends(get_async_db),limit:int=Query(default=100,gt=-1),page:int=Query(default=1,gt=0)):
     result = await db.get_most_played_page(session,page,limit)
 
     return result
