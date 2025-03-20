@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Boolean, Integer, String, Date,UniqueConstraint
+from sqlalchemy import Column, Boolean, Integer, String, Date,JSON,UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey
-from sqlalchemy.dialects.postgresql import JSONB
 import sqlalchemy
 from .database import Base
 
@@ -27,7 +26,7 @@ class HistoricalSteamBase(Base):
     __tablename__ = "historysteambase"
 
     id = Column(Integer, primary_key=True,index=True,autoincrement=True)
-    data = Column(JSONB,nullable=False)
+    data = Column(JSON,nullable=False)
     snapshot_date = Column(Date,nullable=False,default=sqlalchemy.func.current_date())
 
 class UserModel(Base):
@@ -47,13 +46,13 @@ class Game(Base):
     name = Column(String)
     is_free = Column(Boolean)
     short_description = Column(String)
-    requirements = Column(JSONB)
+    requirements = Column(JSON)
     initial_price = Column(Integer)
     final_price = Column(Integer)
     final_formatted_price = Column(String)
     metacritic = Column(String)
     discount = Column(Integer)
-    achievements = Column(JSONB)
+    achievements = Column(JSON)
     recomendations = Column(Integer)
     img_url = Column(String)
     last_updated = Column(Date,default = sqlalchemy.func.current_date())

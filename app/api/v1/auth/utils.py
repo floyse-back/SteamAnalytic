@@ -1,6 +1,6 @@
 import jwt
 import bcrypt
-from ...config import TokenConfig
+from app.config import TokenConfig
 
 token_config = TokenConfig()
 

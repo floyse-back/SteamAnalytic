@@ -1,11 +1,11 @@
 from fastapi import APIRouter,Request,Form,HTTPException,Depends,Response
-from app.routers.auth.utils import *
-from ...database.orm import UsersORM
-from ...database.database import get_async_db
-from ...schemas import User
+from app.api.v1.auth.utils import *
+from app.database.orm import UsersORM
+from app.database.database import get_async_db
+from app.schemas import User
 from datetime import datetime,timedelta,timezone
 from app.config import TokenConfig
-from ...schemas import TokenType
+from app.schemas import TokenType
 from starlette import status
 
 token_config = TokenConfig()
@@ -46,7 +46,7 @@ def create_access_token(user: User) -> str:
     token = encode_jwt(payload)
     return token
 
-@router.post("/login",response_model = TokenType)
+@router.post("/login",response_model = TokenType,status_code=status.HTTP_201_CREATED)
 async def login_user(response: Response,user = Depends(verify_user)):
     access_token = create_access_token(user)
     refresh_token = create_refresh_token(user)
@@ -77,7 +77,7 @@ async def logout_user(response:Response):
 
     return {"message":"Logout successful"}
 
-@router.post("/register_user/")
+@router.post("/register_user/",status_code = status.HTTP_201_CREATED)
 async def register_user(session=Depends(get_async_db),user:User=User):
     user.hashed_password = hashed_password(user.hashed_password).decode("utf-8")
     await users.create_user(session,user)

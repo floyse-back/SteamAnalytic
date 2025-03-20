@@ -16,6 +16,8 @@ CELERY_RESULT_BACKEND = getenv("CELERY_RESULT_BACKEND")
 STEAM_API_KEY = getenv("STEAM_API_KEY")
 STEAMDB_URL = getenv("STEAMDB_URL")
 
+HOST = getenv("HOST")
+
 class TokenConfig(BaseModel):
     private_key_link:Path = BASE_DIR  / "app" / "certs" / "jwt-private.pem"
     public_key_link:Path = BASE_DIR / "app" / "certs" / "jwt-public.pem"
