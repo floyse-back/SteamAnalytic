@@ -43,13 +43,15 @@ class UsersORM:
                 steamname= user.steamname
             )
 
+        user_check = await self.get_user(session,user_model.username)
+
+        if user_check:
+            raise HTTPException(status_code=400, detail="This username is already registered")
         session.add(user_model)
         await session.commit()
 
     async def delete_user(self,session:AsyncSession,username:str):
-        result = await session.execute(select(UserModel).filter(UserModel.username == username))
-        user = result.scalars().first()
-        print(user)
+        user = await self.user_get(session,username)
 
         if user:
             await session.delete(user)
@@ -57,3 +59,7 @@ class UsersORM:
             await session.commit()
         else:
             raise HTTPException(status_code=404, detail="User not found")
+
+    async def user_get(self,session,username) -> dict:
+        result = await session.execute(select(UserModel).filter(UserModel.username == username))
+        return result.scalars().first()

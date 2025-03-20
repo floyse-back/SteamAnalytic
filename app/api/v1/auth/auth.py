@@ -1,53 +1,20 @@
-from fastapi import APIRouter,Request,Form,HTTPException,Depends,Response
+from fastapi import APIRouter,Request, HTTPException,Depends,Response
+from fastapi.security import OAuth2PasswordBearer
+
 from app.api.v1.auth.utils import *
-from app.database.orm import UsersORM
+from app.api.v1.auth.verify_auth import token_config, users, verify_user, create_refresh_token, create_access_token
 from app.database.database import get_async_db
 from app.schemas import User
-from datetime import datetime,timedelta,timezone
-from app.config import TokenConfig
 from app.schemas import TokenType
 from starlette import status
 
-token_config = TokenConfig()
-
 router = APIRouter(prefix="/auth",tags=["auth"])
-users = UsersORM()
 
-async def verify_user(session = Depends(get_async_db),username:str = Form(),password:str = Form()) -> User:
-    user  = await users.get_user(session,username)
-    if not user:
-        raise HTTPException(status_code=404,detail = "User not found")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-    if not verify_password(password,user.hashed_password.encode("utf-8")):
-        raise HTTPException(status_code=404,detail = "Incorrect password")
-
-    return user
-
-def create_refresh_token(user: User) -> str:
-    payload = {
-        "sub": user.username,
-        "type":"refresh_token",
-        "username": user.username,
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=token_config.refresh_token_expires),
-    }
-
-    token = encode_jwt(payload)
-    return token
-
-def create_access_token(user: User) -> str:
-    payload = {
-        "sub": user.username,
-        "type": "access_token",
-        "username": user.username,
-        "email": user.email,
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=token_config.access_token_expires),
-    }
-
-    token = encode_jwt(payload)
-    return token
 
 @router.post("/login",response_model = TokenType,status_code=status.HTTP_201_CREATED)
-async def login_user(response: Response,user = Depends(verify_user)):
+async def login_user(response: Response, user = Depends(verify_user)):
     access_token = create_access_token(user)
     refresh_token = create_refresh_token(user)
 
@@ -55,14 +22,14 @@ async def login_user(response: Response,user = Depends(verify_user)):
         key="access_token",
         value = access_token,
         httponly=True,
-        max_age = token_config.access_token_expires*60
+        max_age =token_config.access_token_expires * 60
     )
 
     response.set_cookie(
         key="refresh_token",
         value = refresh_token,
         httponly = True,
-        max_age = token_config.refresh_token_expires*60
+        max_age =token_config.refresh_token_expires * 60
     )
 
     return TokenType(
@@ -70,17 +37,16 @@ async def login_user(response: Response,user = Depends(verify_user)):
         refresh_token= refresh_token
     )
 
-@router.get("/logout/")
+@router.get("/logout/",status_code=status.HTTP_204_NO_CONTENT)
 async def logout_user(response:Response):
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
 
-    return {"message":"Logout successful"}
 
 @router.post("/register_user/",status_code = status.HTTP_201_CREATED)
 async def register_user(session=Depends(get_async_db),user:User=User):
     user.hashed_password = hashed_password(user.hashed_password).decode("utf-8")
-    await users.create_user(session,user)
+    await users.create_user(session, user)
     return {"message":"Register successful"}
 
 @router.get("/user/me")
@@ -106,7 +72,7 @@ async def delete_user(request:Request,response:Response,session = Depends(get_as
         )
     user = decode_jwt(access_token)
     print(user)
-    await users.delete_user(session,user.get("username"))
+    await users.delete_user(session, user.get("username"))
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
 
