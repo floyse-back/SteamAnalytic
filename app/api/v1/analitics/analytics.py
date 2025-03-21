@@ -1,14 +1,23 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter,Depends, HTTPException,Request
 from steam_web_api import Steam
 from app.config import STEAM_API_KEY,HOST
 from httpx import AsyncClient
+from app.api.v1.auth.utils import decode_jwt
 router = APIRouter(prefix="/api/v1/analytics")
 
 steam = Steam(STEAM_API_KEY)
 
+def user_auth_check(request: Request):
+    token = request.cookies.get("refresh_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    else:
+        decoded_token = decode_jwt(token)
+
+    return decoded_token
 
 @router.get("/user_battle")
-async def analytics(user1_id:str, user2_id:str):
+async def analytics(user1_id:str, user2_id:str,auth = Depends(user_auth_check)):
     if user1_id == user2_id:
         raise HTTPException(status_code=404)
     async with AsyncClient(base_url=f"http://{HOST}") as client:
@@ -20,19 +29,15 @@ async def analytics(user1_id:str, user2_id:str):
             }
 
 @router.get("/friends_top_games")
-async def friends_top_games():
+async def friends_top_games(auth = Depends(user_auth_check)):
     return {"message": "Hello World"}
 
 @router.get("/popular_games/")
-async def popular_games(ganre: str=None):
+async def popular_games(ganre: str=None,auth=Depends(user_auth_check),):
     return {"message": "popular games"}
 
-@router.get("/friends_activity_track")
-async def friends_activity_track():
-    return {"message": "friends activity track"}
-
 @router.get("/friends_list/")
-async def friend_game_list(user_id: int=None):
+async def friend_game_list(user_id: int=None,auth = Depends(user_auth_check)):
     response= steam.users.get_user_friends_list(f"{user_id}")
     return response
 

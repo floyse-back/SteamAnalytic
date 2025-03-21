@@ -1,4 +1,4 @@
-from .models import SteamBase,Game,UserModel
+from .models import SteamBase,Game,UserModel,TokenBase
 from sqlalchemy.ext.asyncio import AsyncSession,async_sessionmaker
 from sqlalchemy import select,Integer,cast
 from ..schemas import User
@@ -63,3 +63,13 @@ class UsersORM:
     async def user_get(self,session,username) -> dict:
         result = await session.execute(select(UserModel).filter(UserModel.username == username))
         return result.scalars().first()
+
+class RefreshTokenORM:
+    def verify_refresh_token(self,session,refresh_token):
+        pass
+
+    def delete_refresh_token(self,session,refresh_token):
+        pass
+
+    def create_refresh_token(self,session,refresh_token):
+        pass

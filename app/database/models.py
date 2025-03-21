@@ -3,6 +3,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey
 import sqlalchemy
 from .database import Base
+from datetime import timedelta,date
+from app.config import TokenConfig
+
+token_config = TokenConfig()
 
 class SteamBase(Base):
     __tablename__ = "steambase"
@@ -129,3 +133,10 @@ class CategoryToMany(Base):
 
     game_id = Column(ForeignKey("gamesdetails.steam_appid", ondelete="CASCADE"), primary_key = True)
     category_id = Column(ForeignKey("categories.category_id", ondelete="CASCADE"), primary_key = True)
+
+class TokenBase(Base):
+    __tablename__ = 'refreshtokens'
+
+    id = Column(Integer, primary_key=True, index=True,autoincrement=True)
+    refresh_token = Column(String,index=True,nullable=False)
+    delete_time = Column(Date,default=lambda: date.today() + timedelta(minutes=token_config.refresh_token_expires))
