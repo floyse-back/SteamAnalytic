@@ -18,7 +18,7 @@ app.conf.beat_schedule = {
     },
     "delete_refresh_tokens_by_time":{
         'task':'app.services.tasks.delete_refresh_tokens_by_time',
-        'schedule': crontab(hour="11",minute="50")
+        'schedule': crontab(hour="11",minute="53")
     }
 }
 

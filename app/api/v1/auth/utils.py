@@ -1,5 +1,7 @@
 import jwt
+from jwt.exceptions import ExpiredSignatureError
 import bcrypt
+from fastapi import HTTPException
 from app.config import TokenConfig
 
 token_config = TokenConfig()
@@ -9,7 +11,13 @@ def decode_jwt(
         public_key:str = token_config.public_key_link.read_text(),
         algorithm:str=token_config.algorithm
 ):
-    return jwt.decode(encoded_jwt, public_key,algorithms=[algorithm])
+    try:
+        return jwt.decode(encoded_jwt, public_key,algorithms=[algorithm])
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code = 401,
+            detail = "Unauthorized user",
+        )
 
 def encode_jwt(
         payload:dict,

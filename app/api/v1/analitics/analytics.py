@@ -1,4 +1,7 @@
 from fastapi import APIRouter,Depends, HTTPException,Request
+
+from app.database.database import get_async_db
+from app.database.orm import RefreshTokenORM
 from steam_web_api import Steam
 from app.config import STEAM_API_KEY,HOST
 from httpx import AsyncClient
@@ -7,12 +10,16 @@ router = APIRouter(prefix="/api/v1/analytics")
 
 steam = Steam(STEAM_API_KEY)
 
-def user_auth_check(request: Request):
+refresh_token = RefreshTokenORM()
+
+async def user_auth_check(request: Request,session = Depends(get_async_db)):
     token = request.cookies.get("refresh_token")
     if not token:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
-    else:
-        decoded_token = decode_jwt(token)
+
+    decoded_token = decode_jwt(token)
+    await refresh_token.verify_refresh_token(session=session,refresh_token=token)
+
 
     return decoded_token
 
@@ -40,4 +47,13 @@ async def popular_games(ganre: str=None,auth=Depends(user_auth_check),):
 async def friend_game_list(user_id: int=None,auth = Depends(user_auth_check)):
     response= steam.users.get_user_friends_list(f"{user_id}")
     return response
+
+@router.get("/games_for_you")
+async def games_for_you(auth = Depends(user_auth_check)):
+    pass
+
+@router.get("/salling_for_you")
+async def salling_for_you(auth = Depends(user_auth_check)):
+    pass
+
 
