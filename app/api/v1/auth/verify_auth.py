@@ -1,10 +1,9 @@
 from datetime import datetime, timezone, timedelta
 
 from app.database.orm import UsersORM
-from app.schemas import User
-from .utils import *
+from app.database.models import UserModel
 from fastapi import Form, Depends, HTTPException
-from app.database.database import engine, get_async_db
+from app.database.database import get_async_db
 from .utils import verify_password, token_config, encode_jwt
 
 
@@ -14,8 +13,7 @@ async def verify_user_account(users_db,username:str = Form(),password:str = Form
 
 users = UsersORM()
 
-
-async def verify_user(session = Depends(get_async_db),username:str = Form(),password:str = Form()) -> User:
+async def verify_user(session = Depends(get_async_db),username:str = Form(),password:str = Form()) -> UserModel:
     user  = await users.get_user(session,username)
     if not user:
         raise HTTPException(status_code=404,detail = "User not found")
@@ -26,8 +24,9 @@ async def verify_user(session = Depends(get_async_db),username:str = Form(),pass
     return user
 
 
-def create_refresh_token(user: User) -> str:
+def create_refresh_token(user: UserModel) -> str:
     payload = {
+        "user_id": user.id,
         "sub": user.username,
         "type":"refresh_token",
         "username": user.username,
@@ -38,7 +37,7 @@ def create_refresh_token(user: User) -> str:
     return token
 
 
-def create_access_token(user: User) -> str:
+def create_access_token(user: UserModel) -> str:
     payload = {
         "sub": user.username,
         "type": "access_token",

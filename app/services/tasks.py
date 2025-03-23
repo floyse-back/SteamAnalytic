@@ -1,10 +1,12 @@
 from .celery_app import app
 
+from datetime import date
+
 from .database import get_db
-from ..database.models import SteamBase,Game,Publisher,Ganres,Category
+from ..database.models import SteamBase, Game, Publisher, Ganres, Category, TokenBase
 from .utils.steam_parser import SteamParser
 from .utils.steam_details_parser import SteamDetailsParser
-from sqlalchemy import text,cast,Integer,select,insert
+from sqlalchemy import text,cast,Integer,select,delete
 
 import logging
 
@@ -70,3 +72,13 @@ def update_or_add_game(game,steam_id):
     steamparser.create_gamesdetails_model([game])
 
     logger.info(f"Game update or add {steam_id}")
+
+@app.task
+def delete_refresh_tokens_by_time():
+    logger.info("Starting task delete_refresh_tokens_by_time!")
+    session = next(get_db())
+    delete_tokens = delete(TokenBase).where(TokenBase.delete_time > date.today())
+
+    session.execute(delete_tokens)
+    session.commit()
+    logger.info("Finished task delete_refresh_tokens_by_time!")

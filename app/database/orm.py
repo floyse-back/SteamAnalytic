@@ -1,6 +1,7 @@
 from .models import SteamBase,Game,UserModel,TokenBase
 from sqlalchemy.ext.asyncio import AsyncSession,async_sessionmaker
-from sqlalchemy import select,Integer,cast
+from sqlalchemy import select,Integer,cast,delete
+from datetime import datetime,timezone
 from ..schemas import User
 from fastapi import HTTPException
 
@@ -30,7 +31,7 @@ class ORM:
             return result.scalars().all()
 
 class UsersORM:
-    async def get_user(self,async_session:AsyncSession,username:str):
+    async def get_user(self,async_session:AsyncSession,username:str) -> UserModel:
         result = await async_session.execute(select(UserModel).filter(UserModel.username == username))
         return result.scalars().first()
 
@@ -65,11 +66,26 @@ class UsersORM:
         return result.scalars().first()
 
 class RefreshTokenORM:
-    def verify_refresh_token(self,session,refresh_token):
-        pass
+    async def verify_refresh_token(self,session,refresh_token):
+        token_get = await session.execute(select(TokenBase).filter(TokenBase.refresh_token == refresh_token))
+        result = token_get.scalars().first()
 
-    def delete_refresh_token(self,session,refresh_token):
-        pass
+        if not result:
+            return False
 
-    def create_refresh_token(self,session,refresh_token):
-        pass
+        return True
+
+    async def delete_refresh_token(self,session:AsyncSession,refresh_token):
+        stmt = delete(TokenBase).where(TokenBase.refresh_token == refresh_token)
+
+        await session.execute(stmt)
+        await session.commit()
+
+    async def create_refresh_token(self,session:AsyncSession,user_id,refresh_token):
+        token_model  =TokenBase(
+            user_id = user_id,
+            refresh_token=refresh_token
+        )
+
+        session.add(token_model)
+        await session.commit()

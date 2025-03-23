@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from app.api.v1.auth.utils import *
 from app.api.v1.auth.verify_auth import token_config, users, verify_user, create_refresh_token, create_access_token
 from app.database.database import get_async_db
+from app.database.orm import RefreshTokenORM
 from app.schemas import User
 from app.schemas import TokenType
 from starlette import status
@@ -12,11 +13,20 @@ router = APIRouter(prefix="/auth",tags=["auth"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+refresh_orm = RefreshTokenORM()
+
+
 
 @router.post("/login",response_model = TokenType,status_code=status.HTTP_201_CREATED)
-async def login_user(response: Response, user = Depends(verify_user)):
+async def login_user(response: Response,session = Depends(get_async_db), user = Depends(verify_user)) -> TokenType:
     access_token = create_access_token(user)
     refresh_token = create_refresh_token(user)
+
+    await refresh_orm.create_refresh_token(
+        session = session,
+        user_id = user.id,
+        refresh_token = refresh_token
+    )
 
     response.set_cookie(
         key="access_token",
@@ -64,15 +74,15 @@ async def user_me(request:Request):
 @router.delete("/delete_user/",status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(request:Request,response:Response,session = Depends(get_async_db)):
     access_token = request.cookies.get("access_token")
-    print(access_token)
     if not access_token:
         raise HTTPException(
             status_code=401,
             detail = "No autorization user"
         )
     user = decode_jwt(access_token)
-    print(user)
+
     await users.delete_user(session, user.get("username"))
+
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
 
