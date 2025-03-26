@@ -1,33 +1,29 @@
 from .models import SteamBase,Game,UserModel,TokenBase
 from sqlalchemy.ext.asyncio import AsyncSession,async_sessionmaker
-from sqlalchemy import select,Integer,cast,delete
+from sqlalchemy import select,Integer,cast,delete,desc
 from ..schemas import User
 from fastapi import HTTPException
 
 
-class ORM:
-    async def get_most_played_page(self,async_session:async_sessionmaker[AsyncSession],page:int,limit:int):
-        statement = select(SteamBase).order_by(SteamBase.positive).offset((page - 1) * limit).limit(limit)
+class SteamORM:
+    async def get_top_games(self,session:AsyncSession,page:int,limit:int):
+        statement = select(SteamBase).order_by(desc(SteamBase.positive)).offset((page - 1) * limit).limit(limit)
 
-        async with async_session() as session:
-            result = await session.execute(statement)
-            return result.scalars().all()
+        result = await session.execute(statement)
+        return result.scalars().all()
 
-    async def get_most_discount_games(self,async_session:async_sessionmaker[AsyncSession],page:int,limit:int):
-        statement = select(SteamBase).order_by(SteamBase.discount).filter(SteamBase.discount > 80).offset((page - 1) * limit).limit(limit)
+    async def get_most_discount_games(self,session:AsyncSession,page:int,limit:int):
+        statement = select(SteamBase).order_by(desc(SteamBase.discount)).filter(SteamBase.discount > 80).offset((page - 1) * limit).limit(limit)
 
-        async with async_session() as session:
-            result = await session.execute(statement)
-            return result.scalars().all()
+        result = await session.execute(statement)
+        return result.scalars().all()
 
-    async def left_join_where_games(self,async_session:async_sessionmaker[AsyncSession]):
-        statements =select(SteamBase).\
-        join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).\
-        filter(Game.steam_appid.is_(None))
+class AnaliticsORM():
+    async def get_user_games_full_info(self,data):
+        for i in data:
+            pass
 
-        async with async_session() as session:
-            result = await session.execute(statements)
-            return result.scalars().all()
+
 
 class UsersORM:
     async def get_user(self,async_session:AsyncSession,username:str) -> UserModel:

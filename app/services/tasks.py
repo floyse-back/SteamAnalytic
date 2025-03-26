@@ -3,7 +3,7 @@ from .celery_app import app
 from datetime import date
 
 from .database import get_db
-from ..database.models import SteamBase, Game, Publisher, Ganres, Category, TokenBase
+from ..database.models import SteamBase, Game, TokenBase
 from .utils.steam_parser import SteamParser
 from .utils.steam_details_parser import SteamDetailsParser
 from sqlalchemy import text,cast,Integer,select,delete
