@@ -10,7 +10,7 @@ app.conf.broker_connection_retry_on_startup=True
 app.conf.beat_schedule = {
     "update_every_night":{
         'task':'app.services.tasks.update_steam_games',
-        'schedule':crontab(hour="0",minute="0")
+        'schedule':crontab(hour="15",minute="25")
     },
     "get_thousand_gamedetails":{
         'task':'app.services.tasks.get_game_details',
@@ -19,6 +19,10 @@ app.conf.beat_schedule = {
     "delete_refresh_tokens_by_time":{
         'task':'app.services.tasks.delete_refresh_tokens_by_time',
         'schedule': crontab(hour="11",minute="53")
+    },
+    "update_game_icon_url":{
+        'task': 'app.services.tasks.update_game_icon_url',
+        'schedule': crontab(hour ="21",minute="21")
     }
 }
 

@@ -50,7 +50,7 @@ async def game_stats(steam_id:int =Path(gt=-1)):
     result = steam.apps.get_app_details(steam_id,filters=filters)
 
     update_or_add_game.apply_async(args=[result,steam_id])
-    return {"message": f"Game Stats {result}"}
+    return result
 
 @router.get("/get_top_games/")
 async def get_top_games(session=Depends(get_async_db),limit:int=Query(default=100,gt=-1),page:int=Query(default=1,gt=0)):

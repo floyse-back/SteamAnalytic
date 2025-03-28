@@ -6,7 +6,7 @@ from .database import get_db
 from ..database.models import SteamBase, Game, TokenBase
 from .utils.steam_parser import SteamParser
 from .utils.steam_details_parser import SteamDetailsParser
-from sqlalchemy import text,cast,Integer,select,delete
+from sqlalchemy import text,cast,Integer,select,delete,update
 
 import logging
 
@@ -43,7 +43,7 @@ def get_game_details():
     session = next(get_db())
 
     try:
-        statement = select(SteamBase.appid).join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).filter(Game.steam_appid.is_(None)).order_by(SteamBase.positive).limit(10)
+        statement = select(SteamBase.appid).join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).filter(Game.steam_appid.is_(None)).order_by(SteamBase.positive).limit(500)
         result = session.execute(statement)
         result = result.scalars().all()
         parser = SteamDetailsParser(session=session)
@@ -82,3 +82,18 @@ def delete_refresh_tokens_by_time():
     session.execute(delete_tokens)
     session.commit()
     logger.info("Finished task delete_refresh_tokens_by_time!")
+
+@app.task
+def update_game_icon_url():
+    logger.info("Starting task update_game_icon_url!")
+
+    session = next(get_db())
+    get_appid_icon_statement = select(SteamBase.appid,Game.img_url).join(Game,cast(SteamBase.appid,Integer) == cast(Game.steam_appid,Integer),isouter=True).where(SteamBase.img_url.is_(None))
+    result = session.execute(get_appid_icon_statement).fetchall()
+
+    print(result)
+    for element in result:
+        stmt = update(SteamBase).where(SteamBase.appid == element[0]).values(img_url=element[1])
+        session.execute(stmt)
+    session.commit()
+    logger.info("Finished task update_game_icon_url!")

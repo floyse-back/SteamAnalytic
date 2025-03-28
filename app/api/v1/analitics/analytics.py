@@ -59,7 +59,6 @@ async def games_for_you(user:str,auth = Depends(user_auth_check)):
     game_data = user_1.json()['user_games']['games']
     analitic = AnaliticGameForYou(game_data)
 
-    print(analitic.filter_data())
     return {"Hello World":"Stress Test"}
 
 @router.get("/salling_for_you")
