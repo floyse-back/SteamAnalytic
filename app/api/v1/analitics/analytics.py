@@ -1,6 +1,7 @@
 from fastapi import APIRouter,Depends, HTTPException,Request
 
-from app.api.v1.analitics.utils import AnaliticGameForYou
+from app.api.v1.analitics.utils.user_rating import UserRating
+from app.api.v1.analitics.utils.utils import AnaliticGameForYou
 from app.database.database import get_async_db
 from app.database.orm import RefreshTokenORM
 from steam_web_api import Steam
@@ -30,8 +31,8 @@ async def analytics(user1_id:str, user2_id:str,auth = Depends(user_auth_check)):
     if user1_id == user2_id:
         raise HTTPException(status_code=404)
     async with AsyncClient(base_url=f"http://{HOST}") as client:
-        user_1 = await client.request("GET",f"/api/v1/steam/users_full_stats/{user1_id}")
-        user_2 = await client.request("GET", f"/api/v1/steam/users_full_stats/{user2_id}")
+        user_1 = await client.request("GET",f"/api/v1/steam/users_full_stats/{user1_id}",params={"friends_details":"false"})
+        user_2 = await client.request("GET", f"/api/v1/steam/users_full_stats/{user2_id}",params={"friends_details":"false"})
 
     return {f"{user1_id}": user_1.json(),
             f"{user2_id}": user_2.json()
@@ -39,8 +40,14 @@ async def analytics(user1_id:str, user2_id:str,auth = Depends(user_auth_check)):
 
 @router.get("/user_score/")
 async def user_score_generate(user:str,auth = Depends(user_auth_check)):
+    user_rating = UserRating()
+
+    async with AsyncClient(base_url=f"http://{HOST}") as client:
+        user_data = await client.request("GET",f"api/v1/steam/users_full_stats/{user}",params={"friends_details":"false"})
+
+    result = user_rating.create_user(user_data.json())
     return {
-        "user_id":f"{user}"
+        "user_rating": result
     }
 
 @router.get("/friends_list/")

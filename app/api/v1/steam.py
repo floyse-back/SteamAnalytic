@@ -3,7 +3,7 @@ from app.database.orm import SteamORM
 from app.database.database import get_async_db
 from steam_web_api import Steam
 from httpx import AsyncClient
-from app.config import STEAM_API_KEY, HOST
+from app.config import STEAM_API_KEY
 from app.services.tasks import update_or_add_game
 router = APIRouter(prefix="/api/v1/steam")
 
@@ -15,33 +15,28 @@ async def best_sallers(session = Depends(get_async_db),page:int=Query(default=1,
     result = await db.get_most_discount_games(session,page,limit)
     return result
 
-@router.get("/users_full_stats/{user_id}")
-async def user_full_stats(user_id:str):
+@router.get("/users_full_stats/{user}")
+async def user_full_stats(user:str,user_badges:bool = Query(default=True),friends_details:bool = Query(default=True),user_games:bool = Query(default=True)):
     try:
-        my_int = int(user_id)
+        my_int = int(user)
         user_data =steam.users.get_user_details(f"{my_int}")
     except Exception:
-        user_data = steam.users.search_user(f"{user_id}")
-        user_id = user_data["player"]["steamid"]
+        user_data = steam.users.search_user(f"{user}")
+        user = user_data["player"]["steamid"]
 
     try:
-        user_friends_list = steam.users.get_user_friends_list(f"{user_id}")
-        user_badges = steam.users.get_user_badges(f"{user_id}")
-        user_games = steam.users.get_owned_games(f"{user_id}")
+        data_dict = dict()
+        data_dict["user_data"] = user_data
+        data_dict["user_friends_list"] = steam.users.get_user_friends_list(f"{user}",enriched=friends_details)
+        data_dict["user_badges"] = steam.users.get_user_badges(f"{user}") if user_badges else None
+        data_dict["user_games"] = steam.users.get_owned_games(f"{user}") if user_games else None
     except Exception:
         return HTTPException(
             status_code = 404,
-            detail = f"User {user_id} not found",
+            detail = f"User {user} not found",
             headers = {"WWW-Authenticate": "Bearer"},
         )
 
-
-    data_dict = {
-        "user_data":user_data,
-        "user_friends_list":user_friends_list,
-        "user_badges":user_badges,
-        "user_games":user_games,
-    }
     return data_dict
 
 @router.get("/game_stats/{steam_id}")

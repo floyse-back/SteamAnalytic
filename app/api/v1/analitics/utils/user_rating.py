@@ -1,0 +1,78 @@
+from datetime import datetime
+from math import log
+
+class UserRating:
+    def create_user(self,data:dict) -> int:
+        year_create_user_score = self.check_user_years(data["user_data"]["player"]["timecreated"]) * 10
+        count_user_friends_score = len(data["user_friends_list"]["friends"]) * 2
+        lastlogoff = self.count_score_last_logoff(self.last_logoff(data["user_data"]["player"].get("lastlogoff")).days) if data["user_data"]["player"].get("lastlogoff") else 0
+        profile_visible = self.profile_visible(data["user_data"]["player"]["personastate"]) if data["user_data"]["player"].get("personastate") else 0
+        count_game_score = data["user_games"]["game_count"] * 2
+        steam_state = data["user_data"]["player"]["communityvisibilitystate"] * 3
+        user_level_score = data["user_badges"]["player_level"] * 5
+        badge_level_score = self.badges_correct(data["user_badges"]["badges"])
+        open_user_elements = self.user_opening_for_steam(data["user_data"]["player"])
+
+        result = self.formula_user(
+            [year_create_user_score,count_user_friends_score,lastlogoff,profile_visible,count_game_score,steam_state,user_level_score,badge_level_score,open_user_elements],
+        ) % 10000
+
+        return result
+
+    def formula_user(self,data:list):
+        return round(sum(data))
+
+    @staticmethod
+    def check_user_years(seconds):
+        dt = datetime.fromtimestamp(seconds).year
+        return datetime.now().year - dt
+
+    @staticmethod
+    def last_logoff(seconds):
+        dt = datetime.fromtimestamp(seconds)
+        return datetime.now() - dt
+
+    @staticmethod
+    def count_score_last_logoff(days)->int:
+        if days == 0:
+            return 30
+        elif days == 1:
+            return 20
+        elif days < 7:
+            return 10
+        elif days < 14:
+            return 5
+        elif days < 30 :
+            return 1
+        return 0
+
+    @staticmethod
+    def profile_visible(person_state):
+        if person_state !=0:
+            return 5
+        return 0
+
+    @staticmethod
+    def badges_correct(badges:list) -> int:
+        rating = 0
+        for badge in badges:
+            rating += max(0,50 - log(badge["scarcity"],10))
+        return rating
+
+    @staticmethod
+    def user_opening_for_steam(data:dict)->int:
+        rating = 0
+        open_elements = {
+            "realname":30,
+            "primaryclanid":25,
+            "cityid":40,
+            "loccountrycode":25,
+            "locstatecode":20,
+            "loccityid":24
+        }
+
+        for key,value in open_elements.items():
+            if data.get(key):
+                rating += value
+
+        return rating

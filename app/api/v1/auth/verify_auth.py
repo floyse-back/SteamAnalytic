@@ -30,7 +30,7 @@ def create_refresh_token(user: UserModel) -> str:
         "sub": user.username,
         "type":"refresh_token",
         "username": user.username,
-        "exp": datetime.now(timezone.utc) + timedelta(seconds=token_config.refresh_token_expires),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=token_config.refresh_token_expires),
     }
 
     token = encode_jwt(payload)
