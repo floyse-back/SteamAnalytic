@@ -45,7 +45,7 @@ async def user_score_generate(user:str,auth = Depends(user_auth_check)):
     async with AsyncClient(base_url=f"http://{HOST}") as client:
         user_data = await client.request("GET",f"api/v1/steam/users_full_stats/{user}",params={"friends_details":"false"})
 
-    result = user_rating.create_user(user_data.json())
+    result = await user_rating.create_user(user_data.json())
     return {
         "user_rating": result
     }
