@@ -1,19 +1,16 @@
-from sqlalchemy import Column, Boolean, Integer, String, Date,JSON,UniqueConstraint
-from sqlalchemy.orm import relationship
-from sqlalchemy import ForeignKey
 import sqlalchemy
-from .database import Base
-from datetime import timedelta,date
-from app.config import TokenConfig
+from sqlalchemy import Column, Integer, String, JSON, Date, Boolean, UniqueConstraint, ForeignKey
+from sqlalchemy.orm import relationship
 
-token_config = TokenConfig()
+from app.database.database import Base
+
 
 class SteamBase(Base):
     __tablename__ = "steambase"
 
-    id = Column(Integer, primary_key=True, index=True,autoincrement=True)
+    id = Column(Integer, primary_key=True,autoincrement=True)
     name = Column(String)
-    appid = Column(String)
+    appid = Column(String,index=True)
     developer = Column(String)
     publisher = Column(String)
     positive = Column(Integer)
@@ -26,6 +23,7 @@ class SteamBase(Base):
     discount = Column(Integer)
     img_url = Column(String,nullable=True,default=None)
 
+
 class HistoricalSteamBase(Base):
     __tablename__ = "historysteambase"
 
@@ -33,17 +31,6 @@ class HistoricalSteamBase(Base):
     data = Column(JSON,nullable=False)
     snapshot_date = Column(Date,nullable=False,default=sqlalchemy.func.current_date())
 
-class UserModel(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key = True, autoincrement=True)
-    username = Column(String,nullable=False,unique=True)
-    hashed_password = Column(String,nullable=False)
-    email = Column(String,default = None)
-    steamid = Column(String,default = "")
-    steamname = Column(String,default="")
-
-    refresh_tokens = relationship("TokenBase", back_populates="user", cascade="all,delete-orphan")
 
 class Game(Base):
     __tablename__ = 'gamesdetails'
@@ -85,6 +72,7 @@ class Game(Base):
         back_populates="category_games"
     )
 
+
 class Category(Base):
     __tablename__ = 'categories'
     category_id = Column(Integer, primary_key=True, index=True)
@@ -95,6 +83,7 @@ class Category(Base):
         secondary="category_to_many",
         back_populates = "game_categories"
     )
+
 
 class Ganres(Base):
     __tablename__ = 'ganres'
@@ -107,6 +96,7 @@ class Ganres(Base):
         back_populates="game_ganre"
     )
 
+
 class Publisher(Base):
     __tablename__ = 'publishers'
     publisher_id = Column(Integer, primary_key=True, index=True)
@@ -118,11 +108,13 @@ class Publisher(Base):
         back_populates="game_publisher"
     )
 
+
 class GanreToMany(Base):
     __tablename__ = 'ganre_to_many'
 
     game_id = Column(ForeignKey("gamesdetails.steam_appid", ondelete="CASCADE"), primary_key=True)
     ganre_id = Column(ForeignKey("ganres.ganres_id", ondelete="CASCADE"), primary_key=True)
+
 
 class PublisherToMany(Base):
     __tablename__ = 'publisher_to_many'
@@ -130,18 +122,9 @@ class PublisherToMany(Base):
     game_id = Column(ForeignKey("gamesdetails.steam_appid", ondelete="CASCADE"), primary_key=True)
     publisher_id = Column(ForeignKey("publishers.publisher_id", ondelete="CASCADE"), primary_key=True)
 
+
 class CategoryToMany(Base):
     __tablename__ = 'category_to_many'
 
     game_id = Column(ForeignKey("gamesdetails.steam_appid", ondelete="CASCADE"), primary_key = True)
     category_id = Column(ForeignKey("categories.category_id", ondelete="CASCADE"), primary_key = True)
-
-class TokenBase(Base):
-    __tablename__ = 'refreshtokens'
-
-    id = Column(Integer, primary_key=True, index=True,autoincrement=True)
-    user_id = Column(ForeignKey("users.id",ondelete="CASCADE"))
-    refresh_token = Column(String,index=True,nullable=False)
-    delete_time = Column(Date,default=lambda: date.today() + timedelta(minutes=token_config.refresh_token_expires))
-
-    user = relationship("UserModel", back_populates="refresh_tokens")

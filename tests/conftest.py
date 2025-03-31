@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy.orm import sessionmaker
 
 from app.database.database import Base
-from app.database.models import UserModel
+from app.models.user import UserModel
 import asyncio
 
 DATABASE_URL = "sqlite+aiosqlite:///mytest.db"

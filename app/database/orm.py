@@ -1,7 +1,8 @@
-from .models import SteamBase,Game,UserModel,TokenBase
-from sqlalchemy.ext.asyncio import AsyncSession,async_sessionmaker
-from sqlalchemy import select,Integer,cast,delete,desc
-from ..schemas import User
+from ..models.steam import SteamBase
+from ..models.user import UserModel, TokenBase
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, delete,desc
+from app.schemas.user import User
 from fastapi import HTTPException
 
 

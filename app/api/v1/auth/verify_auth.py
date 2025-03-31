@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, timedelta
 
 from app.database.orm import UsersORM
-from app.database.models import UserModel
+from app.models.user import UserModel
 from fastapi import Form, Depends, HTTPException
 from app.database.database import get_async_db
 from .utils import verify_password, token_config, encode_jwt

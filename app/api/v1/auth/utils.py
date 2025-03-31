@@ -2,7 +2,7 @@ import jwt
 from jwt.exceptions import ExpiredSignatureError
 import bcrypt
 from fastapi import HTTPException
-from app.config import TokenConfig
+from app.core.config import TokenConfig
 
 token_config = TokenConfig()
 

@@ -5,7 +5,7 @@ from app.api.v1.analitics.utils.utils import AnaliticGameForYou
 from app.database.database import get_async_db
 from app.database.orm import RefreshTokenORM
 from steam_web_api import Steam
-from app.config import STEAM_API_KEY,HOST
+from app.core.config import STEAM_API_KEY,HOST
 from httpx import AsyncClient
 from app.api.v1.auth.utils import decode_jwt
 

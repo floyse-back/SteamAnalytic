@@ -1,12 +1,12 @@
-from fastapi import APIRouter,Request, HTTPException,Depends,Response
+from fastapi import APIRouter,Request, Depends,Response
 from fastapi.security import OAuth2PasswordBearer
 
 from app.api.v1.auth.utils import *
 from app.api.v1.auth.verify_auth import token_config, users, verify_user, create_refresh_token, create_access_token
 from app.database.database import get_async_db
 from app.database.orm import RefreshTokenORM
-from app.schemas import User
-from app.schemas import TokenType
+from app.schemas.user import User
+from app.schemas.user import TokenType
 from starlette import status
 
 router = APIRouter(prefix="/auth",tags=["auth"])

@@ -3,7 +3,7 @@ from app.database.orm import SteamORM
 from app.database.database import get_async_db
 from steam_web_api import Steam
 from httpx import AsyncClient
-from app.config import STEAM_API_KEY
+from app.core.config import STEAM_API_KEY
 from app.services.tasks import update_or_add_game
 router = APIRouter(prefix="/api/v1/steam")
 

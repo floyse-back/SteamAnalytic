@@ -11,9 +11,3 @@ class TokenType(BaseModel):
     access_token: str
     refresh_token: str
     type: str = "bearer"
-
-class GameTypeStats(BaseModel):
-    user:str
-    friends_details:bool = True
-    user_badges:bool = True
-    user_games:bool = True

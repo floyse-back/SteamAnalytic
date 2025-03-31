@@ -1,5 +1,5 @@
 import steamspypi
-from ...database.models import SteamBase
+from ...models.steam import SteamBase
 import time
 
 class SteamParser:
