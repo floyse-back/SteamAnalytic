@@ -1,27 +1,7 @@
 from datetime import datetime, timezone, timedelta
 
-from app.repository.user_repository import UsersORM
 from app.models.user import UserModel
-from fastapi import Form, Depends, HTTPException
-from app.repository.database import get_async_db
-from .utils import verify_password, token_config, encode_jwt
-
-
-async def verify_user_account(users_db,username:str = Form(),password:str = Form()):
-    pass
-
-
-users = UsersORM()
-
-async def verify_user(session = Depends(get_async_db),username:str = Form(),password:str = Form()) -> UserModel:
-    user  = await users.get_user(session,username)
-    if not user:
-        raise HTTPException(status_code=404,detail = "User not found")
-
-    if not verify_password(password,user.hashed_password.encode("utf-8")):
-        raise HTTPException(status_code=404,detail = "Incorrect password")
-
-    return user
+from app.utils.utils import token_config, encode_jwt
 
 
 def create_refresh_token(user: UserModel) -> str:

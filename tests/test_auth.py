@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient,ASGITransport
+
 from app.repository.database import get_async_db
 from app.main import app
 from tests.conftest import override_get_db
@@ -24,7 +25,7 @@ async def test_create_token(register_user):
 
     data = {
         "username": user.username,
-        "password": user.hashed_password
+        "password": app.utils.utils.hashed_password
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:

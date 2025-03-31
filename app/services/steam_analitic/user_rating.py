@@ -3,7 +3,7 @@ from math import log
 import asyncio
 
 class UserRating:
-    async def create_user(self,data:dict) -> int:
+    async def create_user_rating(self,data:dict) -> int:
         year_create_user_score = await self.check_user_years(data["user_data"]["player"]["timecreated"]) * 10
         count_user_friends_score = len(data["user_friends_list"]["friends"]) * 2
         lastlogoff = await self.count_score_last_logoff(self.last_logoff(data["user_data"]["player"].get("lastlogoff")).days) if data["user_data"]["player"].get("lastlogoff") else 0
@@ -21,7 +21,7 @@ class UserRating:
 
         return result
 
-    def formula_user(self,data:list):
+    def formula_user(self,data:list)->int:
         return round(sum(data))
 
     @staticmethod
