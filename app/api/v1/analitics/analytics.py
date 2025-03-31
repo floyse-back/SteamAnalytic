@@ -2,8 +2,8 @@ from fastapi import APIRouter,Depends, HTTPException,Request
 
 from app.api.v1.analitics.utils.user_rating import UserRating
 from app.api.v1.analitics.utils.utils import AnaliticGameForYou
-from app.database.database import get_async_db
-from app.database.orm import RefreshTokenORM
+from app.repository.database import get_async_db
+from app.repository.refresh_token_repository import RefreshTokenORM
 from steam_web_api import Steam
 from app.core.config import STEAM_API_KEY,HOST
 from httpx import AsyncClient

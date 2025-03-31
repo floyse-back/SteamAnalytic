@@ -68,7 +68,7 @@ class SteamParser:
             except Exception as ex:
                 print(f"Error info: {ex}")
                 if self.__count_error >= 3:
-                    return "Server don`t respond"
+                    return "Server don`t response"
                 self.__count_error += 1
                 time.sleep(200)
 

@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Query, Path, HTTPException, Depends
-from app.database.orm import SteamORM
-from app.database.database import get_async_db
+from app.repository.steam_repository import SteamORM
+from app.repository.database import get_async_db
 from steam_web_api import Steam
 from httpx import AsyncClient
 from app.core.config import STEAM_API_KEY
-from app.services.tasks import update_or_add_game
+from app.tasks.steam_tasks import update_or_add_game
 router = APIRouter(prefix="/api/v1/steam")
 
 steam = Steam(STEAM_API_KEY)

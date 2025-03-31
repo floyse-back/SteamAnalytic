@@ -2,7 +2,7 @@ import sqlalchemy
 from sqlalchemy import Column, Integer, String, JSON, Date, Boolean, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import relationship
 
-from app.database.database import Base
+from app.repository.database import Base
 
 
 class SteamBase(Base):

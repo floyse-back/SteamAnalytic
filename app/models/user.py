@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
 
-from app.database.database import Base
+from app.repository.database import Base
 from app.core.config import TokenConfig
 
 token_config = TokenConfig()
