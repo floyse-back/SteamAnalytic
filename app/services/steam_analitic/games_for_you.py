@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repository.analitic_repository import AnaliticRepository
 from app.models.steam import Game
 
-
 class GamesForYou:
     def __init__(self):
         self.repository = AnaliticRepository()
@@ -30,34 +29,43 @@ class GamesForYou:
         return appid_games
 
     def __count_games_elements(self,game_data:list[Game]):
-        ganres = dict()
-        publishers = dict()
-        categories = dict()
+        self.ganres = dict()
+        self.publishers = dict()
+        self.categories = dict()
         for game in game_data:
-            for ganre in game.game_ganre:
-                ganre_name = ganre.ganres_name
-                if ganres.get(ganre_name):
-                    ganres[ganre_name] += 1
-                else:
-                    ganres[ganre_name] = 1
-
-            for publisher in game.game_publisher:
-                publisher_name = publisher.publisher_name
-                if publishers.get(publisher_name):
-                    publishers[publisher_name] += 1
-                else:
-                    publishers[publisher_name] = 1
-
-            for category in game.game_categories:
-                categories_name = category.category_name
-                if categories.get(categories_name):
-                    categories[categories_name] += 1
-                else:
-                    categories[categories_name] = 1
+            self.__count_ganres(game)
+            self.__count_publishers(game)
+            self.__count_categories(game)
 
         return {
-            "ganres_dict":ganres,
-            "publishers_dict":publishers,
-            "categories_dict":categories,
+            "ganres_dict":self.ganres,
+            "publishers_dict":self.publishers,
+            "categories_dict":self.categories,
         }
+
+
+    def __count_ganres(self,game):
+        for ganre in game.game_ganre:
+            ganre_name = ganre.ganres_name
+            if self.ganres.get(ganre_name):
+                self.ganres[ganre_name] += 1
+            else:
+                self.ganres[ganre_name] = 1
+
+    def __count_publishers(self,game):
+        for publisher in game.game_publisher:
+            publisher_name = publisher.publisher_name
+            if self.publishers.get(publisher_name):
+                self.publishers[publisher_name] += 1
+            else:
+                self.publishers[publisher_name] = 1
+
+    def __count_categories(self,game):
+        for category in game.game_categories:
+            categories_name = category.category_name
+            if self.categories.get(categories_name):
+                self.categories[categories_name] += 1
+            else:
+                self.categories[categories_name] = 1
+
 
