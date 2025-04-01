@@ -6,6 +6,7 @@ from app.models.steam import SteamBase
 
 class SteamRepository:
     """Репозиторій для роботи з Steam даними"""
+
     @staticmethod
     async def get_top_games(session:AsyncSession,page:int,limit:int):
         statement = select(SteamBase).order_by(desc(SteamBase.positive)).offset((page - 1) * limit).limit(limit)

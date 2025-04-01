@@ -9,7 +9,7 @@ from app.schemas.user import User
 class UserRepository:
     """Репозиторій для роботи з користувачами"""
 
-    async def create_user(self,session:AsyncSession,user:User):
+    async def create_user(self,session:AsyncSession,user = User):
         user_model = UserModel(
                 username = user.username,
                 hashed_password = user.hashed_password,

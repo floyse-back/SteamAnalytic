@@ -57,19 +57,22 @@ class Game(Base):
     game_ganre = relationship(
         "Ganres",
         secondary="ganre_to_many",
-        back_populates="ganre_games"
+        back_populates="ganre_games",
+        lazy="joined"
     )
 
     game_publisher = relationship(
         "Publisher",
         secondary="publisher_to_many",
-        back_populates="publisher_games"
+        back_populates="publisher_games",
+        lazy="joined"
     )
 
     game_categories = relationship(
         "Category",
         secondary="category_to_many",
-        back_populates="category_games"
+        back_populates="category_games",
+        lazy="joined"
     )
 
 

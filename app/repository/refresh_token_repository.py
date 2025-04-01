@@ -17,14 +17,14 @@ class RefreshTokenRepository:
         return True
 
     @staticmethod
-    async def delete_refresh_token(self,session:AsyncSession,refresh_token):
+    async def delete_refresh_token(session:AsyncSession,refresh_token):
         stmt = delete(TokenBase).where(TokenBase.refresh_token == refresh_token)
 
         await session.execute(stmt)
         await session.commit()
 
     @staticmethod
-    async def create_refresh_token(self,session:AsyncSession,user_id,refresh_token):
+    async def create_refresh_token(session:AsyncSession,user_id,refresh_token):
         token_model  =TokenBase(
             user_id = user_id,
             refresh_token=refresh_token

@@ -1,13 +1,14 @@
 from fastapi import Depends, Form, HTTPException
 from starlette.requests import Request
 
-from app.api.v1.analytics import refresh_token
 from app.models.user import UserModel
 from app.repository.database import get_async_db
 from app.repository.user_repository import UserRepository
+from app.repository.refresh_token_repository import RefreshTokenRepository
 from app.utils.utils import verify_password, decode_jwt
 
 users = UserRepository()
+refresh_token = RefreshTokenRepository()
 
 async def verify_user(session=Depends(get_async_db), username: str = Form(), password: str = Form()) -> UserModel:
     user = await users.get_user(session, username)

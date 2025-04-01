@@ -1,18 +1,18 @@
 from fastapi import APIRouter,Depends, HTTPException
 
-from app.repository.refresh_token_repository import RefreshTokenRepository
 from steam_web_api import Steam
 from app.core.config import STEAM_API_KEY,HOST
 from httpx import AsyncClient
 
+from app.repository.database import get_async_db
 from app.services.auth_service import user_auth_check
 from app.services.steam_analitic.analitic_service import AnaliticService
 
 router = APIRouter(prefix="/api/v1/analytics")
 
 steam = Steam(STEAM_API_KEY)
+analitic_service = AnaliticService()
 
-refresh_token = RefreshTokenRepository()
 
 @router.get("/user_battle")
 async def analytics(user1_id:str, user2_id:str, auth = Depends(user_auth_check)):
@@ -28,12 +28,10 @@ async def analytics(user1_id:str, user2_id:str, auth = Depends(user_auth_check))
 
 @router.get("/user_score/")
 async def user_score_generate(user:str, auth = Depends(user_auth_check)):
-    user_rating = AnaliticService()
-
     async with AsyncClient(base_url=f"http://{HOST}") as client:
         user_data = await client.request("GET",f"api/v1/steam/users_full_stats/{user}",params={"friends_details":"false"})
 
-    result = await user_rating.analitic_user_rating(user_data.json())
+    result = await analitic_service.analitic_user_rating(user_data.json())
     return {
         "user_rating": result
     }
@@ -44,14 +42,15 @@ async def friend_game_list(user_id: int=None, auth = Depends(user_auth_check)):
     return response
 
 @router.get("/games_for_you")
-async def games_for_you(user:str, auth = Depends(user_auth_check)):
+async def games_for_you(user:str,session = Depends(get_async_db), auth = Depends(user_auth_check)):
     async with AsyncClient(base_url=f"http://{HOST}") as client:
-        user_1 = await client.request("GET",f"/api/v1/steam/users_full_stats/{user}")
+        user_1 = await client.request("GET",f"/api/v1/steam/user_games_played",params={"user":f"{user}"})
 
     if user_1.status_code != 200:
         raise HTTPException(status_code=404)
 
-    return {"Hello World":"Stress Test"}
+    result = await analitic_service.analitic_games_for_you(user_1.json(),session = session)
+    return result
 
 @router.get("/salling_for_you")
 async def salling_for_you(auth = Depends(user_auth_check)):

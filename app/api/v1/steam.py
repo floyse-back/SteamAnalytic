@@ -54,7 +54,7 @@ async def get_top_games(session=Depends(get_async_db),limit:int=Query(default=10
     return result
 
 @router.get("/game_achivements")
-async def game_achivements(game_id,session = Depends(get_async_db)):
+async def game_achivements(game_id):
     async with AsyncClient() as client:
         response = await client.get(f"https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid={game_id}")
 
@@ -63,3 +63,14 @@ async def game_achivements(game_id,session = Depends(get_async_db)):
 
     return response.json()
 
+@router.get("/user_games_played")
+async def user_games_play(user:str):
+    try:
+        my_int = int(user)
+    except Exception:
+        user_data = steam.users.search_user(f"{user}")
+        user = user_data["player"]["steamid"]
+
+    response = steam.users.get_owned_games(f"{user}")
+
+    return response
