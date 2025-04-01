@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Depends, HTTPException
 
-from app.repository.refresh_token_repository import RefreshTokenORM
+from app.repository.refresh_token_repository import RefreshTokenRepository
 from steam_web_api import Steam
 from app.core.config import STEAM_API_KEY,HOST
 from httpx import AsyncClient
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/v1/analytics")
 
 steam = Steam(STEAM_API_KEY)
 
-refresh_token = RefreshTokenORM()
+refresh_token = RefreshTokenRepository()
 
 @router.get("/user_battle")
 async def analytics(user1_id:str, user2_id:str, auth = Depends(user_auth_check)):

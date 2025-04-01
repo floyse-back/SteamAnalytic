@@ -6,10 +6,8 @@ from app.models.user import UserModel
 from app.schemas.user import User
 
 
-class UsersORM:
-    async def get_user(self,async_session:AsyncSession,username:str) -> UserModel:
-        result = await async_session.execute(select(UserModel).filter(UserModel.username == username))
-        return result.scalars().first()
+class UserRepository:
+    """Репозиторій для роботи з користувачами"""
 
     async def create_user(self,session:AsyncSession,user:User):
         user_model = UserModel(
@@ -37,6 +35,12 @@ class UsersORM:
         else:
             raise HTTPException(status_code=404, detail="User not found")
 
-    async def user_get(self,session,username) -> dict:
+    @staticmethod
+    async def user_get(session,username) -> dict:
         result = await session.execute(select(UserModel).filter(UserModel.username == username))
+        return result.scalars().first()
+
+    @staticmethod
+    async def get_user(async_session:AsyncSession,username:str) -> UserModel:
+        result = await async_session.execute(select(UserModel).filter(UserModel.username == username))
         return result.scalars().first()

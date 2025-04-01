@@ -4,10 +4,10 @@ from starlette.requests import Request
 from app.api.v1.analytics import refresh_token
 from app.models.user import UserModel
 from app.repository.database import get_async_db
-from app.repository.user_repository import UsersORM
+from app.repository.user_repository import UserRepository
 from app.utils.utils import verify_password, decode_jwt
 
-users = UsersORM()
+users = UserRepository()
 
 async def verify_user(session=Depends(get_async_db), username: str = Form(), password: str = Form()) -> UserModel:
     user = await users.get_user(session, username)

@@ -5,7 +5,7 @@ from app.services.auth_service import users, verify_user
 from app.utils.auth_utils import create_refresh_token, create_access_token
 from app.utils.utils import token_config, decode_jwt, hashed_password
 from app.repository.database import get_async_db
-from app.repository.refresh_token_repository import RefreshTokenORM
+from app.repository.refresh_token_repository import RefreshTokenRepository
 from app.schemas.user import User
 from app.schemas.user import TokenType
 from starlette import status
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/auth",tags=["auth"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-refresh_orm = RefreshTokenORM()
+refresh_orm = RefreshTokenRepository()
 
 
 

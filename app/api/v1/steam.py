@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query, Path, HTTPException, Depends
-from app.repository.steam_repository import SteamORM
+from app.repository.steam_repository import SteamRepository
 from app.repository.database import get_async_db
 from steam_web_api import Steam
 from httpx import AsyncClient
@@ -8,7 +8,7 @@ from app.tasks.steam_tasks import update_or_add_game
 router = APIRouter(prefix="/api/v1/steam")
 
 steam = Steam(STEAM_API_KEY)
-db = SteamORM()
+db = SteamRepository()
 
 @router.get("/best_sallers/")
 async def best_sallers(session = Depends(get_async_db),page:int=Query(default=1,gt=0),limit:int=Query(default=100,gt=-1)):
