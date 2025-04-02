@@ -60,17 +60,6 @@ async def register_user(session=Depends(get_async_db),user=User):
     await users.create_user(session, user)
     return {"message":"Register successful"}
 
-@router.get("/user/me")
-async def user_me(request:Request):
-    token = request.cookies.get("refresh_token")
-    if not token:
-        raise HTTPException(
-            status_code=401,
-            detail = "No autorization user"
-        )
-
-    user = decode_jwt(token)
-    return user
 
 @router.delete("/delete_user/",status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(request:Request,response:Response,session = Depends(get_async_db)):

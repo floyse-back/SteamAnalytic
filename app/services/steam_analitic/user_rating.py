@@ -1,6 +1,5 @@
 from datetime import datetime
 from math import log
-import asyncio
 
 class UserRating:
     async def create_user_rating(self,data:dict) -> int:

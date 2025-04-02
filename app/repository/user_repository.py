@@ -44,3 +44,10 @@ class UserRepository:
     async def get_user(async_session:AsyncSession,username:str) -> UserModel:
         result = await async_session.execute(select(UserModel).filter(UserModel.username == username))
         return result.scalars().first()
+
+    @staticmethod
+    async def user_update(session,user:UserModel):
+        user_model = await session.execute(select(UserModel).filter(UserModel.username == user.username))
+        user = user_model.scalars().first()
+        if user:
+            await session.commit()
