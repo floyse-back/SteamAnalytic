@@ -4,6 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import UserModel
 from app.schemas.user import User
+from app.utils.utils import hashed_password, verify_password
+
+
+class UserNotFound(Exception):
+    pass
 
 
 class UserRepository:
@@ -24,6 +29,13 @@ class UserRepository:
             raise HTTPException(status_code=400, detail="This username is already registered")
         session.add(user_model)
         await session.commit()
+
+    @staticmethod
+    async def get_user_for_id(user_id:int,session:AsyncSession):
+        stmt = select(UserModel).filter(UserModel.id==user_id)
+        result =await session.execute(stmt)
+
+        return result.scalars().first()
 
     async def delete_user(self,session:AsyncSession,username:str):
         user = await self.user_get(session,username)
@@ -46,8 +58,22 @@ class UserRepository:
         return result.scalars().first()
 
     @staticmethod
-    async def user_update(session,user:UserModel):
-        user_model = await session.execute(select(UserModel).filter(UserModel.username == user.username))
-        user = user_model.scalars().first()
-        if user:
-            await session.commit()
+    async def user_update(session,id:int,user:User):
+        user_model = await session.execute(select(UserModel).filter(UserModel.id == id))
+        my_user = user_model.scalars().first()
+        if verify_password(user.hashed_password, my_user.hashed_password):
+            if my_user.username != user.username:
+                verify_unique = await session.execute(select(UserModel).filter(UserModel.email == user.email or UserModel.username == user.username))
+            else:
+                verify_unique = await session.execute(select(UserModel).filter(UserModel.email == user.email))
+
+            if not verify_unique.scalars().first():
+                my_user.username = user.username
+                my_user.email = user.email
+                my_user.steamid = user.steamid
+            else:
+                 raise UserNotFound(f"User {user.username} not found")
+        else:
+             raise UserNotFound("User password is incorrect")
+
+        await session.commit()

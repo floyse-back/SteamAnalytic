@@ -15,7 +15,7 @@ async def verify_user(session=Depends(get_async_db), username: str = Form(), pas
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if not verify_password(password, user.hashed_password.encode("utf-8")):
+    if not verify_password(password, user.hashed_password):
         raise HTTPException(status_code=404, detail="Incorrect password")
 
     return user
