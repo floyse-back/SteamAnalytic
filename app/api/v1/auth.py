@@ -1,7 +1,8 @@
 from fastapi import APIRouter,Request, Depends,Response,HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
-from app.services.auth_service import users, verify_user
+from app.core.dependencies import verify_user
+from app.repository.user_repository import UserRepository
 from app.utils.auth_utils import create_refresh_token, create_access_token
 from app.utils.utils import token_config, decode_jwt, hashed_password
 from app.repository.database import get_async_db
@@ -16,7 +17,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 refresh_orm = RefreshTokenRepository()
 
-
+users = UserRepository()
 
 @router.post("/login",response_model = TokenType,status_code=status.HTTP_201_CREATED)
 async def login_user(response: Response,session = Depends(get_async_db), user = Depends(verify_user)) -> TokenType:

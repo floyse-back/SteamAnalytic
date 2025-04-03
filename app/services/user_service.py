@@ -19,7 +19,7 @@ class UserService:
             )
         id_element = decode_jwt(token).get("user_id")
         try:
-            await UserRepository.user_update(session=session, id=id_element, user=user)
+            await self.user_repository.user_update(session=session, id=id_element, user=user)
         except UserNotFound as error:
             raise HTTPException(
                 detail=f"{error}",

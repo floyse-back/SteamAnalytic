@@ -5,7 +5,7 @@ from app.core.config import STEAM_API_KEY,HOST
 from httpx import AsyncClient
 
 from app.repository.database import get_async_db
-from app.services.auth_service import user_auth_check
+from app.core.dependencies import user_auth_check
 from app.services.steam_analitic.analitic_service import AnaliticService
 
 router = APIRouter(prefix="/api/v1/analytics")
@@ -14,7 +14,7 @@ steam = Steam(STEAM_API_KEY)
 analitic_service = AnaliticService()
 
 
-@router.get("/user_battle")
+@router.get("/user_battle",response_model=None)
 async def analytics(user1_id:str, user2_id:str, auth = Depends(user_auth_check)):
     if user1_id == user2_id:
         raise HTTPException(status_code=404)
