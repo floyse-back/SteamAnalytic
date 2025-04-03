@@ -55,7 +55,7 @@ async def logout_user(response:Response):
 
 
 @router.post("/register_user/",status_code = status.HTTP_201_CREATED)
-async def register_user(session=Depends(get_async_db),user=User):
+async def register_user(user:User,session=Depends(get_async_db)):
     user.hashed_password = hashed_password(user.hashed_password).decode("utf-8")
     await users.create_user(session, user)
     return {"message":"Register successful"}

@@ -2,6 +2,7 @@ from fastapi import Depends, Form, HTTPException
 from starlette.requests import Request
 
 from app.models.user import UserModel
+from app.repository.blacklist_repository import BlackListRepository
 from app.repository.database import get_async_db
 from app.repository.user_repository import UserRepository
 from app.repository.refresh_token_repository import RefreshTokenRepository
@@ -27,7 +28,9 @@ async def user_auth_check(request: Request,session = Depends(get_async_db)):
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     decoded_token = decode_jwt(token)
-    await refresh_token.verify_refresh_token(session=session,refresh_token=token)
+    if await BlackListRepository.verify_blacklist_token(token=token,session=session):
+        raise HTTPException(status_code=401, detail="This token is blacklisted")
+
 
 
     return decoded_token

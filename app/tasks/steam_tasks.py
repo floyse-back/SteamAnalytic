@@ -4,7 +4,7 @@ from datetime import date
 
 from .database import get_db
 from ..models.steam import SteamBase, Game
-from ..models.user import TokenBase
+from ..models.user import RefreshToken
 from .utils.steam_parser import SteamParser
 from .utils.steam_details_parser import SteamDetailsParser
 from sqlalchemy import text,cast,Integer,select,delete,update
@@ -78,7 +78,7 @@ def update_or_add_game(game,steam_id):
 def delete_refresh_tokens_by_time():
     logger.info("Starting task delete_refresh_tokens_by_time!")
     session = next(get_db())
-    delete_tokens = delete(TokenBase).where(TokenBase.delete_time > date.today())
+    delete_tokens = delete(RefreshToken).where(RefreshToken.delete_time > date.today())
 
     session.execute(delete_tokens)
     session.commit()

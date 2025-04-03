@@ -3,6 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import UserModel
+from app.repository.blacklist_repository import BlackListRepository
+from app.repository.refresh_token_repository import RefreshTokenRepository
 from app.schemas.user import User
 from app.utils.utils import hashed_password, verify_password
 
@@ -20,7 +22,6 @@ class UserRepository:
                 hashed_password = user.hashed_password,
                 email = user.email,
                 steamid = user.steamid,
-                steamname= user.steamname
             )
 
         user_check = await self.get_user(session,user_model.username)
@@ -67,6 +68,8 @@ class UserRepository:
             else:
                 verify_unique = await session.execute(select(UserModel).filter(UserModel.email == user.email))
 
+            print(verify_unique)
+
             if not verify_unique.scalars().first():
                 my_user.username = user.username
                 my_user.email = user.email
@@ -77,3 +80,17 @@ class UserRepository:
              raise UserNotFound("User password is incorrect")
 
         await session.commit()
+
+    @staticmethod
+    async def delete_refresh_tokens(session:AsyncSession,id):
+        user_model = await session.execute(
+            select(UserModel).filter(UserModel.id == id)
+        )
+        my_user = user_model.scalars().first()
+
+        if my_user:
+            await BlackListRepository.add_blacklist_tokens(my_user.refresh_tokens,session)
+            await RefreshTokenRepository.delete_refresh_tokens(session,id)
+        await session.commit()
+
+
