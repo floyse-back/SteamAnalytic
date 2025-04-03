@@ -38,8 +38,8 @@ class UserRepository:
 
         return result.scalars().first()
 
-    async def delete_user(self,session:AsyncSession,username:str):
-        user = await self.user_get(session,username)
+    async def delete_user(self,session:AsyncSession,user_id:str):
+        user = await self.get_user_for_id(int(user_id),session)
 
         if user:
             await session.delete(user)

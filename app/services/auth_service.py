@@ -1,17 +1,23 @@
-from fastapi import HTTPException
+from fastapi import HTTPException,Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
+from app.core.config import TokenConfig
 from app.models.user import UserModel
 from app.repository.blacklist_repository import BlackListRepository
-from app.repository.user_repository import UserRepository
 from app.repository.refresh_token_repository import RefreshTokenRepository
-from app.utils.utils import verify_password, decode_jwt
+from app.repository.user_repository import UserRepository
+from app.schemas.user import TokenType, User
+from app.utils.auth_utils import create_access_token, create_refresh_token
+from app.utils.utils import verify_password, decode_jwt, hashed_password
+
 
 class AuthService:
     def __init__(self):
         self.users = UserRepository()
+        self.refresh_token = RefreshTokenRepository()
         self.black_list_repository = BlackListRepository()
+        self.token_config = TokenConfig()
 
     async def verify_user(self,session:AsyncSession, username: str, password: str) -> UserModel:
         user = await self.users.get_user(session, username)
@@ -34,3 +40,47 @@ class AuthService:
             raise HTTPException(status_code=401, detail="This token is blacklisted")
 
         return decoded_token
+
+    async def user_login(self,response:Response,session:AsyncSession,user)->TokenType:
+        access_token = create_access_token(user)
+        refresh_token = create_refresh_token(user)
+
+        await self.refresh_token.create_refresh_token(
+            session=session,
+            user_id=user.id,
+            refresh_token=refresh_token
+        )
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            max_age=self.token_config.access_token_expires * 60
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            max_age=self.token_config.refresh_token_expires * 60
+        )
+
+        return TokenType(
+            access_token=access_token,
+            refresh_token=refresh_token
+        )
+
+    async def register_user(self,user:User,session:AsyncSession):
+        user.hashed_password = hashed_password(user.hashed_password).decode("utf-8")
+        await self.users.create_user(session, user)
+        return {"message":"Register successful"}
+
+    async def delete_from_user(self,access_token,session:AsyncSession):
+        if not access_token:
+            raise HTTPException(
+                status_code=401,
+                detail="No autorization user"
+            )
+        user = decode_jwt(access_token)
+        print(user)
+        await self.users.delete_user(session, user.get("user_id"))

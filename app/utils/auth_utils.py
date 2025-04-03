@@ -19,6 +19,7 @@ def create_refresh_token(user: UserModel) -> str:
 
 def create_access_token(user: UserModel) -> str:
     payload = {
+        "user_id" : user.id,
         "sub": user.username,
         "type": "access_token",
         "username": user.username,

@@ -17,7 +17,9 @@ class UserService:
                 status_code=401,
                 detail="No autorization user"
             )
+
         id_element = decode_jwt(token).get("user_id")
+
         try:
             await self.user_repository.user_update(session=session, id=id_element, user=user)
         except UserNotFound as error:
@@ -25,7 +27,9 @@ class UserService:
                 detail=f"{error}",
                 status_code=status.HTTP_404_NOT_FOUND
             )
+
         await self.user_repository.delete_refresh_tokens(session, id_element)
+
 
     async def get_user_me(self,token,session:AsyncSession)->UserMe:
         if not token:
