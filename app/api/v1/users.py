@@ -1,6 +1,5 @@
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter,Depends,Request,Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.requests import Request
 
 from app.core.dependencies import user_auth_check
 from app.schemas.user import User, UserMe
@@ -18,9 +17,13 @@ async def user_me(request:Request,auth = Depends(user_auth_check),session:AsyncS
     return await user_service.get_user_me(token,session)
 
 @router.put('/user_me',status_code =status.HTTP_201_CREATED)
-async def update_user_me(user:User,request:Request,auth = Depends(user_auth_check),session:AsyncSession = Depends(get_async_db)):
+async def update_user_me(user:User,request:Request,response:Response,auth = Depends(user_auth_check),session:AsyncSession = Depends(get_async_db)):
     token = request.cookies.get("refresh_token")
-    await user_service.put_user(token=token,session=session,user=user)
+    data = await user_service.put_user(token=token,session=session,user=user)
+
+    response.set_cookie("refresh_token",value=data.refresh_token,httponly=True,secure=True)
+    response.set_cookie("access_token",value=data.access_token,httponly=True,secure=True)
+
 
 
 @router.get("/user_profile/{user_id}")

@@ -25,7 +25,7 @@ class AuthService:
             raise HTTPException(status_code=404, detail="User not found")
 
         if not verify_password(password, user.hashed_password):
-            raise HTTPException(status_code=404, detail="Incorrect password")
+            raise HTTPException(status_code=401, detail="Incorrect password")
 
         return user
 
@@ -84,3 +84,11 @@ class AuthService:
         user = decode_jwt(access_token)
         print(user)
         await self.users.delete_user(session, user.get("user_id"))
+
+    def refresh_token(self,refresh_token:str,user):
+        access_token = create_access_token(user)
+
+        return TokenType(
+            access_token=access_token,
+            refresh_token=refresh_token
+        )

@@ -37,3 +37,8 @@ async def delete_user(request:Request,response:Response,session = Depends(get_as
 
     response.delete_cookie("access_token",httponly=True,secure=True)
     response.delete_cookie("refresh_token",httponly=True,secure=True)
+
+@router.post("/refresh-token")
+async def refresh_token(request:Request,user=Depends(verify_user)):
+    refresh_token = request.cookies.get("refresh_token")
+    return auth_service.refresh_token(refresh_token=refresh_token,user=user)

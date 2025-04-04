@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from app.repository.user_repository import UserRepository, UserNotFound
-from app.schemas.user import User, UserMe, UserPublic
+from app.schemas.user import User, UserMe, UserPublic, TokenType
+from app.utils.auth_utils import create_access_token, create_refresh_token
 from app.utils.utils import decode_jwt
 
 
@@ -21,7 +22,7 @@ class UserService:
         id_element = decode_jwt(token).get("user_id")
 
         try:
-            await self.user_repository.user_update(session=session, id=id_element, user=user)
+            user = await self.user_repository.user_update(session=session, id=id_element, user=user)
         except UserNotFound as error:
             raise HTTPException(
                 detail=f"{error}",
@@ -29,7 +30,11 @@ class UserService:
             )
 
         await self.user_repository.delete_refresh_tokens(session, id_element)
+        print(user)
+        access_token=create_access_token(user)
+        refresh_token=create_refresh_token(user)
 
+        return TokenType(access_token=access_token, refresh_token=refresh_token)
 
     async def get_user_me(self,token,session:AsyncSession)->UserMe:
         if not token:

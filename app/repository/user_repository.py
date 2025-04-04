@@ -63,14 +63,16 @@ class UserRepository:
         user_model = await session.execute(select(UserModel).filter(UserModel.id == id))
         my_user = user_model.scalars().first()
         if verify_password(user.hashed_password, my_user.hashed_password):
-            if my_user.username != user.username:
+            if my_user.username == user.username and user.email == my_user.email:
+                verify_unique = False
+            elif my_user.username != user.username and user.email != my_user.email:
                 verify_unique = await session.execute(select(UserModel).filter(UserModel.email == user.email or UserModel.username == user.username))
+            elif my_user.email == user.email:
+                verify_unique = await session.execute(select(UserModel).filter(UserModel.username == user.username))
             else:
                 verify_unique = await session.execute(select(UserModel).filter(UserModel.email == user.email))
 
-            print(verify_unique)
-
-            if not verify_unique.scalars().first():
+            if type(verify_unique)==bool or not verify_unique.scalars().first():
                 my_user.username = user.username
                 my_user.email = user.email
                 my_user.steamid = user.steamid
@@ -80,6 +82,10 @@ class UserRepository:
              raise UserNotFound("User password is incorrect")
 
         await session.commit()
+
+        if user_model:
+            return my_user
+        return False
 
     @staticmethod
     async def delete_refresh_tokens(session:AsyncSession,id):
