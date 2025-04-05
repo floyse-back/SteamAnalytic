@@ -19,6 +19,11 @@ class AuthService:
         self.black_list_repository = BlackListRepository()
         self.token_config = TokenConfig()
 
+    async def check_cookie_auth(self,request: Request):
+        if not request.cookies.get("access_token") and not request.cookies.get("refresh_token"):
+            return True
+        return False
+
     async def verify_user(self,session:AsyncSession, username: str, password: str) -> UserModel:
         user = await self.users.get_user(session, username)
         if not user:
@@ -75,15 +80,30 @@ class AuthService:
         await self.users.create_user(session, user)
         return {"message":"Register successful"}
 
-    async def delete_from_user(self,access_token,session:AsyncSession):
+    async def delete_from_user(self,access_token,user_password,session:AsyncSession):
         if not access_token:
             raise HTTPException(
                 status_code=401,
                 detail="No autorization user"
             )
-        user = decode_jwt(access_token)
-        print(user)
-        await self.users.delete_user(session, user.get("user_id"))
+        refresh_token_data = decode_jwt(access_token)
+
+        user = await self.users.get_user_for_id(user_id=refresh_token_data.get("user_id"),session=session)
+
+        #Перевірка на правильність введеного пароля
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="User not found"
+            )
+
+        if not verify_password(user_password, user.hashed_password):
+            raise HTTPException(
+                status_code=401,
+                detail="Incorrect password",
+            )
+
+        await self.users.delete_user(session,user)
 
     async def refresh_token(self,response:Response,refresh_token:str,user:str,session:AsyncSession):
         user_model = await self.users.get_user_for_id(user_id=int(user), session=session)

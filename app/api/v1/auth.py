@@ -1,10 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter,Request, Depends,Response
+from fastapi import APIRouter, Request, Depends, Response, Cookie, HTTPException, Form
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import verify_user, user_auth_check
+from app.core.dependencies import verify_user, user_auth_check, user_cookie_auth
 from app.services.auth_service import AuthService
 from app.repository.database import get_async_db
 from app.schemas.user import User
@@ -22,7 +22,12 @@ async def login_user(response: Response,session = Depends(get_async_db), user = 
     return await auth_service.user_login(response=response,session=session, user=user)
 
 @router.get("/logout/",status_code=status.HTTP_204_NO_CONTENT)
-async def logout_user(response:Response):
+async def logout_user(response:Response,is_cookie_auth = Depends(user_cookie_auth)):
+    if is_cookie_auth:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+        )
     response.delete_cookie("access_token",httponly=True,secure=True)
     response.delete_cookie("refresh_token",httponly=True,secure=True)
 
@@ -33,10 +38,10 @@ async def register_user(user:User,session=Depends(get_async_db)):
 
 
 @router.delete("/delete_user/",status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(request:Request,response:Response,session = Depends(get_async_db)):
+async def delete_user(request:Request,response:Response,password:str=Form(),session = Depends(get_async_db)):
     access_token = request.cookies.get("access_token")
 
-    await auth_service.delete_from_user(access_token=access_token,session=session)
+    await auth_service.delete_from_user(access_token=access_token,user_password=password,session=session)
 
     response.delete_cookie("access_token",httponly=True,secure=True)
     response.delete_cookie("refresh_token",httponly=True,secure=True)

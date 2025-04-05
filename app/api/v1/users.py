@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends,Request,Response
+from fastapi import APIRouter, Depends, Request, Response, Form, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import user_auth_check
@@ -17,9 +17,10 @@ async def user_me(request:Request,auth = Depends(user_auth_check),session:AsyncS
     return await user_service.get_user_me(token,session)
 
 @router.put('/user_me',status_code =status.HTTP_201_CREATED)
-async def update_user_me(user:User,request:Request,response:Response,auth = Depends(user_auth_check),session:AsyncSession = Depends(get_async_db)):
-    token = request.cookies.get("refresh_token")
-    data = await user_service.put_user(token=token,session=session,user=user)
+async def update_user_me(user:UserMe,request:Request,response:Response,auth = Depends(user_auth_check),password:str=Form,session:AsyncSession = Depends(get_async_db)):
+    token = request.cookies.get("access_token")
+
+    data = await user_service.put_user(token=token,session=session,user=user,password=password)
 
     response.set_cookie("refresh_token",value=data.refresh_token,httponly=True,secure=True)
     response.set_cookie("access_token",value=data.access_token,httponly=True,secure=True)

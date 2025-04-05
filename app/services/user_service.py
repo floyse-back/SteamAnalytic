@@ -5,14 +5,14 @@ from starlette import status
 from app.repository.user_repository import UserRepository, UserNotFound
 from app.schemas.user import User, UserMe, UserPublic, TokenType
 from app.utils.auth_utils import create_access_token, create_refresh_token
-from app.utils.utils import decode_jwt
+from app.utils.utils import decode_jwt, verify_password
 
 
 class UserService:
     def __init__(self):
         self.user_repository = UserRepository()
 
-    async def put_user(self,token,user:User,session:AsyncSession):
+    async def put_user(self,token,password:str,user:UserMe,session:AsyncSession):
         if not token:
             raise HTTPException(
                 status_code=401,
@@ -22,7 +22,13 @@ class UserService:
         id_element = decode_jwt(token).get("user_id")
 
         try:
-            user = await self.user_repository.user_update(session=session, id=id_element, user=user)
+            user_model = await self.user_repository.get_user_for_id(user_id=id_element,session=session)
+            if user_model is None:
+                raise UserNotFound("User don`t found")
+            if not verify_password(password,user_model.hashed_password):
+                raise UserNotFound("Password incorrect")
+
+            user = await self.user_repository.user_update(session=session, my_user=user_model, user=user)
         except UserNotFound as error:
             raise HTTPException(
                 detail=f"{error}",
@@ -30,7 +36,6 @@ class UserService:
             )
 
         await self.user_repository.delete_refresh_tokens(session, id_element)
-        print(user)
         access_token=create_access_token(user)
         refresh_token=create_refresh_token(user)
 
