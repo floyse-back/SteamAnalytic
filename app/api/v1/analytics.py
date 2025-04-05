@@ -47,7 +47,7 @@ async def games_for_you(user:str,session = Depends(get_async_db), auth = Depends
         user_1 = await client.request("GET",f"/api/v1/steam/user_games_played",params={"user":f"{user}"})
 
     if user_1.status_code != 200:
-        raise HTTPException(status_code=404)
+        raise HTTPException(status_code=401)
 
     result = await analitic_service.analitic_games_for_you(user_1.json(),session = session)
     return result

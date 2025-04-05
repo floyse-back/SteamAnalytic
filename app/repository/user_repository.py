@@ -6,7 +6,7 @@ from app.models.user import UserModel
 from app.repository.blacklist_repository import BlackListRepository
 from app.repository.refresh_token_repository import RefreshTokenRepository
 from app.schemas.user import User
-from app.utils.utils import hashed_password, verify_password
+from app.utils.utils import verify_password
 
 
 class UserNotFound(Exception):

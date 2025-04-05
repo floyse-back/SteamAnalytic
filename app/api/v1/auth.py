@@ -1,7 +1,10 @@
+from typing import Annotated
+
 from fastapi import APIRouter,Request, Depends,Response
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import verify_user
+from app.core.dependencies import verify_user, user_auth_check
 from app.services.auth_service import AuthService
 from app.repository.database import get_async_db
 from app.schemas.user import User
@@ -38,7 +41,9 @@ async def delete_user(request:Request,response:Response,session = Depends(get_as
     response.delete_cookie("access_token",httponly=True,secure=True)
     response.delete_cookie("refresh_token",httponly=True,secure=True)
 
-@router.post("/refresh-token")
-async def refresh_token(request:Request,user=Depends(verify_user)):
+@router.post("/refresh_token")
+async def refresh_token(request:Request,response:Response,auth:dict=Depends(user_auth_check),session:AsyncSession = Depends(get_async_db)):
     refresh_token = request.cookies.get("refresh_token")
-    return auth_service.refresh_token(refresh_token=refresh_token,user=user)
+
+    return await auth_service.refresh_token(refresh_token=refresh_token,user=auth.get("user_id"),session=session,response=response)
+

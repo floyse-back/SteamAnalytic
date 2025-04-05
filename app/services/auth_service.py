@@ -15,7 +15,7 @@ from app.utils.utils import verify_password, decode_jwt, hashed_password
 class AuthService:
     def __init__(self):
         self.users = UserRepository()
-        self.refresh_token = RefreshTokenRepository()
+        self.refresh_token_repository = RefreshTokenRepository()
         self.black_list_repository = BlackListRepository()
         self.token_config = TokenConfig()
 
@@ -45,7 +45,7 @@ class AuthService:
         access_token = create_access_token(user)
         refresh_token = create_refresh_token(user)
 
-        await self.refresh_token.create_refresh_token(
+        await self.refresh_token_repository.create_refresh_token(
             session=session,
             user_id=user.id,
             refresh_token=refresh_token
@@ -85,10 +85,20 @@ class AuthService:
         print(user)
         await self.users.delete_user(session, user.get("user_id"))
 
-    def refresh_token(self,refresh_token:str,user):
-        access_token = create_access_token(user)
+    async def refresh_token(self,response:Response,refresh_token:str,user:str,session:AsyncSession):
+        user_model = await self.users.get_user_for_id(user_id=int(user), session=session)
+
+        access_token = create_access_token(user=user_model)
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            max_age=self.token_config.access_token_expires * 60
+        )
 
         return TokenType(
             access_token=access_token,
             refresh_token=refresh_token
         )
+
