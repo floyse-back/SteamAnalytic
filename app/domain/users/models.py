@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 
 
 from app.repository.database import Base
-from app.core.config import TokenConfig
+from app.utils.config import TokenConfig
 
 token_config = TokenConfig()
 

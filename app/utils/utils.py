@@ -3,7 +3,7 @@ import jwt
 from fastapi import HTTPException
 from jwt import ExpiredSignatureError
 
-from app.core.config import TokenConfig
+from app.utils.config import TokenConfig
 
 token_config = TokenConfig()
 

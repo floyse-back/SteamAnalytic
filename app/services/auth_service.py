@@ -2,7 +2,7 @@ from fastapi import HTTPException,Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
-from app.core.config import TokenConfig
+from app.utils.config import TokenConfig
 from app.domain.users.models import UserModel
 from app.repository.blacklist_repository import BlackListRepository
 from app.repository.refresh_token_repository import RefreshTokenRepository

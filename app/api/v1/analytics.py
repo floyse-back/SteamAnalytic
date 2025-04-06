@@ -1,11 +1,11 @@
 from fastapi import APIRouter,Depends, HTTPException
 
 from steam_web_api import Steam
-from app.core.config import STEAM_API_KEY,HOST
+from app.utils.config import STEAM_API_KEY,HOST
 from httpx import AsyncClient
 
 from app.repository.database import get_async_db
-from app.core.dependencies import user_auth_check
+from app.utils.dependencies import user_auth_check
 from app.services.steam_analitic.analitic_service import AnaliticService
 
 router = APIRouter(prefix="/api/v1/analytics")

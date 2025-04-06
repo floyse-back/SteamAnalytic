@@ -1,6 +1,6 @@
 from celery import Celery
 from celery.schedules import crontab
-from app.core.config import CELERY_RESULT_BACKEND,CELERY_BROKER_URL
+from app.utils.config import CELERY_RESULT_BACKEND,CELERY_BROKER_URL
 
 app = Celery('steam_analitics', broker=CELERY_BROKER_URL, backend=CELERY_RESULT_BACKEND)
 
