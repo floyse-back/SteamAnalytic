@@ -1,14 +1,12 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Request, Depends, Response, Cookie, HTTPException, Form
+from fastapi import APIRouter, Request, Depends, Response, HTTPException, Form
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import verify_user, user_auth_check, user_cookie_auth
 from app.services.auth_service import AuthService
 from app.repository.database import get_async_db
-from app.schemas.user import User
-from app.schemas.user import TokenType
+from app.domain.users.schemas import User
+from app.domain.users.schemas import TokenType
 from starlette import status
 
 router = APIRouter(prefix="/auth",tags=["auth"])

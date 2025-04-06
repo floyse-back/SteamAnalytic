@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
-from app.models.user import RefreshToken, BlackList
+from app.domain.users.models import RefreshToken, BlackList
 
 
 class BlackListRepository:

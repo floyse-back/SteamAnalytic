@@ -1,7 +1,7 @@
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.steam import SteamBase
+from app.domain.steam.models import SteamBase
 
 
 class SteamRepository:

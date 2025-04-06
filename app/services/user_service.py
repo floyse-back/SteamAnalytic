@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from app.repository.user_repository import UserRepository, UserNotFound
-from app.schemas.user import User, UserMe, UserPublic, TokenType
+from app.domain.users.schemas import UserMe, UserPublic, TokenType
 from app.utils.auth_utils import create_access_token, create_refresh_token
 from app.utils.utils import decode_jwt, verify_password
 

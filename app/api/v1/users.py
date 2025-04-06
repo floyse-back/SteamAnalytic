@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Request, Response, Form, HTTPException
+from fastapi import APIRouter, Depends, Request, Response, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import user_auth_check
-from app.schemas.user import User, UserMe
+from app.domain.users.schemas import UserMe
 from app.repository.database import get_async_db
 from app.services.user_service import UserService
 from starlette import status

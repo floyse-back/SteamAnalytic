@@ -3,11 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from app.core.config import TokenConfig
-from app.models.user import UserModel
+from app.domain.users.models import UserModel
 from app.repository.blacklist_repository import BlackListRepository
 from app.repository.refresh_token_repository import RefreshTokenRepository
 from app.repository.user_repository import UserRepository
-from app.schemas.user import TokenType, User
+from app.domain.users.schemas import TokenType, User
 from app.utils.auth_utils import create_access_token, create_refresh_token
 from app.utils.utils import verify_password, decode_jwt, hashed_password
 

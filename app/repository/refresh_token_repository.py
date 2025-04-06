@@ -1,9 +1,7 @@
-from typing import List
-
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import RefreshToken
+from app.domain.users.models import RefreshToken
 
 
 class RefreshTokenRepository:

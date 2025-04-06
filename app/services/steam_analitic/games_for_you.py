@@ -1,9 +1,8 @@
-from typing import Tuple,List
-
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repository.analitic_repository import AnaliticRepository
-from app.models.steam import Game
+from app.domain.steam.models import Game
 
 class GamesForYou:
     def __init__(self):
@@ -14,6 +13,11 @@ class GamesForYou:
         games_details_list = await self.repository.get_games_for_appids(session,appid_list)
         count_dict = self.__count_games_elements(games_details_list)
 
+        if not count_dict.get("ganres_dict") or not count_dict.get("category_dict") or not appid_list:
+            raise HTTPException(
+                status_code=400,
+                detail="User doesn't play games"
+            )
         data = await self.repository.games_for_you(session=session,ganres_data=count_dict.get("ganres_dict"),category_data=count_dict.get("categories_dict"),steam_appids=appid_list)
 
         return {

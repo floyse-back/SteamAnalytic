@@ -1,13 +1,8 @@
-from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select,text,join,case
+from sqlalchemy import select, case
 from sqlalchemy import func
-from app.models.steam import Game,Ganres,Category,GanreToMany,CategoryToMany
-from typing import List,Tuple
-
-
-
-
+from app.domain.steam.models import Game,Ganres,Category,GanreToMany,CategoryToMany
+from typing import List
 
 
 class AnaliticRepository:
@@ -18,12 +13,6 @@ class AnaliticRepository:
         return games_get.scalars().unique().all()
 
     async def games_for_you(self,session:AsyncSession,ganres_data:List,category_data:List,steam_appids:List):
-        if not steam_appids or not category_data or not ganres_data:
-            raise HTTPException(
-                status_code=400,
-                detail="User doesn't play games"
-            )
-
         ganre_cases = [ (Ganres.ganres_name == f'{ganre[0]}',ganre[1]) for ganre in ganres_data ]
         category_case = [ (Category.category_name == f'{category[0]}',category[1]) for category in category_data ]
 

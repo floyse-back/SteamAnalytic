@@ -3,8 +3,8 @@ from .celery_app import app
 from datetime import date
 
 from .database import get_db
-from ..models.steam import SteamBase, Game
-from ..models.user import RefreshToken
+from app.domain.steam.models import SteamBase, Game
+from app.domain.users.models import RefreshToken
 from .utils.steam_parser import SteamParser
 from .utils.steam_details_parser import SteamDetailsParser
 from sqlalchemy import text,cast,Integer,select,delete,update

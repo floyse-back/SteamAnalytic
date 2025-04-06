@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 import pytest
 
 from app.repository.database import Base
-from app.models.user import UserModel
+from app.domain.users.models import UserModel
 import asyncio
 
 DATABASE_URL = "sqlite+aiosqlite:///mytest.db"
