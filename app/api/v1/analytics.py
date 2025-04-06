@@ -4,9 +4,9 @@ from steam_web_api import Steam
 from app.utils.config import STEAM_API_KEY,HOST
 from httpx import AsyncClient
 
-from app.repository.database import get_async_db
+from app.infrastructure.db.repository import get_async_db
 from app.utils.dependencies import user_auth_check
-from app.services.steam_analitic.analitic_service import AnaliticService
+from app.application.steam_analitic.analitic_use_cases import AnaliticService
 
 router = APIRouter(prefix="/api/v1/analytics")
 

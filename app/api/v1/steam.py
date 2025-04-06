@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Query, Path, HTTPException, Depends
-from app.repository.steam_repository import SteamRepository
-from app.repository.database import get_async_db
+from app.infrastructure.db.repository import SteamRepository
+from app.infrastructure.db.repository import get_async_db
 from steam_web_api import Steam
 from httpx import AsyncClient
 from app.utils.config import STEAM_API_KEY
-from app.tasks.steam_tasks import update_or_add_game
+from app.infrastructure.celery_app.steam_tasks import update_or_add_game
 router = APIRouter(prefix="/api/v1/steam")
 
 steam = Steam(STEAM_API_KEY)

@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utils.dependencies import user_auth_check
 from app.domain.users.schemas import UserMe
-from app.repository.database import get_async_db
-from app.services.user_service import UserService
+from app.infrastructure.db.repository import get_async_db
+from app.application.user_use_cases.user_use_cases import UserService
 from starlette import status
 
 router = APIRouter()

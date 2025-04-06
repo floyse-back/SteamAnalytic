@@ -2,7 +2,7 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 import pytest
 
-from app.repository.database import Base
+from app.infrastructure.db.repository import Base
 from app.domain.users.models import UserModel
 import asyncio
 

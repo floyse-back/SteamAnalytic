@@ -3,8 +3,8 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utils.dependencies import verify_user, user_auth_check, user_cookie_auth
-from app.services.auth_service import AuthService
-from app.repository.database import get_async_db
+from app.application.auth_use_cases.auth_use_cases import AuthService
+from app.infrastructure.db.repository import get_async_db
 from app.domain.users.schemas import User
 from app.domain.users.schemas import TokenType
 from starlette import status

@@ -1,8 +1,8 @@
 from fastapi import Depends,Request
 from fastapi.params import Form
 
-from app.repository.database import get_async_db
-from app.services.auth_service import AuthService
+from app.infrastructure.db.database import get_async_db
+from app.application.auth_use_cases.auth_use_cases import AuthService
 
 
 def get_auth_service():

@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient,ASGITransport
 
-from app.repository.database import get_async_db
+from app.infrastructure.db.repository import get_async_db
 from app.main import app
 from tests.conftest import override_get_db
 
