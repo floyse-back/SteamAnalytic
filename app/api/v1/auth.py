@@ -46,7 +46,7 @@ async def delete_user(request:Request,response:Response,password:str=Form(),sess
     response.delete_cookie("access_token",httponly=True,secure=True)
     response.delete_cookie("refresh_token",httponly=True,secure=True)
 
-@router.post("/refresh_token")
+@router.post("/refresh_token",status_code=status.HTTP_201_CREATED)
 async def refresh_token(request:Request,response:Response,auth:dict=Depends(user_auth_check),session:AsyncSession = Depends(get_async_db)):
     refresh_token = request.cookies.get("refresh_token")
 

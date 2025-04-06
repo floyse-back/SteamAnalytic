@@ -1,3 +1,5 @@
+from typing import Tuple,List
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repository.analitic_repository import AnaliticRepository
@@ -10,11 +12,14 @@ class GamesForYou:
     async def find_games_for_you(self,data:dict,session:AsyncSession):
         appid_list = self.__get_games_appid_list(data)
         games_details_list = await self.repository.get_games_for_appids(session,appid_list)
-        data = self.__count_games_elements(games_details_list)
+        count_dict = self.__count_games_elements(games_details_list)
 
-        elements_data = await self.repository.find_games_for_elements(genre_weights=self.ganres,category_weights=self.categories,session=session,limit=10)
+        data = await self.repository.games_for_you(session=session,ganres_data=count_dict.get("ganres_dict"),category_data=count_dict.get("categories_dict"),steam_appids=appid_list)
 
-        return elements_data
+        return {
+            "count_dict":count_dict,
+            "games_details_list":data,
+        }
 
     def __get_games_appid_list(self,data:dict):
         add_rank_data = self.__add_rank_data(data.get("games"))
@@ -73,7 +78,7 @@ class GamesForYou:
             else:
                 self.categories[categories_name] = 1
 
-    def __resize_elements(self,data:dict,elements:int = 5):
+    def __resize_elements(self,data:dict,elements:int = 100):
         items = data.items()
         items = sorted(items,key= lambda x:x[1],reverse=True)
         return items[:elements]

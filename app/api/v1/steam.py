@@ -69,6 +69,7 @@ async def user_games_play(user:str):
         my_int = int(user)
     except Exception:
         user_data = steam.users.search_user(f"{user}")
+        print(user_data)
         user = user_data["player"]["steamid"]
 
     response = steam.users.get_owned_games(f"{user}")

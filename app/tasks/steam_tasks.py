@@ -44,7 +44,7 @@ def get_game_details():
     session = next(get_db())
 
     try:
-        statement = select(SteamBase.appid).join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).filter(Game.steam_appid.is_(None)).order_by(SteamBase.positive).limit(500)
+        statement = select(SteamBase.appid).join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).filter(Game.steam_appid.is_(None)).order_by(SteamBase.positive.desc()).limit(100)
         result = session.execute(statement)
         result = result.scalars().all()
         parser = SteamDetailsParser(session=session)
