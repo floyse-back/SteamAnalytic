@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.db.repository.analitic_repository import AnaliticRepository
-from app.domain.steam.models import Game
+from app.infrastructure.db.models.steam_models import Game
 
 class GamesForYou:
     def __init__(self):
@@ -15,8 +15,7 @@ class GamesForYou:
         data = await self.repository.games_for_you(session=session,ganres_data=count_dict.get("ganres_dict"),category_data=count_dict.get("categories_dict"),steam_appids=appid_list)
 
         return {
-            "count_dict":count_dict,
-            "games_details_list":data,
+            "games":data,
         }
 
     def __get_games_appid_list(self,data:dict):

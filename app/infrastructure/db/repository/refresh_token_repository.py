@@ -1,10 +1,11 @@
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.users.models import RefreshToken
+from app.domain.users.repository import IRefreshTokenRepository
+from app.infrastructure.db.models.users_models import RefreshToken
 
 
-class RefreshTokenRepository:
+class RefreshTokenRepository(IRefreshTokenRepository):
     """Репозиторій для роботи з RefreshToken"""
     @staticmethod
     async def verify_refresh_token(session,refresh_token):

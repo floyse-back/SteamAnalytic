@@ -2,17 +2,18 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.users.models import UserModel
+from app.infrastructure.db.models.users_models import UserModel
 from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
 from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
 from app.domain.users.schemas import User, UserMe
+from app.domain.users.repository import IUserRepository
 
 
 class UserNotFound(Exception):
     pass
 
 
-class UserRepository:
+class UserRepository(IUserRepository):
     """Репозиторій для роботи з користувачами"""
 
     async def create_user(self,session:AsyncSession,user = User):
@@ -43,7 +44,7 @@ class UserRepository:
         await session.commit()
 
     @staticmethod
-    async def user_get(session,username) -> dict:
+    async def user_get(session,username) -> UserModel:
         result = await session.execute(select(UserModel).filter(UserModel.username == username))
         return result.scalars().first()
 

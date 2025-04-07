@@ -2,10 +2,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
-from app.domain.users.models import RefreshToken, BlackList
+from app.domain.users.repository import IBlackListRepository
+from app.infrastructure.db.models.users_models import RefreshToken, BlackList
 
 
-class BlackListRepository:
+class BlackListRepository(IBlackListRepository):
     @staticmethod
     async def add_blacklist_tokens(refresh_tokens:List[RefreshToken],session:AsyncSession):
         for refresh_token in refresh_tokens:
@@ -16,9 +17,8 @@ class BlackListRepository:
                                     )
             session.add(token_model)
 
-
     @staticmethod
-    async def verify_blacklist_token(session:AsyncSession,token:str):
+    async def verify_blacklist_token(session:AsyncSession,token:str) -> bool:
         result = await session.execute(select(BlackList).filter(BlackList.token == token))
         if result.scalars().first():
             return True

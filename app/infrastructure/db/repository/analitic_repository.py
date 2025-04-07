@@ -1,11 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, case
 from sqlalchemy import func
-from app.domain.steam.models import Game,Ganres,Category,GanreToMany,CategoryToMany
+
+from app.domain.steam.repository import IAnaliticsRepository
+from app.infrastructure.db.models.steam_models import Game,Ganres,Category,GanreToMany,CategoryToMany
 from typing import List
 
 
-class AnaliticRepository:
+class AnaliticRepository(IAnaliticsRepository):
     """Репозиторій для роботи з аналітикою даних"""
     async def get_games_for_appids(self,session:AsyncSession,appid_list: List[int]):
         games_get = await session.execute(select(Game).filter(Game.steam_appid.in_(appid_list)))

@@ -1,7 +1,7 @@
 import datetime
 import time
 from steam_web_api import Steam
-from app.domain.steam.models import Game, Category, Ganres, Publisher
+from app.infrastructure.db.models.steam_models import Game, Category, Ganres, Publisher
 from app.utils.config import STEAM_API_KEY
 
 

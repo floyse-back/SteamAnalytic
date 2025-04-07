@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utils.dependencies import user_auth_check
 from app.domain.users.schemas import UserMe
-from app.infrastructure.db.repository import get_async_db
+from app.infrastructure.db.database import get_async_db
 from app.application.user_use_cases.user_use_cases import UserService
 from starlette import status
 

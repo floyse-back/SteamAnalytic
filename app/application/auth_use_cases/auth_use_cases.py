@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from app.utils.config import TokenConfig
-from app.domain.users.models import UserModel
+from app.infrastructure.db.models.users_models import UserModel
 from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
 from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
 from app.infrastructure.db.repository.user_repository import UserRepository

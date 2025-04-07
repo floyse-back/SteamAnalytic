@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta
 
-from app.domain.users.models import UserModel
+from app.infrastructure.db.models.users_models import UserModel
 from app.utils.utils import token_config, encode_jwt
 
 

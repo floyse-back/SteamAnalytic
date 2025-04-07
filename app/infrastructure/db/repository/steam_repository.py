@@ -1,10 +1,11 @@
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.steam.models import SteamBase
+from app.domain.steam.repository import ISteamRepository
+from app.infrastructure.db.models.steam_models import SteamBase
 
 
-class SteamRepository:
+class SteamRepository(ISteamRepository):
     """Репозиторій для роботи з Steam даними"""
 
     @staticmethod
