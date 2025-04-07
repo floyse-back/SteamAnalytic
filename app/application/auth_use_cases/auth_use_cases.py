@@ -12,7 +12,7 @@ from app.utils.auth_utils import create_access_token, create_refresh_token
 from app.utils.utils import verify_password, decode_jwt, hashed_password
 
 
-class AuthService:
+class AuthUseCase:
     def __init__(self):
         self.users = UserRepository()
         self.refresh_token_repository = RefreshTokenRepository()

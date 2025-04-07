@@ -2,11 +2,11 @@ from fastapi import Depends,Request
 from fastapi.params import Form
 
 from app.infrastructure.db.database import get_async_db
-from app.application.auth_use_cases.auth_use_cases import AuthService
+from app.application.auth_use_cases.auth_use_cases import AuthUseCase
 
 
 def get_auth_service():
-    return AuthService()
+    return AuthUseCase()
 
 async def verify_user(session = Depends(get_async_db),auth_service = Depends(get_auth_service),username:str = Form,password:str = Form):
     return await auth_service.verify_user(session,username,password)

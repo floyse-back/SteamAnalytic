@@ -8,7 +8,7 @@ from app.utils.auth_utils import create_access_token, create_refresh_token
 from app.utils.utils import decode_jwt, verify_password
 
 
-class UserService:
+class UserUseCase:
     def __init__(self):
         self.user_repository = UserRepository()
 

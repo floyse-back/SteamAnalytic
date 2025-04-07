@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utils.dependencies import verify_user, user_auth_check, user_cookie_auth
-from app.application.auth_use_cases.auth_use_cases import AuthService
+from app.application.auth_use_cases.auth_use_cases import AuthUseCase
 from app.infrastructure.db.database import get_async_db
 from app.domain.users.schemas import User
 from app.domain.users.schemas import TokenType
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/auth",tags=["auth"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-auth_service = AuthService()
+auth_service = AuthUseCase()
 
 @router.post("/login",response_model = TokenType,status_code=status.HTTP_201_CREATED)
 async def login_user(response: Response,session = Depends(get_async_db), user = Depends(verify_user)) -> TokenType:

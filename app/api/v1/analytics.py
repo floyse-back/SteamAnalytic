@@ -6,12 +6,12 @@ from httpx import AsyncClient
 
 from app.infrastructure.db.database import get_async_db
 from app.utils.dependencies import user_auth_check
-from app.application.steam_analitic.analitic_use_cases import AnaliticService
+from app.application.steam_analitic.analitic_use_cases import AnaliticUseCase
 
 router = APIRouter(prefix="/api/v1/analytics")
 
 steam = Steam(STEAM_API_KEY)
-analitic_service = AnaliticService()
+analitic_service = AnaliticUseCase()
 
 
 @router.get("/user_battle",response_model=None)

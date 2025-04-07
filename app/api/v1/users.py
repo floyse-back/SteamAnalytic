@@ -4,12 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utils.dependencies import user_auth_check
 from app.domain.users.schemas import UserMe
 from app.infrastructure.db.database import get_async_db
-from app.application.user_use_cases.user_use_cases import UserService
+from app.application.user_use_cases.user_use_cases import UserUseCase
 from starlette import status
 
 router = APIRouter()
 
-user_service = UserService()
+user_service = UserUseCase()
 
 @router.get("/user_me",response_model=UserMe,status_code=status.HTTP_200_OK)
 async def user_me(request:Request,auth = Depends(user_auth_check),session:AsyncSession = Depends(get_async_db)):
