@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.infrastructure.db.models.users_models import UserModel
 from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
 from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
-from app.domain.users.schemas import User, UserMe
+from app.application.dto.user_dto import User, UserMe
 from app.domain.users.repository import IUserRepository
 
 

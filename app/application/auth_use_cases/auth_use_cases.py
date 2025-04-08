@@ -7,7 +7,7 @@ from app.infrastructure.db.models.users_models import UserModel
 from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
 from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
 from app.infrastructure.db.repository.user_repository import UserRepository
-from app.domain.users.schemas import TokenType, User
+from app.application.dto.user_dto import User, TokenType
 from app.utils.auth_utils import create_access_token, create_refresh_token
 from app.utils.utils import verify_password, decode_jwt, hashed_password
 

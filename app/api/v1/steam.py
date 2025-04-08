@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, Path, Depends
 
-from app.application.steam_use_cases.steam_use_cases import SteamUseCase
+from app.application.steam_use_cases.steam_use_cases import SteamService
 from app.infrastructure.db.database import get_async_db
 from steam_web_api import Steam
 from app.utils.config import STEAM_API_KEY
@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/v1/steam")
 steam = Steam(STEAM_API_KEY)
 
 
-steam_service = SteamUseCase()
+steam_service = SteamService()
 
 @router.get("/best_sallers/")
 async def best_sallers(session = Depends(get_async_db),page:int=Query(default=1,gt=0),limit:int=Query(default=100,gt=-1)):

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .games_for_you import GamesForYou
 from .user_rating import UserRating
 
-class AnaliticUseCase:
+class AnaliticService:
     def __init__(self):
         self.user_rating = UserRating()
         self.games_for_you = GamesForYou()

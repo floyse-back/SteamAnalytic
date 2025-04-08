@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.domain.users.schemas import User, UserMe
+from app.application.dto.user_dto import User, UserMe
 from app.infrastructure.db.models.users_models import UserModel
 
 

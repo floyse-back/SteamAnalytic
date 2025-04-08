@@ -3,12 +3,12 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from steam_web_api import Steam
 
-from app.domain.steam.schemas import SteamUser
+from app.application.dto.steam_dto import SteamUser
 from app.infrastructure.db.repository.steam_repository import SteamRepository
 from app.utils.config import STEAM_API_KEY
 
 
-class SteamUseCase:
+class SteamService:
     def __init__(self):
         self.steam_repository = SteamRepository()
         self.steam = Steam(STEAM_API_KEY)
