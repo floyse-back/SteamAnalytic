@@ -31,8 +31,7 @@ class UserRepository(IUserRepository):
         session.add(user_model)
         await session.commit()
 
-    @staticmethod
-    async def get_user_for_id(user_id:int,session:AsyncSession):
+    async def get_user_for_id(self,user_id:int,session:AsyncSession):
         stmt = select(UserModel).filter(UserModel.id==user_id)
         result =await session.execute(stmt)
 
@@ -43,18 +42,11 @@ class UserRepository(IUserRepository):
         await session.flush()
         await session.commit()
 
-    @staticmethod
-    async def user_get(session,username) -> UserModel:
+    async def get_user(self,session:AsyncSession,username:str) -> UserModel:
         result = await session.execute(select(UserModel).filter(UserModel.username == username))
         return result.scalars().first()
 
-    @staticmethod
-    async def get_user(async_session:AsyncSession,username:str) -> UserModel:
-        result = await async_session.execute(select(UserModel).filter(UserModel.username == username))
-        return result.scalars().first()
-
-    @staticmethod
-    async def user_update(session,my_user,user:UserMe):
+    async def user_update(self,session,my_user,user:UserMe):
         if my_user.username == user.username and user.email == my_user.email:
             verify_unique = False
         elif my_user.username != user.username and user.email != my_user.email:
@@ -77,8 +69,7 @@ class UserRepository(IUserRepository):
             return my_user
         return False
 
-    @staticmethod
-    async def delete_refresh_tokens(session:AsyncSession,id):
+    async def delete_refresh_tokens(self,session:AsyncSession,id):
         user_model = await session.execute(
             select(UserModel).filter(UserModel.id == id)
         )
@@ -86,7 +77,7 @@ class UserRepository(IUserRepository):
 
         if my_user:
             await BlackListRepository.add_blacklist_tokens(my_user.refresh_tokens,session)
-            await RefreshTokenRepository.delete_refresh_tokens(session,id)
+            await RefreshTokenRepository.delete_refresh_from_id(session, id, )
         await session.commit()
 
 

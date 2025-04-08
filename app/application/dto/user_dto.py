@@ -9,22 +9,22 @@ class User(BaseModel):
 
 
 class TokenType(BaseModel):
-    access_token: str
-    refresh_token: str
-    type: str = "bearer"
+    access_token: str = Field(default_factory=str)
+    refresh_token: str = Field(default_factory=str)
+    type: str = Field(default="bearer")
 
 
 class PublicUser(BaseModel):
-    username: str
-    steamname: str
+    username: str = Field(default_factory=str)
+    steamname: str = Field(default_factory=str)
 
 
 class UserMe(BaseModel):
-    username: str
+    username: str = Field(default_factory=str)
     email: str = Field(default_factory=str)
     steamid: str = Field(default_factory=str)
 
 
 class UserPublic(BaseModel):
-    username: str
+    username: str = Field(default_factory=str)
     steamid: str = Field(default_factory=str)

@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import List
 
-from app.application.dto.user_dto import User, UserMe
-from app.infrastructure.db.models.users_models import UserModel
+from app.domain.users.schemas import User, UserMe
+from app.infrastructure.db.models.users_models import UserModel, RefreshToken
 
 
 class IUserRepository(ABC):
@@ -9,9 +10,8 @@ class IUserRepository(ABC):
     async def create_user(self,session,user:User):
         pass
 
-
     @abstractmethod
-    async def get_user_for_id(self,user_id:int,session):
+    async def get_user_for_id(self,user_id:int,session)->tuple[UserModel]:
         pass
 
     @abstractmethod
@@ -19,7 +19,7 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def user_get(self,session,username)->UserModel:
+    async def get_user(self,session,username:UserModel)->UserModel:
         pass
 
     @abstractmethod
@@ -36,24 +36,24 @@ class IRefreshTokenRepository(ABC):
         pass
 
     @abstractmethod
-    async def delete_refresh_tokens(self):
+    async def delete_refresh_from_id(self,session,user_id):
         pass
 
     @abstractmethod
-    async def delete_refresh_token(self):
+    async def delete_refresh_token(self,session,user_id):
         pass
 
     @abstractmethod
-    async def create_refresh_token(self):
+    async def create_refresh_token(self,session,user_id:int,refresh_token:str):
         pass
 
 class IBlackListRepository(ABC):
     @abstractmethod
-    async def add_blacklist_tokens(self):
+    async def add_blacklist_tokens(self,refresh_tokens:List[RefreshToken],session):
         pass
 
     @abstractmethod
-    async def verify_blacklist_token(self) -> bool:
+    async def verify_blacklist_token(self,session,token) -> bool:
         pass
 
 

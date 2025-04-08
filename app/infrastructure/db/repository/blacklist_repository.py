@@ -7,8 +7,7 @@ from app.infrastructure.db.models.users_models import RefreshToken, BlackList
 
 
 class BlackListRepository(IBlackListRepository):
-    @staticmethod
-    async def add_blacklist_tokens(refresh_tokens:List[RefreshToken],session:AsyncSession):
+    async def add_blacklist_tokens(self,refresh_tokens:List[RefreshToken],session:AsyncSession):
         for refresh_token in refresh_tokens:
             token_model = BlackList(user_id=refresh_token.user_id,
                                     token=refresh_token.refresh_token,
@@ -17,8 +16,7 @@ class BlackListRepository(IBlackListRepository):
                                     )
             session.add(token_model)
 
-    @staticmethod
-    async def verify_blacklist_token(session:AsyncSession,token:str) -> bool:
+    async def verify_blacklist_token(self,session:AsyncSession,token:str) -> bool:
         result = await session.execute(select(BlackList).filter(BlackList.token == token))
         if result.scalars().first():
             return True
