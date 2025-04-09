@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from app.infrastructure.db.models.steam_models import Game, SteamBase
-
+from app.domain.steam.schemas import SteamBase,Game
 
 class ISteamRepository(ABC):
     @abstractmethod

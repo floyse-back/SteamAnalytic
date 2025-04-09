@@ -49,7 +49,7 @@ class UserService:
             )
 
         data = decode_jwt(token)
-        user = await self.user_repository.get_user(async_session=session, username=data["username"])
+        user = await self.user_repository.get_user(session=session, username=data["username"])
 
         return UserMe(
             username=user.username,

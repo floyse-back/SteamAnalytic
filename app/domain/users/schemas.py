@@ -30,3 +30,12 @@ class UserPublic:
     username: str
     steamid: str
 
+@dataclass(frozen=True)
+class UserModel:
+    pass
+
+@dataclass(frozen=True)
+class RefreshToken:
+    pass
+
+

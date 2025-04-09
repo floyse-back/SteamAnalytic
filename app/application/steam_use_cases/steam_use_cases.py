@@ -42,7 +42,7 @@ class SteamService:
 
         return SteamUser(
             user_data = user_data,
-            user_friends = user_friends_list,
+            user_friends_list = user_friends_list,
             user_badges = user_badges,
             user_games = user_games,
         )

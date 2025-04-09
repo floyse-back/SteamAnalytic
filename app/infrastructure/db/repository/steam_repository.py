@@ -8,13 +8,13 @@ from app.infrastructure.db.models.steam_models import SteamBase
 class SteamRepository(ISteamRepository):
     """Репозиторій для роботи з Steam даними"""
 
-    async def get_top_games(self,session:AsyncSession,page:int,limit:int)->tuple[SteamBase]:
+    async def get_top_games(self,session:AsyncSession,page:int,limit:int):
         statement = select(SteamBase).order_by(desc(SteamBase.positive)).offset((page - 1) * limit).limit(limit)
 
         result = await session.execute(statement)
         return result.scalars().all()
 
-    async def get_most_discount_games(self,session:AsyncSession,page:int,limit:int)->SteamBase:
+    async def get_most_discount_games(self,session:AsyncSession,page:int,limit:int):
         statement = select(SteamBase).order_by(desc(SteamBase.discount)).filter(SteamBase.discount > 80).offset((page - 1) * limit).limit(limit)
 
         result = await session.execute(statement)

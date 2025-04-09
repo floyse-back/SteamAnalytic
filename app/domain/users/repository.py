@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from app.domain.users.schemas import User, UserMe
-from app.infrastructure.db.models.users_models import UserModel, RefreshToken
-
+from app.domain.users.schemas import User, UserMe,UserModel,RefreshToken
 
 class IUserRepository(ABC):
     @abstractmethod
