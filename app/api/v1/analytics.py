@@ -53,8 +53,15 @@ async def games_for_you(user:str,session = Depends(get_async_db), auth = Depends
     return result
 
 @router.get("/salling_for_you")
-async def salling_for_you(auth = Depends(user_auth_check)):
-    pass
+async def salling_for_games_you(user:str,auth = Depends(user_auth_check),session = Depends(get_async_db)):
+    async with AsyncClient(base_url=f"http://{HOST}") as client:
+        user_1 = await client.request("GET",f"/api/v1/steam/user_games_played",params={"user":f"{user}"})
+
+    if user_1.status_code != 200:
+        raise HTTPException(status_code=401)
+
+    result = await analitic_service.salling_for_you_games(user_1.json(),session=session)
+    return result
 
 @router.get("/user_achivements/")
 async def user_achivements(steam_id:int, app_id:int, auth = Depends(user_auth_check)):
