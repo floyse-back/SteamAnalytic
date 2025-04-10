@@ -37,19 +37,12 @@ async def user_score_generate(user:str, auth = Depends(user_auth_check)):
     }
 
 @router.get("/friends_list/")
-async def friend_game_list(user_id: int=None, auth = Depends(user_auth_check)):
-    response= steam.users.get_user_friends_list(f"{user_id}")
-    return response
+async def friend_game_list(user:str, auth = Depends(user_auth_check)):
+    return await analitic_service.friends_game_list(user)
 
 @router.get("/games_for_you")
 async def games_for_you(user:str,session = Depends(get_async_db), auth = Depends(user_auth_check)):
-    async with AsyncClient(base_url=f"http://{HOST}") as client:
-        user_1 = await client.request("GET",f"/api/v1/steam/user_games_played",params={"user":f"{user}"})
-
-    if user_1.status_code != 200:
-        raise HTTPException(status_code=401)
-
-    result = await analitic_service.analitic_games_for_you(user_1.json(),session = session)
+    result = await analitic_service.analitic_games_for_you(user,session = session)
     return result
 
 @router.get("/salling_for_you")
