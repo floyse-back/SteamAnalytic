@@ -98,3 +98,25 @@ def update_game_icon_url():
         session.execute(stmt)
     session.commit()
     logger.info("Finished task update_game_icon_url!")
+
+@app.task
+def update_gamesdetails_from_discount():
+    logger.info("Starting task update_gamesdetails_from_discount!")
+
+    session = next(get_db())
+    try:
+        statement = select(SteamBase.appid).join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).filter(Game.steam_appid.is_(None)).order_by(SteamBase.discount.desc())
+        result = session.execute(statement)
+        result = result.scalars().all()
+        parser = SteamDetailsParser(session=session)
+
+        logger.info(f"Get games")
+        parser.parse(game_list_appid=result)
+
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
+
+    logger.info("Finished task update_gamesdetails_from_discount!")
