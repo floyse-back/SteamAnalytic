@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .games_for_you import GamesForYou, SallingForYou
 from .user_rating import UserRating
+from .users_battle import UsersBattle
 from ..steam_use_cases.steam_use_cases import SteamService
 from ...infrastructure.steam_api.client import SteamClient
 
@@ -16,6 +17,7 @@ class AnaliticService:
         self.user_rating = UserRating()
         self.games_for_you = GamesForYou()
         self.salling_for_you = SallingForYou()
+        self.user_battle = UsersBattle()
         self.steam_service = SteamService()
 
     async def analitic_user_rating(self,user:str):
@@ -36,10 +38,10 @@ class AnaliticService:
         user_1 = await self.steam_service.user_full_stats(user=user1,friends_details=False)
         user_2 = await self.steam_service.user_full_stats(user=user2,friends_details=False)
 
-        return {
-            "message":user_1,
-            "message2":user_2
-        }
+
+        data = await self.user_battle.users_battle(user_1,user_2)
+
+        return data
 
 
 

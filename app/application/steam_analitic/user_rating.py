@@ -18,7 +18,10 @@ class UserRating:
 
         result = self.formula_user(
             [year_create_user_score,count_user_friends_score,lastlogoff,profile_visible,count_game_score,steam_state,user_level_score,badge_level_score,open_user_elements,count_game_time],
-        ) % 10000
+        )*2
+
+        if result >10000:
+            return 9999
 
         return result
 
