@@ -1,7 +1,4 @@
-from fastapi import HTTPException
-from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from steam_web_api import Steam
 
 from app.application.dto.steam_dto import SteamUser
 from app.infrastructure.db.repository.steam_repository import SteamRepository

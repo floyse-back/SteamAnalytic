@@ -1,5 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from .games_for_you import GamesForYou, SallingForYou
 from .user_rating import UserRating
 from .users_battle import UsersBattle
@@ -25,7 +23,7 @@ class AnaliticService:
 
         return await self.user_rating.create_user_rating(data=data)
 
-    async def analitic_games_for_you(self,user,session:AsyncSession):
+    async def analitic_games_for_you(self,user,session):
         user = await self.steam_service.user_games_play(user)
         data = user.json()
 
@@ -45,7 +43,7 @@ class AnaliticService:
 
 
 
-    async def salling_for_you_games(self,user:str,session:AsyncSession):
+    async def salling_for_you_games(self,user:str,session):
         user_data = await self.steam_service.user_games_play(user=user)
         return await self.salling_for_you.find_games_for_you(data=user_data,session=session)
 

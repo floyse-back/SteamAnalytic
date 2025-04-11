@@ -1,7 +1,9 @@
-from fastapi import HTTPException,Response
+from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
+from app.application.exceptions.exception_handler import PasswordIncorrect, UserNotFound, UserNotAuthorized, \
+    BlacklistToken, TokenNotFound
 from app.utils.config import TokenConfig
 from app.infrastructure.db.models.users_models import UserModel
 from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
@@ -27,10 +29,10 @@ class AuthUseCase:
     async def verify_user(self,session:AsyncSession, username: str, password: str) -> UserModel:
         user = await self.users.get_user(session, username)
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise UserNotFound("User not found")
 
         if not verify_password(password, user.hashed_password):
-            raise HTTPException(status_code=401, detail="Incorrect password")
+            raise PasswordIncorrect("Password incorrect")
 
         return user
 
@@ -38,11 +40,11 @@ class AuthUseCase:
         "Перевіряє token і якщо він є повертає дані з цього токена"
         token = request.cookies.get("refresh_token")
         if not token:
-            raise HTTPException(status_code=401, detail="Invalid refresh token")
+            raise TokenNotFound("Token not found")
 
         decoded_token = decode_jwt(token)
         if await self.black_list_repository.verify_blacklist_token(token=token, session=session):
-            raise HTTPException(status_code=401, detail="This token is blacklisted")
+            raise BlacklistToken("Token is blacklisted")
 
         return decoded_token
 
@@ -54,20 +56,6 @@ class AuthUseCase:
             session=session,
             user_id=user.id,
             refresh_token=refresh_token
-        )
-
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            max_age=self.token_config.access_token_expires * 60
-        )
-
-        response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            httponly=True,
-            max_age=self.token_config.refresh_token_expires * 60
         )
 
         return TokenType(
@@ -82,26 +70,18 @@ class AuthUseCase:
 
     async def delete_from_user(self,access_token,user_password,session:AsyncSession):
         if not access_token:
-            raise HTTPException(
-                status_code=401,
-                detail="No autorization user"
-            )
+            raise UserNotAuthorized("Access token is invalid")
+
         refresh_token_data = decode_jwt(access_token)
 
         user = await self.users.get_user_for_id(user_id=refresh_token_data.get("user_id"),session=session)
 
         #Перевірка на правильність введеного пароля
         if not user:
-            raise HTTPException(
-                status_code=401,
-                detail="User not found"
-            )
+            raise UserNotFound(f"User Not Found")
 
         if not verify_password(user_password, user.hashed_password):
-            raise HTTPException(
-                status_code=401,
-                detail="Incorrect password",
-            )
+            raise PasswordIncorrect("Incorrect password")
 
         await self.users.delete_user(session,user)
 
