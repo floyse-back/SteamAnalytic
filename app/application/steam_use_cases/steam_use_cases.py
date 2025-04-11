@@ -18,7 +18,7 @@ class SteamService:
         result = await self.steam_repository.get_most_discount_games(session = session,page = page,limit = limit)
         return result
 
-    async def user_full_stats(self, user,user_badges:bool,friends_details:bool,user_games:bool):
+    async def user_full_stats(self, user,user_badges:bool = True,friends_details:bool = True,user_games:bool = True):
         user_data,user = await self.steam.get_user_info(user)
 
         user_friends_list = self.steam.users.get_user_friends_list(f"{user}", enriched=friends_details)

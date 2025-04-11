@@ -1,18 +1,20 @@
 from datetime import datetime
 from math import log
 
+from app.application.dto.steam_dto import SteamUser
+
 class UserRating:
-    async def create_user_rating(self,data:dict) -> int:
-        year_create_user_score = await self.check_user_years(data["user_data"]["player"]["timecreated"]) * 10
-        count_user_friends_score = len(data["user_friends_list"]["friends"]) * 2
-        lastlogoff = await self.count_score_last_logoff(self.last_logoff(data["user_data"]["player"].get("lastlogoff")).days) if data["user_data"]["player"].get("lastlogoff") else 0
-        profile_visible = await self.profile_visible(data["user_data"]["player"]["personastate"]) if data["user_data"]["player"].get("personastate") else 0
-        count_game_score = data["user_games"]["game_count"] * 2
-        steam_state = data["user_data"]["player"]["communityvisibilitystate"] * 3
-        user_level_score = data["user_badges"]["player_level"] * 5
-        badge_level_score = await self.badges_correct(data["user_badges"]["badges"])
-        open_user_elements = await self.user_opening_for_steam(data["user_data"]["player"])
-        count_game_time = await self.game_check_result(games=data["user_games"]["games"])
+    async def create_user_rating(self,data:SteamUser) -> int:
+        year_create_user_score = await self.check_user_years(data.user_data["player"]["timecreated"]) * 10
+        count_user_friends_score = len(data.user_friends_list["friends"]) * 2
+        lastlogoff = await self.count_score_last_logoff(self.last_logoff(data.user_data["player"].get("lastlogoff")).days) if data.user_data["player"].get("lastlogoff") else 0
+        profile_visible = await self.profile_visible(data.user_data["player"]["personastate"]) if data.user_data["player"].get("personastate") else 0
+        count_game_score = data.user_games["game_count"] * 2
+        steam_state = data.user_data["player"]["communityvisibilitystate"] * 3
+        user_level_score = data.user_badges["player_level"] * 5
+        badge_level_score = await self.badges_correct(data.user_badges["badges"])
+        open_user_elements = await self.user_opening_for_steam(data.user_data["player"])
+        count_game_time = await self.game_check_result(games=data.user_games["games"])
 
         result = self.formula_user(
             [year_create_user_score,count_user_friends_score,lastlogoff,profile_visible,count_game_score,steam_state,user_level_score,badge_level_score,open_user_elements,count_game_time],
