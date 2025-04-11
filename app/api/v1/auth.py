@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, Depends, Response, HTTPException, Form
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.utils.config import TokenConfig
 from app.utils.dependencies import verify_user, user_auth_check, user_cookie_auth
 from app.application.auth_use_cases.auth_use_cases import AuthUseCase
 from app.infrastructure.db.database import get_async_db
@@ -13,10 +14,27 @@ router = APIRouter(prefix="/auth",tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 auth_service = AuthUseCase()
+token_config = TokenConfig()
 
 @router.post("/login",response_model = TokenType,status_code=status.HTTP_201_CREATED)
 async def login_user(response: Response,session = Depends(get_async_db), user = Depends(verify_user)) -> TokenType:
-    return await auth_service.user_login(response=response,session=session, user=user)
+    result = await auth_service.user_login(session=session, user=user)
+
+    response.set_cookie(
+        key="access_token",
+        value=result.access_token,
+        httponly=True,
+        max_age=token_config.access_token_expires * 60
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=result.refresh_token,
+        httponly=True,
+        max_age=token_config.refresh_token_expires * 60
+    )
+
+    return result
 
 @router.get("/logout/",status_code=status.HTTP_204_NO_CONTENT)
 async def logout_user(response:Response,is_cookie_auth = Depends(user_cookie_auth)):
@@ -47,5 +65,14 @@ async def delete_user(request:Request,response:Response,password:str=Form(),sess
 async def refresh_token(request:Request,response:Response,auth:dict=Depends(user_auth_check),session:AsyncSession = Depends(get_async_db)):
     refresh_token = request.cookies.get("refresh_token")
 
-    return await auth_service.refresh_token(refresh_token=refresh_token,user=auth.get("user_id"),session=session,response=response)
+    result = await auth_service.refresh_token(refresh_token=refresh_token,user=auth.get("user_id"),session=session)
+
+    response.set_cookie(
+        key="access_token",
+        value=result.access_token,
+        httponly=True,
+        max_age = token_config.access_token_expires * 60
+    )
+
+    return result
 

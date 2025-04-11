@@ -1,6 +1,4 @@
-from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.requests import Request
 
 from app.application.exceptions.exception_handler import PasswordIncorrect, UserNotFound, UserNotAuthorized, \
     BlacklistToken, TokenNotFound
@@ -21,11 +19,6 @@ class AuthUseCase:
         self.black_list_repository = BlackListRepository()
         self.token_config = TokenConfig()
 
-    async def check_cookie_auth(self,request: Request):
-        if not request.cookies.get("access_token") and not request.cookies.get("refresh_token"):
-            return True
-        return False
-
     async def verify_user(self,session:AsyncSession, username: str, password: str) -> UserModel:
         user = await self.users.get_user(session, username)
         if not user:
@@ -36,9 +29,8 @@ class AuthUseCase:
 
         return user
 
-    async def user_auth_check(self,request: Request, session:AsyncSession):
+    async def user_auth_check(self,token, session:AsyncSession):
         "Перевіряє token і якщо він є повертає дані з цього токена"
-        token = request.cookies.get("refresh_token")
         if not token:
             raise TokenNotFound("Token not found")
 
@@ -48,7 +40,7 @@ class AuthUseCase:
 
         return decoded_token
 
-    async def user_login(self,response:Response,session:AsyncSession,user)->TokenType:
+    async def user_login(self,session:AsyncSession,user)->TokenType:
         access_token = create_access_token(user)
         refresh_token = create_refresh_token(user)
 
@@ -85,17 +77,10 @@ class AuthUseCase:
 
         await self.users.delete_user(session,user)
 
-    async def refresh_token(self,response:Response,refresh_token:str,user:str,session:AsyncSession):
+    async def refresh_token(self,refresh_token:str,user:str,session:AsyncSession):
         user_model = await self.users.get_user_for_id(user_id=int(user), session=session)
 
         access_token = create_access_token(user=user_model)
-
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            max_age=self.token_config.access_token_expires * 60
-        )
 
         return TokenType(
             access_token=access_token,

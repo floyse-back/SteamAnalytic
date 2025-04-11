@@ -12,7 +12,11 @@ async def verify_user(session = Depends(get_async_db),auth_service = Depends(get
     return await auth_service.verify_user(session,username,password)
 
 async def user_auth_check(request: Request,auth_service = Depends(get_auth_service), session = Depends(get_async_db)):
-    return await auth_service.user_auth_check(request,session)
+    token = request.cookies.get("refresh_token")
 
-async def user_cookie_auth(request:Request,auth_service = Depends(get_auth_service), session = Depends(get_async_db)):
-    return await auth_service.check_cookie_auth(request=request)
+    return await auth_service.user_auth_check(token,session)
+
+async def user_cookie_auth(request:Request,auth_service = Depends(get_auth_service)):
+    if not request.cookies.get("access_token") and not request.cookies.get("refresh_token"):
+        return True
+    return False
