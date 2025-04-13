@@ -13,3 +13,11 @@ class TokenNotFound(Exception):
 class BlacklistToken(Exception):
     pass
 
+class UserFriendsException(Exception):
+    pass
+
+class UserBadgesException(Exception):
+    pass
+
+class UserGetOwnedGames(Exception):
+    pass

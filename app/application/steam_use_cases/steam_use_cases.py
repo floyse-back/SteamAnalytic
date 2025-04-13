@@ -1,9 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.steam_dto import SteamUser
+from app.application.exceptions.exception_handler import UserFriendsException, UserBadgesException, UserGetOwnedGames
 from app.infrastructure.db.repository.steam_repository import SteamRepository
 from app.infrastructure.steam_api.client import SteamClient
 from app.utils.config import STEAM_API_KEY
+
+
 
 
 class SteamService:
@@ -18,9 +21,22 @@ class SteamService:
     async def user_full_stats(self, user,user_badges:bool = True,friends_details:bool = True,user_games:bool = True):
         user_data,user = await self.steam.get_user_info(user)
 
-        user_friends_list = self.steam.users.get_user_friends_list(f"{user}", enriched=friends_details)
-        user_badges = self.steam.users.get_user_badges(f"{user}") if user_badges else None
-        user_games = self.steam.users.get_owned_games(f"{user}") if user_games else None
+        print(user_data,user)
+
+        try:
+            user_friends_list = self.steam.users.get_user_friends_list(f"{user}", enriched=friends_details)
+        except Exception:
+            raise UserFriendsException("This user doesn't have any friends")
+
+        try:
+            user_badges = self.steam.users.get_user_badges(f"{user}") if user_badges else None
+        except Exception:
+            raise UserBadgesException("Error UserBadgesException")
+
+        try:
+            user_games = self.steam.users.get_owned_games(f"{user}") if user_games else None
+        except Exception:
+            raise UserGetOwnedGames("Error")
 
         return SteamUser(
             user_data = user_data,

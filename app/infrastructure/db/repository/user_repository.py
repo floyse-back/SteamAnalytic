@@ -31,7 +31,7 @@ class UserRepository(IUserRepository):
         session.add(user_model)
         await session.commit()
 
-    async def get_user_for_id(self,user_id:int,session:AsyncSession):
+    async def get_user_for_id(self,user_id:int,session:AsyncSession) -> UserModel:
         stmt = select(UserModel).filter(UserModel.id==user_id)
         result =await session.execute(stmt)
 
