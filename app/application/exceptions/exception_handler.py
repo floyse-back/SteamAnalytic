@@ -13,11 +13,6 @@ class TokenNotFound(Exception):
 class BlacklistToken(Exception):
     pass
 
-class UserFriendsException(Exception):
-    pass
-
-class UserBadgesException(Exception):
-    pass
-
-class UserGetOwnedGames(Exception):
-    pass
+class ProfilePrivate(Exception):
+    def __init__(self, user_profile):
+        self.user_profile = user_profile

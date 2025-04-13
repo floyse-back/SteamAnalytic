@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.steam_dto import SteamUser
-from app.application.exceptions.exception_handler import UserFriendsException, UserBadgesException, UserGetOwnedGames
+from app.application.exceptions.exception_handler import ProfilePrivate
 from app.infrastructure.db.repository.steam_repository import SteamRepository
 from app.infrastructure.steam_api.client import SteamClient
 from app.utils.config import STEAM_API_KEY
@@ -21,29 +21,19 @@ class SteamService:
     async def user_full_stats(self, user,user_badges:bool = True,friends_details:bool = True,user_games:bool = True):
         user_data,user = await self.steam.get_user_info(user)
 
-        print(user_data,user)
-
-        try:
+        if user_data["player"].get("communityvisibilitystate") == 3:
             user_friends_list = self.steam.users.get_user_friends_list(f"{user}", enriched=friends_details)
-        except Exception:
-            raise UserFriendsException("This user doesn't have any friends")
-
-        try:
             user_badges = self.steam.users.get_user_badges(f"{user}") if user_badges else None
-        except Exception:
-            raise UserBadgesException("Error UserBadgesException")
-
-        try:
             user_games = self.steam.users.get_owned_games(f"{user}") if user_games else None
-        except Exception:
-            raise UserGetOwnedGames("Error")
 
-        return SteamUser(
-            user_data = user_data,
-            user_friends_list = user_friends_list,
-            user_badges = user_badges,
-            user_games = user_games,
-        )
+
+            return SteamUser(
+                user_data = user_data,
+                user_friends_list = user_friends_list,
+                user_badges = user_badges,
+                user_games = user_games,
+            )
+        raise ProfilePrivate(user_profile=user_data["player"].get("personaname"))
 
     async def game_stats(self,steam_id:int):
         filters = 'basic,controller_support,dlc,fullgame,developers,demos,price_overview,metacritic,categories,genres,recommendations,achievements'

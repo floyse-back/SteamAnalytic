@@ -31,3 +31,9 @@ async def blacklist_token_handler(request:Request,exc:BlacklistToken):
         status_code=401,
         content={"detail": "Token blacklisted"}
     )
+
+async def profile_private_handler(request:Request,exc:ProfilePrivate):
+    return JSONResponse(
+        status_code=401,
+        content={"detail": f"Profile Private {exc.user_profile}"}
+    )
