@@ -1,10 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.steam_dto import SteamUser
+from app.application.dto.steam_dto import SteamUser,SteamBase
 from app.application.exceptions.exception_handler import ProfilePrivate
 from app.infrastructure.db.repository.steam_repository import SteamRepository
 from app.infrastructure.steam_api.client import SteamClient
 from app.utils.config import STEAM_API_KEY
+from app.infrastructure.redis.redis_repository import RedisRepository
 
 
 
@@ -13,9 +14,17 @@ class SteamService:
     def __init__(self):
         self.steam_repository = SteamRepository()
         self.steam = SteamClient(STEAM_API_KEY)
+        self.redis_repository = RedisRepository()
 
     async def best_sallers(self,session:AsyncSession,page,limit):
+        redis_result  = self.redis_repository.get_data(f"best_sallers{page}_{limit}")
+        if redis_result:
+            return redis_result
+
         result = await self.steam_repository.get_most_discount_games(session = session,page = page,limit = limit)
+
+        redis_result = self.redis_repository.cache_data(f"best_sallers{page}_{limit}",result,1200)
+        
         return result
 
     async def user_full_stats(self, user,user_badges:bool = True,friends_details:bool = True,user_games:bool = True):

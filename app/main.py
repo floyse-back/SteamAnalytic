@@ -17,4 +17,3 @@ app.add_exception_handler(PasswordIncorrect, password_incorrect_handler)
 app.add_exception_handler(TokenNotFound, token_not_found_handler)
 app.add_exception_handler(BlacklistToken, blacklist_token_handler)
 app.add_exception_handler(ProfilePrivate, profile_private_handler)
-
