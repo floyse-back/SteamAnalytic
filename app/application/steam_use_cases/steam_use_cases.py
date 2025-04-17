@@ -23,6 +23,7 @@ class SteamService:
 
         return new_result
 
+    @redis_cache(expire=2400)
     async def user_full_stats(self, user,user_badges:bool = True,friends_details:bool = True,user_games:bool = True):
         user_data,user = await self.steam.get_user_info(user)
 
@@ -31,31 +32,37 @@ class SteamService:
             user_badges = self.steam.users.get_user_badges(f"{user}") if user_badges else None
             user_games = self.steam.users.get_owned_games(f"{user}") if user_games else None
 
-
             return SteamUser(
                 user_data = user_data,
                 user_friends_list = user_friends_list,
                 user_badges = user_badges,
                 user_games = user_games,
-            )
+            ).model_dump()
+
         raise ProfilePrivate(user_profile=user_data["player"].get("personaname"))
 
+    @redis_cache(expire=2400)
     async def game_stats(self,steam_id:int):
         filters = 'basic,controller_support,dlc,fullgame,developers,demos,price_overview,metacritic,categories,genres,recommendations,achievements'
         result = self.steam.apps.get_app_details(steam_id, filters=filters)
 
         return result
 
+    @redis_cache(expire=1200)
     async def get_top_games(self,session:AsyncSession,limit:int,page:int):
         result = await self.steam_repository.get_top_games(session,page,limit)
 
-        return result
+        serialize_result = [ transform_to_dto(SteamBase,i) for i in range(0,len(result))]
 
+        return serialize_result
+
+    @redis_cache(expire=600)
     async def game_achivements(self,game_id):
         response = await self.steam.get_global_achievements(game_id)
 
         return response.json()
 
+    @redis_cache(expire=1200)
     async def user_games_play(self,user:str):
         user_data,user = await self.steam.get_user_info(user)
 
