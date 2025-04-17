@@ -10,6 +10,7 @@ class UsersBattle:
     async def users_battle(self, user1_data: SteamUser, user2_data: SteamUser):
         data = dict()
 
+        print(user1_data,type(user1_data))
         self.user1_id = user1_data.user_data["player"].get("steamid")
         self.user2_id = user2_data.user_data["player"].get("steamid")
 

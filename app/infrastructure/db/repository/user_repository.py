@@ -1,10 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.infrastructure.db.models.users_models import UserModel
-from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
-from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
 from app.application.dto.user_dto import User, UserMe
 from app.domain.users.repository import IUserRepository
 
@@ -75,9 +72,6 @@ class UserRepository(IUserRepository):
         )
         my_user = user_model.scalars().first()
 
-        if my_user:
-            await BlackListRepository.add_blacklist_tokens(my_user.refresh_tokens,session)
-            await RefreshTokenRepository.delete_refresh_from_id(session, id, )
-        await session.commit()
+        return my_user
 
 

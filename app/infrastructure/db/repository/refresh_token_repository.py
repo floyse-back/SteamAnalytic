@@ -27,6 +27,8 @@ class RefreshTokenRepository(IRefreshTokenRepository):
 
         await session.execute(stmt)
 
+        await session.commit()
+
     async def create_refresh_token(self,session:AsyncSession,user_id,refresh_token):
         token_model  =RefreshToken(
             user_id = user_id,
