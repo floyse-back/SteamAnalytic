@@ -26,28 +26,28 @@ class SteamBase(BaseModel):
     img_url: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CategoryOut(BaseModel):
     category_id: int
     category_name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class GanresOut(BaseModel):
     ganres_id: int
     ganres_name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class PublisherOut(BaseModel):
     publisher_id: int
     publisher_name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Game(BaseModel):
     steam_appid: int
@@ -70,4 +70,7 @@ class Game(BaseModel):
     game_categories: List[CategoryOut]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+def transform_to_dto(model:BaseModel,orm):
+    return model.model_validate(orm).model_dump()

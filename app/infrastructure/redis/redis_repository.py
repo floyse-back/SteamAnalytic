@@ -1,24 +1,39 @@
-import hashlib
+import functools
 
 from app.infrastructure.redis.redis_db import redis_client
 import json
 
 class RedisRepository:
-    def __init__(self,client = None):
-        self.redis_client = client or redis_client.client
+    REDIS_CLIENT = redis_client.client
 
-    def cache_data(self, key: str, data, expire: int = 3600):
-        if isinstance(data, list):
-            data = [item.dict() for item in data]
-        else:
-            data = data.dict()
+    @classmethod
+    def cache_data(cls, key: str, data, expire: int = 3600):
+        cls.REDIS_CLIENT.set(key, json.dumps(data), ex=expire)
 
-        self.redis_client.set(key, json.dumps(data), ex=expire)
-
-    def get_data(self,key):
-        result = self.redis_client.get(key)
+    @classmethod
+    def get_data(cls,key):
+        result = cls.REDIS_CLIENT.get(key)
 
         return json.loads(result) if result else None
 
-    def delete_data(self,key):
-        self.redis_client.delete(key)
+    @classmethod
+    def delete_data(cls,key):
+        cls.REDIS_CLIENT.delete(key)
+
+def redis_cache(expire: int = 3600):
+    def decorator(func):
+        @functools.wraps(func)
+        async def wrapper(*args,**kwargs):
+            key = f"{func.__name__}:{args}:{kwargs}"
+
+            redis_result = RedisRepository.get_data(key)
+            if redis_result:
+                return redis_result
+
+            result = await func(*args,**kwargs)
+
+            RedisRepository.cache_data(key,result,expire)
+
+            return result
+        return wrapper
+    return decorator

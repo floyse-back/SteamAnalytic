@@ -15,7 +15,7 @@ class SteamRepository(ISteamRepository):
         return result.scalars().all()
 
     async def get_most_discount_games(self,session:AsyncSession,page:int,limit:int):
-        statement = select(SteamBase).order_by(desc(SteamBase.discount)).filter(SteamBase.discount > 80).offset((page - 1) * limit).limit(limit)
+        statement = select(SteamBase).order_by(desc(SteamBase.discount)).offset((page - 1) * limit).order_by(desc(SteamBase.discount),desc(SteamBase.positive),desc(SteamBase.price)).limit(limit)
 
         result = await session.execute(statement)
         return result.scalars().all()
