@@ -17,7 +17,7 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_user(self,session,username:UserModel)->UserModel:
+    async def get_user(self,session,username:str)->UserModel:
         pass
 
     @abstractmethod

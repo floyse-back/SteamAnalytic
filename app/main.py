@@ -8,9 +8,7 @@ app = FastAPI()
 app.include_router(steam.router, tags=["steam"])
 app.include_router(analytics.router, tags=["analytics"])
 app.include_router(auth.router, tags=["auth"])
-app.include_router(admin.router, tags=["admin"])
 app.include_router(users.router, tags=["users"])
-
 app.include_router(admin.router, tags=["admin"])
 
 app.add_exception_handler(UserNotFound, user_not_found_handler)

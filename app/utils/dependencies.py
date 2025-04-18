@@ -1,6 +1,7 @@
 from fastapi import Depends,Request
 from fastapi.params import Form
 
+from app.application.admin_use_cases.admin_use_cases import AdminService
 from app.application.steam_use_cases.steam_use_cases import SteamService
 from app.application.user_use_cases.user_use_cases import UserService
 from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
@@ -50,6 +51,12 @@ async def get_auth_service():
         black_list_repository = BlackListRepository()
     )
 
+async def get_admin_service():
+    return AdminService(
+        user_repository = UserRepository()
+    )
+
+
 
 """Other Depends"""
 async def verify_user(session = Depends(get_async_db),auth_service = Depends(get_auth_service),username:str = Form,password:str = Form):
@@ -64,4 +71,5 @@ async def user_cookie_auth(request:Request):
     if not request.cookies.get("access_token") and not request.cookies.get("refresh_token"):
         return True
     return False
+
 

@@ -31,8 +31,8 @@ class UserRepository(IUserRepository):
         await session.commit()
 
     async def get_user_for_id(self,user_id:int,session:AsyncSession) -> UserModel:
-        stmt = select(UserModel).filter(UserModel.id==user_id)
-        result =await session.execute(stmt)
+        stmt = select(UserModel).filter(UserModel.id == user_id)
+        result = await session.execute(stmt)
 
         return result.scalars().first()
 
