@@ -2,25 +2,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.exceptions.exception_handler import PasswordIncorrect, UserNotFound, UserNotAuthorized, \
     BlacklistToken, TokenNotFound
+from app.domain.users.repository import IUserRepository, IRefreshTokenRepository, IBlackListRepository
 from app.utils.config import TokenConfig
 from app.infrastructure.db.models.users_models import UserModel
-from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
-from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
-from app.infrastructure.db.repository.user_repository import UserRepository
 from app.application.dto.user_dto import User, TokenType
 from app.utils.auth_utils import create_access_token, create_refresh_token
 from app.utils.utils import verify_password, decode_jwt, hashed_password
 
 
-class AuthUseCase:
-    def __init__(self):
-        self.users = UserRepository()
-        self.refresh_token_repository = RefreshTokenRepository()
-        self.black_list_repository = BlackListRepository()
+class AuthService:
+    def __init__(self,user_repository:IUserRepository,refresh_token_repository:IRefreshTokenRepository,black_list_repository:IBlackListRepository):
+        self.user_repository = user_repository
+        self.refresh_token_repository = refresh_token_repository
+        self.black_list_repository = black_list_repository
         self.token_config = TokenConfig()
 
     async def verify_user(self,session:AsyncSession, username: str, password: str) -> UserModel:
-        user = await self.users.get_user(session, username)
+        user = await self.user_repository.get_user(session, username)
         if not user:
             raise UserNotFound("User not found")
 
@@ -57,7 +55,7 @@ class AuthUseCase:
 
     async def register_user(self,user:User,session:AsyncSession):
         user.hashed_password = hashed_password(user.hashed_password).decode("utf-8")
-        await self.users.create_user(session, user)
+        await self.user_repository.create_user(session, user)
         return {"message":"Register successful"}
 
     async def delete_from_user(self,access_token,user_password,session:AsyncSession):
@@ -66,7 +64,7 @@ class AuthUseCase:
 
         refresh_token_data = decode_jwt(access_token)
 
-        user = await self.users.get_user_for_id(user_id=refresh_token_data.get("user_id"),session=session)
+        user = await self.user_repository.get_user_for_id(user_id=refresh_token_data.get("user_id"),session=session)
 
         #Перевірка на правильність введеного пароля
         if not user:
@@ -75,10 +73,10 @@ class AuthUseCase:
         if not verify_password(user_password, user.hashed_password):
             raise PasswordIncorrect("Incorrect password")
 
-        await self.users.delete_user(session,user)
+        await self.user_repository.delete_user(session,user)
 
     async def refresh_token(self,refresh_token:str,user:str,session:AsyncSession):
-        user_model = await self.users.get_user_for_id(user_id=int(user), session=session)
+        user_model = await self.user_repository.get_user_for_id(user_id=int(user), session=session)
 
         access_token = create_access_token(user=user_model)
 

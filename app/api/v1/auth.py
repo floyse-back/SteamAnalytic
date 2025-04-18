@@ -3,8 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utils.config import TokenConfig
-from app.utils.dependencies import verify_user, user_auth_check, user_cookie_auth
-from app.application.auth_use_cases.auth_use_cases import AuthUseCase
+from app.utils.dependencies import verify_user, user_auth_check, user_cookie_auth, get_auth_service
 from app.infrastructure.db.database import get_async_db
 from app.application.dto.user_dto import User, TokenType
 from starlette import status
@@ -13,11 +12,10 @@ router = APIRouter(prefix="/auth",tags=["auth"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-auth_service = AuthUseCase()
 token_config = TokenConfig()
 
 @router.post("/login",response_model = TokenType,status_code=status.HTTP_201_CREATED)
-async def login_user(response: Response,session = Depends(get_async_db), user = Depends(verify_user)) -> TokenType:
+async def login_user(response: Response,session = Depends(get_async_db),auth_service = Depends(get_auth_service), user = Depends(verify_user)) -> TokenType:
     result = await auth_service.user_login(session=session, user=user)
 
     response.set_cookie(
@@ -48,12 +46,12 @@ async def logout_user(response:Response,is_cookie_auth = Depends(user_cookie_aut
 
 
 @router.post("/register_user/",status_code = status.HTTP_201_CREATED)
-async def register_user(user:User,session=Depends(get_async_db)):
+async def register_user(user:User,auth_service = Depends(get_auth_service),session=Depends(get_async_db)):
     return await auth_service.register_user(user=user,session=session)
 
 
 @router.delete("/delete_user/",status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(request:Request,response:Response,password:str=Form(),session = Depends(get_async_db)):
+async def delete_user(request:Request,response:Response,auth_service = Depends(get_auth_service),password:str=Form(),session = Depends(get_async_db)):
     access_token = request.cookies.get("access_token")
 
     await auth_service.delete_from_user(access_token=access_token,user_password=password,session=session)
@@ -62,7 +60,7 @@ async def delete_user(request:Request,response:Response,password:str=Form(),sess
     response.delete_cookie("refresh_token",httponly=True,secure=True)
 
 @router.post("/refresh_token",status_code=status.HTTP_201_CREATED)
-async def refresh_token(request:Request,response:Response,auth:dict=Depends(user_auth_check),session:AsyncSession = Depends(get_async_db)):
+async def refresh_token(request:Request,response:Response,auth_service = Depends(get_auth_service),auth:dict=Depends(user_auth_check),session:AsyncSession = Depends(get_async_db)):
     refresh_token = request.cookies.get("refresh_token")
 
     result = await auth_service.refresh_token(refresh_token=refresh_token,user=auth.get("user_id"),session=session)

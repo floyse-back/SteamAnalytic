@@ -11,6 +11,8 @@ app.include_router(auth.router, tags=["auth"])
 app.include_router(admin.router, tags=["admin"])
 app.include_router(users.router, tags=["users"])
 
+app.include_router(admin.router, tags=["admin"])
+
 app.add_exception_handler(UserNotFound, user_not_found_handler)
 app.add_exception_handler(UserNotAuthorized, user_not_authorized_handler)
 app.add_exception_handler(PasswordIncorrect, password_incorrect_handler)

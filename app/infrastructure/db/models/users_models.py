@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime, timezone
 
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
 
@@ -17,6 +17,8 @@ class UserModel(Base):
     username = Column(String, nullable=False, unique=True, index=True)
     hashed_password = Column(String, nullable=False)
     email = Column(String, default=None)
+    is_active = Column(Boolean, default=False)
+    role = Column(String, default="user")
     steamid = Column(String, default="")
     steamname = Column(String, default="")
 

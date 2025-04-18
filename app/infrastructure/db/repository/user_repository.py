@@ -17,6 +17,8 @@ class UserRepository(IUserRepository):
         user_model = UserModel(
                 username = user.username,
                 hashed_password = user.hashed_password,
+                role="user",
+                is_active = False,
                 email = user.email,
                 steamid = user.steamid,
             )

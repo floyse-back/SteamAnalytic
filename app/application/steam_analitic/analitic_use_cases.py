@@ -1,7 +1,6 @@
 from .games_for_you import GamesForYou, SallingForYou
 from .user_rating import UserRating
 from .users_battle import UsersBattle
-from ..dto.steam_dto import transform_to_dto
 from ..steam_use_cases.steam_use_cases import SteamService
 from ...infrastructure.redis.redis_repository import redis_cache
 from ...infrastructure.steam_api.client import SteamClient
@@ -10,14 +9,14 @@ from ...infrastructure.steam_api.client import SteamClient
 
 
 class AnaliticService:
-    def __init__(self):
-        self.steam = SteamClient()
+    def __init__(self, steam:SteamClient,steam_service: SteamService):
+        self.steam = steam
+        self.steam_service = steam_service
 
         self.user_rating = UserRating()
         self.games_for_you = GamesForYou()
         self.salling_for_you = SallingForYou()
         self.user_battle = UsersBattle()
-        self.steam_service = SteamService()
 
     @redis_cache(expire=1200)
     async def analitic_user_rating(self,user:str):

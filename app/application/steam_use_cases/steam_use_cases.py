@@ -2,19 +2,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.steam_dto import SteamUser,SteamBase,transform_to_dto
 from app.application.exceptions.exception_handler import ProfilePrivate
-from app.infrastructure.db.repository.steam_repository import SteamRepository
+from app.domain.steam.repository import ISteamRepository
 from app.infrastructure.steam_api.client import SteamClient
-from app.utils.config import STEAM_API_KEY
-from app.infrastructure.redis.redis_repository import RedisRepository,redis_cache
+from app.infrastructure.redis.redis_repository import redis_cache
 
 
 
 
 class SteamService:
-    def __init__(self):
-        self.steam_repository = SteamRepository()
-        self.steam = SteamClient(STEAM_API_KEY)
-        self.redis_repository = RedisRepository()
+    def __init__(self,steam_repository: ISteamRepository,steam: SteamClient):
+        self.steam_repository = steam_repository
+        self.steam = steam
 
     @redis_cache(expire=2400)
     async def best_sallers(self,session:AsyncSession,page,limit):
@@ -52,7 +50,7 @@ class SteamService:
     async def get_top_games(self,session:AsyncSession,limit:int,page:int):
         result = await self.steam_repository.get_top_games(session,page,limit)
 
-        serialize_result = [ transform_to_dto(SteamBase,i) for i in range(0,len(result))]
+        serialize_result = [ transform_to_dto(SteamBase,i) for i in result]
 
         return serialize_result
 
@@ -60,7 +58,7 @@ class SteamService:
     async def game_achivements(self,game_id):
         response = await self.steam.get_global_achievements(game_id)
 
-        return response.json()
+        return response
 
     @redis_cache(expire=1200)
     async def user_games_play(self,user:str):

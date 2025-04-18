@@ -2,9 +2,8 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
-from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
-from app.infrastructure.db.repository.user_repository import UserRepository, UserNotFound
+from app.domain.users.repository import IUserRepository, IBlackListRepository, IRefreshTokenRepository
+from app.infrastructure.db.repository.user_repository import UserNotFound
 from app.application.dto.user_dto import TokenType, UserMe, UserPublic
 from app.infrastructure.redis.redis_repository import redis_cache
 from app.utils.auth_utils import create_access_token, create_refresh_token
@@ -12,10 +11,10 @@ from app.utils.utils import decode_jwt, verify_password
 
 
 class UserService:
-    def __init__(self):
-        self.user_repository = UserRepository()
-        self.refresh_token_repository = RefreshTokenRepository()
-        self.blacklist_repository = BlackListRepository()
+    def __init__(self,user_repository: IUserRepository,blacklist_repository: IBlackListRepository,refresh_token_repository:IRefreshTokenRepository):
+        self.user_repository = user_repository
+        self.refresh_token_repository = refresh_token_repository
+        self.blacklist_repository = blacklist_repository
 
     async def put_user(self,token,password:str,user:UserMe,session:AsyncSession):
         if not token:

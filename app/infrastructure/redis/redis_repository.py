@@ -6,6 +6,7 @@ import json
 class RedisRepository:
     REDIS_CLIENT = redis_client.client
 
+
     @classmethod
     def cache_data(cls, key: str, data, expire: int = 3600):
         cls.REDIS_CLIENT.set(key, json.dumps(data), ex=expire)
