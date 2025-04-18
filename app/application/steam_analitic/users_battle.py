@@ -10,17 +10,16 @@ class UsersBattle:
     async def users_battle(self, user1_data: SteamUser, user2_data: SteamUser):
         data = dict()
 
-        print(user1_data,type(user1_data))
-        self.user1_id = user1_data.user_data["player"].get("steamid")
-        self.user2_id = user2_data.user_data["player"].get("steamid")
+        self.user1_id = user1_data["user_data"]["player"].get("steamid")
+        self.user2_id = user2_data["user_data"]["player"].get("steamid")
 
         # Перевірка на наявність steamid (базова інформація)
         if not self.user1_id or not self.user2_id:
             return data  # Немає ID - не можемо порівнювати
 
         # user_data
-        player1 = user1_data.user_data.get("player")
-        player2 = user2_data.user_data.get("player")
+        player1 = user1_data["user_data"].get("player")
+        player2 = user2_data["user_data"].get("player")
 
         if player1 and player2:
             self.generate_dict_element(
@@ -79,8 +78,8 @@ class UsersBattle:
             )
 
         # user_badges
-        badges1 = user1_data.user_badges
-        badges2 = user2_data.user_badges
+        badges1 = user1_data["user_badges"]
+        badges2 = user2_data["user_badges"]
 
         if badges1 and badges2:
             self.generate_dict_element(
@@ -111,8 +110,8 @@ class UsersBattle:
             )
 
         # user_games
-        games1 = user1_data.user_games
-        games2 = user2_data.user_games
+        games1 = user1_data["user_games"]
+        games2 = user2_data["user_games"]
 
         if games1 and games2:
             self.generate_dict_element(

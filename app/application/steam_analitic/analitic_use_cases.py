@@ -28,7 +28,10 @@ class AnaliticService:
     @redis_cache(expire=1200)
     async def analitic_games_for_you(self,user,session):
         user = await self.steam_service.user_games_play(user)
-        data = user.json()
+        if not isinstance(user,dict):
+            data = user.json()
+        else:
+            data = user
 
         result =  await self.games_for_you.find_games_for_you(data=data,session = session)
 
