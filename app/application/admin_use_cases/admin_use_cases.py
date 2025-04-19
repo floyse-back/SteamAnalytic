@@ -16,6 +16,9 @@ class AdminService:
         else:
             raise UserNotFound
 
+        if user_model == None:
+            raise UserNotFound
+
         return user_model
 
     async def delete_user(self,session,user_id:int,username:str):
