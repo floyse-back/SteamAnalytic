@@ -1,6 +1,7 @@
-from app.application.exceptions.exception_handler import UserNotFound
+from app.application.exceptions.exception_handler import UserNotFound, TokenNotFound
 from app.domain.users.repository import IUserRepository
 from app.domain.users.schemas import UserModel
+from app.utils.utils import decode_jwt
 
 
 class AdminService:
@@ -26,5 +27,18 @@ class AdminService:
 
         await self.user_repository.delete_user(session,user_model)
 
+    async def role_check_user(self,session,token):
+        if token == None:
+            raise TokenNotFound("Token not found")
+
+        token_decoded = decode_jwt(token)
+        user_id = token_decoded["user_id"]
+
+        user_model =await self.get_user(session=session,user_id=user_id,username="")
+        if user_model.role == "admin":
+            return True
+        return False
+
     async def get_user_info(self,session,username:str,user_id:int):
-        return await self.get_user(session,user_id,username)
+        data =  await self.get_user(session,user_id,username)
+        return data

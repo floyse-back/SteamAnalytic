@@ -3,7 +3,6 @@ from datetime import date
 from fastapi import APIRouter,Depends
 from app.infrastructure.db.database import get_async_db
 from app.utils.dependencies import user_auth_check, get_analitic_service
-from app.application.steam_analitic.analitic_use_cases import AnaliticService
 
 router = APIRouter(prefix="/api/v1/analytics")
 

@@ -67,6 +67,11 @@ async def user_auth_check(request: Request,auth_service = Depends(get_auth_servi
 
     return await auth_service.user_auth_check(token,session)
 
+async def user_admin_check(request:Request,session=Depends(get_async_db),admin_service = Depends(get_admin_service)):
+    token = request.cookies.get("refresh_token")
+
+    return await admin_service.role_check_user(session,token)
+
 async def user_cookie_auth(request:Request):
     if not request.cookies.get("access_token") and not request.cookies.get("refresh_token"):
         return True
