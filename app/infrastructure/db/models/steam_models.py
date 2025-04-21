@@ -23,15 +23,6 @@ class SteamBase(Base):
     discount = Column(Integer)
     img_url = Column(String,nullable=True,default=None)
 
-
-class HistoricalSteamBase(Base):
-    __tablename__ = "historysteambase"
-
-    id = Column(Integer, primary_key=True,index=True,autoincrement=True)
-    data = Column(JSON,nullable=False)
-    snapshot_date = Column(Date,nullable=False,default=sqlalchemy.func.current_date())
-
-
 class Game(Base):
     __tablename__ = 'gamesdetails'
 

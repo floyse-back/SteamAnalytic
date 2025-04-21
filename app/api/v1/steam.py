@@ -38,3 +38,12 @@ async def game_achivements(game_id,steam_service = Depends(get_steam_service)):
 @router.get("/user_games_played")
 async def user_games_play(user:str,steam_service = Depends(get_steam_service)):
     return await steam_service.user_games_play(user)
+
+@router.get("/games_filter")
+async def games_100_filter(steam_service = Depends(get_steam_service),session = Depends(get_async_db)):
+    return await steam_service.games_filter(
+        session=session
+
+
+
+    )

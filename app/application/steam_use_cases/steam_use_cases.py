@@ -67,3 +67,7 @@ class SteamService:
         response = self.steam.users.get_owned_games(f"{user}")
 
         return response
+
+    @redis_cache(expire=600)
+    async def games_filter(self,session:AsyncSession):
+        pass

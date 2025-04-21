@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from app.api.v1 import steam, auth, analytics,users,admin
-from app.application.exceptions import *
 from app.api.http_exceptions import *
 
 app = FastAPI()

@@ -19,3 +19,5 @@ class SteamRepository(ISteamRepository):
 
         result = await session.execute(statement)
         return result.scalars().all()
+
+

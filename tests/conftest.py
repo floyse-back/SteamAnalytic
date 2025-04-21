@@ -1,59 +1,33 @@
+# conftest.py
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 import pytest
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncConnection, AsyncTransaction
+from sqlalchemy.orm import sessionmaker
+from app.infrastructure.db.database import Base
+from app.infrastructure.db.models import users_models, steam_models
 
-from app.infrastructure.db.repository import Base
-from app.infrastructure.db.models.users_models import UserModel
-import asyncio
+TEST_DATABASE_URL = "sqlite+aiosqlite:///test.db"
+engine = create_async_engine(TEST_DATABASE_URL, echo=True)
 
-DATABASE_URL = "sqlite+aiosqlite:///mytest.db"
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def prepare_database():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
 
-test_engine = create_async_engine(DATABASE_URL)
+@pytest_asyncio.fixture(scope="session")
+async def connection():
+    async with engine.connect() as conn:
+        yield conn
 
-TestingSession = async_sessionmaker(test_engine, expire_on_commit=False)
+@pytest_asyncio.fixture()
+async def transaction(connection: AsyncConnection):
+    async with connection.begin() as trans:
+        yield trans
 
-async def override_get_db():
-    async with TestingSession() as session:
-        yield session
+@pytest_asyncio.fixture()
+async def session(connection: AsyncConnection, transaction: AsyncTransaction):
+    async_session = AsyncSession(bind=connection, join_transaction_mode="create_savepoint")
+    yield async_session
+    await transaction.rollback()
 
-@pytest_asyncio.fixture(scope = "session")
-def event_loop():
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
-@pytest_asyncio.fixture
-async def async_session(event_loop):
-    session = async_sessionmaker(
-        test_engine,
-        expire_on_commit=False,
-    )
-
-    async with session() as s:
-        async with test_engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-        yield s
-
-        async with session() as s:
-            async with test_engine.begin() as conn:
-                await conn.run_sync(Base.metadata.drop_all)
-
-        await test_engine.dispose()
-
-@pytest.fixture
-async def register_user():
-    """Фікстура для створення тестового користувача."""
-    user = UserModel(
-        username="john_doe",
-        hashed_password="hashed_password_123",
-        email="john.doe@example.com",
-        steamid="123456789",
-        steamname="JohnDoeGamer"
-    )
-    async with TestingSession() as session:
-        session.add(user)
-        await session.commit()
-        await session.refresh(user)
-
-    return user  # Повертаємо пов'язаний із сесією об'єкт
