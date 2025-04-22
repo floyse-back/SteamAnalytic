@@ -3,11 +3,12 @@ from typing import Optional,List
 from datetime import date
 
 
+
 class SteamUser(BaseModel):
-    user_data: dict = Field(default=dict())
-    user_friends_list: dict = Field(default=dict())
-    user_badges: dict = Field(default=dict())
-    user_games: dict = Field(default=dict())
+    user_data: Optional[dict] = None
+    user_friends_list: Optional[dict] = None
+    user_badges: Optional[dict] = None
+    user_games: Optional[dict] = None
 
 class SteamBase(BaseModel):
     id: int

@@ -1,4 +1,5 @@
 # conftest.py
+import random
 from typing import AsyncGenerator
 
 import pytest_asyncio
@@ -10,7 +11,7 @@ from app.infrastructure.db.models import users_models, steam_models
 from app.main import app
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///test.db"
-engine = create_async_engine(TEST_DATABASE_URL)
+engine = create_async_engine(TEST_DATABASE_URL,echo=True)
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def prepare_database():
@@ -30,7 +31,7 @@ async def transaction(connection: AsyncConnection):
 
 @pytest_asyncio.fixture()
 async def session(connection: AsyncConnection, transaction: AsyncTransaction):
-    async_session = async_sessionmaker(connection=connection,
+    async_session = async_sessionmaker(bind=connection,
                                        join_transaction_mode="create_savepoint",
                                        )
     yield async_session
@@ -58,3 +59,27 @@ async def client(connection:AsyncConnection,transaction:AsyncTransaction):
     del app.dependency_overrides[get_async_db]
 
     await transaction.rollback()
+
+@pytest_asyncio.fixture(scope="function")
+async def steamgames(session: async_sessionmaker[AsyncSession]):
+    async with session() as s:
+        steam_games = [
+            steam_models.SteamBase(
+                name = f"Item {i}",
+                appid = f"{i}",
+                developer = f"Random Nick{i}",
+                publisher= f"Random Publisher{i}",
+                positive = random.randint(1,15000),
+                negative = random.randint(1,15000),
+                average_forever=random.randint(1,1000),
+                average_2weeks=random.randint(1,200),
+                median_2weeks=random.randint(1,500),
+                median_forever=random.randint(1,400),
+                price=random.randint(0,1000),
+                discount=random.randint(0,100),
+                img_url="img.connect//"
+            ) for i in range(0,100)
+        ]
+        s.add_all(steam_games)
+        await s.commit()
+
