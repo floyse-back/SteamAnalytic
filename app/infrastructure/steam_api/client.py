@@ -1,14 +1,9 @@
 from steam_web_api import Steam
+
+from app.infrastructure.exceptions.exception_handler import SteamGameNotFound, SteamUserNotFound
 from app.utils.config import STEAM_API_KEY
 import re
 from httpx import AsyncClient
-
-
-class SteamGameNotFound(Exception):
-    pass
-
-class SteamUserNotFound(Exception):
-    pass
 
 
 class SteamClient(Steam):
@@ -33,7 +28,8 @@ class SteamClient(Steam):
                 return user_data, steam_id
 
         user_data = self.users.search_user(user)
-        if user_data is None or user_data.get('player') is None:
+
+        if user_data is None or isinstance(user_data,str) or user_data.get('player') is None:
             raise SteamUserNotFound(f"User {user} not found")
 
         steam_id = user_data["player"]["steamid"]
