@@ -4,11 +4,15 @@ from typing import AsyncGenerator
 
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
+from sqlalchemy import text
+from fastapi import Request
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncConnection, AsyncTransaction, \
     async_sessionmaker
 from app.infrastructure.db.database import Base, get_async_db
-from app.infrastructure.db.models import users_models, steam_models
+from app.infrastructure.db.models import steam_models
+from app.infrastructure.db.models.users_models import UserModel
 from app.main import app
+from app.utils.utils import hashed_password
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///test.db"
 engine = create_async_engine(TEST_DATABASE_URL,echo=True)
@@ -83,3 +87,54 @@ async def steamgames(session: async_sessionmaker[AsyncSession]):
         s.add_all(steam_games)
         await s.commit()
 
+@pytest_asyncio.fixture(scope="function")
+async def users(session: async_sessionmaker[AsyncSession]):
+    async with session() as s:
+        await s.execute(text("DELETE FROM users"))
+        users = [
+            UserModel(username="admin_ivan", hashed_password=hashed_password("hashedpass1"),
+                      email="ivan.admin@example.com", is_active=True, role="admin", steamid="76561198123456789",
+                      steamname="AdminIvan"),
+            UserModel(username="admin_olena", hashed_password=hashed_password("hashedpass2"),
+                      email="olena.admin@example.com", is_active=True, role="admin", steamid="76561198123456788",
+                      steamname="AdminOlena"),
+
+            UserModel(username="user_dmytro", hashed_password=hashed_password("hashedpass3"),
+                      email="dmytro.user@example.com", is_active=False, steamid="76561198123456787",
+                      steamname="DmytroTheGreat"),
+            UserModel(username="user_maryna", hashed_password=hashed_password("hashedpass4"),
+                      email="maryna.user@example.com", is_active=True, steamid="76561198123456786",
+                      steamname="MarynaM"),
+            UserModel(username="user_artem", hashed_password=hashed_password("hashedpass5"),
+                      email="artem.user@example.com", is_active=True, steamid="76561198123456785",
+                      steamname="ArtemPlayz"),
+            UserModel(username="user_natali", hashed_password=hashed_password("hashedpass6"),
+                      email="natali.user@example.com", is_active=False, steamid="76561198123456784",
+                      steamname="NataliGames"),
+            UserModel(username="user_bohdan", hashed_password=hashed_password("hashedpass7"),
+                      email="bohdan.user@example.com", is_active=True, steamid="76561198123456783",
+                      steamname="BohdanK"),
+            UserModel(username="user_viktor", hashed_password=hashed_password("hashedpass8"),
+                      email="viktor.user@example.com", is_active=True, steamid="76561198123456782",
+                      steamname="ViktorV"),
+            UserModel(username="user_yana", hashed_password=hashed_password("hashedpass9"),
+                      email="yana.user@example.com", is_active=False, steamid="76561198123456781",
+                      steamname="YanaSmile"),
+            UserModel(username="user_oleh", hashed_password=hashed_password("hashedpass10"),
+                      email="oleh.user@example.com", is_active=True, steamid="76561198123456780", steamname="Oleh_Pro"),
+        ]
+    s.add_all(users)
+    await s.commit()
+
+@pytest_asyncio.fixture(scope="function")
+async def login(request:Request,client:AsyncClient,session: async_sessionmaker[AsyncSession]):
+    async with session() as s:
+        await s.execute(text("DELETE FROM users"))
+        user = UserModel(username="floysefake", hashed_password=hashed_password("password"),
+                      email="new_gmail.com", is_active=True, steamid="4353454336",
+                      steamname="NewSte"),
+        s.add(user)
+        await s.commit()
+
+    response = await client.post("/auth/login",params={"username":"floysefake","password":"password"})
+    return request

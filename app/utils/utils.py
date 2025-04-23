@@ -30,8 +30,8 @@ def encode_jwt(
     return jwt.encode(payload, private_key, algorithm=algorithm)
 
 
-def hashed_password(password:str)->bytes:
-    return bcrypt.hashpw(password=password.encode("utf-8"),salt=bcrypt.gensalt())
+def hashed_password(password:str)->str:
+    return bcrypt.hashpw(password=password.encode("utf-8"),salt=bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(password:str,hashed_password:str)->bool:

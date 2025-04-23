@@ -54,7 +54,7 @@ class AuthService:
         )
 
     async def register_user(self,user:User,session:AsyncSession):
-        user.hashed_password = hashed_password(user.hashed_password).decode("utf-8")
+        user.hashed_password = hashed_password(user.hashed_password)
         await self.user_repository.create_user(session, user)
         return {"message":"Register successful"}
 
