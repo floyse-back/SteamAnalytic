@@ -132,9 +132,14 @@ async def login(request:Request,client:AsyncClient,session: async_sessionmaker[A
         await s.execute(text("DELETE FROM users"))
         user = UserModel(username="floysefake", hashed_password=hashed_password("password"),
                       email="new_gmail.com", is_active=True, steamid="4353454336",
-                      steamname="NewSte"),
+                      steamname="NewSte")
         s.add(user)
         await s.commit()
 
     response = await client.post("/auth/login",params={"username":"floysefake","password":"password"})
-    return request
+    data = response.json()
+    return {
+        "client":client,
+        "username":"floysefake",
+        "access_token":data.get("access_token")
+    }

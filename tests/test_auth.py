@@ -96,3 +96,73 @@ class TestAuth:
         assert response.status_code == status_code
         assert response.json().get("detail") == exception
 
+    async def test_delete_users(self,login:AsyncClient,session:AsyncSession):
+        new_client = login["client"]
+        response = await new_client.delete(
+            url=f"/auth/delete_user",
+            params={"password":"password"}
+        )
+
+        assert response.status_code == 204
+        assert new_client.cookies.get("access_token") is None
+        assert new_client.cookies.get("refresh_token") is None
+
+        async with session() as s:
+            stmt = await s.execute(
+                select(UserModel).where(UserModel.username == f"")
+            )
+            result = stmt.scalars().first()
+
+        assert result is None
+
+    async def test_incorrect_password_delete_users(self,login:AsyncClient,session:AsyncSession):
+        new_client = login["client"]
+        response = await new_client.delete(
+            url=f"/auth/delete_user",
+            params={"password":"bad_password"}
+        )
+
+        assert response.status_code == 401
+        assert response.json().get("detail") == "Incorrect password"
+        assert new_client.cookies.get("access_token") is not None
+        assert new_client.cookies.get("refresh_token") is not None
+
+
+    async def test_not_auth_delete_users(self,client:AsyncClient):
+        response = await client.delete(
+            url=f"/auth/delete_user",
+            params={"password":"password"}
+        )
+
+        assert response.status_code == 401
+        assert response.json().get("detail") == "User Not Authorized"
+
+    async def test_logout_users(self,login:dict,session:AsyncSession):
+        new_client = login["client"]
+        response = await new_client.get("/auth/logout/")
+
+        assert response.status_code == 204
+        assert new_client.cookies.get("access_token") is None
+        assert new_client.cookies.get("refresh_token") is None
+
+    async  def test_not_auth_logout_users(self,client:AsyncClient):
+        response = await client.get("/auth/logout/")
+
+        assert response.status_code == 401
+        assert response.json().get("detail") == "Could not validate credentials"
+
+    async def test_refresh_token(self,login:dict,session:AsyncSession):
+        new_client = login["client"]
+        response = await new_client.post("/auth/refresh_token")
+
+        print(login["access_token"])
+
+        assert response.status_code == 201
+        assert response.json().get("access_token") != login["access_token"]
+        assert response.json().get("refresh_token") is not None
+
+    async def test_not_refresh_token(self,client:AsyncClient):
+        response = await client.post("/auth/refresh_token")
+
+        assert response.status_code == 401
+        assert response.json().get("detail") == "Token not found"

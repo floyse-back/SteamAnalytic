@@ -50,8 +50,8 @@ async def register_user(user:User,auth_service = Depends(get_auth_service),sessi
     return await auth_service.register_user(user=user,session=session)
 
 
-@router.delete("/delete_user/",status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(request:Request,response:Response,auth_service = Depends(get_auth_service),password:str=Form(),session = Depends(get_async_db)):
+@router.delete("/delete_user",status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(password:str,request:Request,response:Response,auth_service = Depends(get_auth_service),session = Depends(get_async_db)):
     access_token = request.cookies.get("access_token")
 
     await auth_service.delete_from_user(access_token=access_token,user_password=password,session=session)
