@@ -85,6 +85,52 @@ class TestAnalitic:
         else:
             assert response.json()["friends"] != None
 
+    @pytest.mark.parametrize(
+        "new_url,user,status_code,expected",
+        [
+        ("games_for_you","76561199054741771",200,None),
+         ("games_for_you","54546576543rgrgrer", 404, "Steam user not found"),
+         ("salling_for_you", "76561199054741771", 200, None),
+          ("salling_for_you", "54546576543rgrgrer", 404, "Steam user not found")
+         ]
+    )
+    @pytest.mark.usefixtures("steamgames")
+    async def test_block_for_you(self,login,user,status_code,expected,new_url):
+        new_client = login["client"]
+        response = await new_client.get(url=f"{self.base_url}/{new_url}",
+                                        params={
+                                            "user":user,
+                                        }
+                                        )
+
+        assert response.status_code == status_code
+        if expected:
+            assert response.json()['detail'] == expected
+
+    @pytest.mark.parametrize(
+        "app_id,steam_id,status_code,expected",
+        [
+            ("760","76561199054741771",200,None),
+            ("760","54546576543rgrgrer", 404, "Steam user not found"),
+            ("740", "76561199054741771", 404, None),
+            ("745", "54546576543rgrgrer", 404, "Steam user not found")
+
+        ]
+    )
+    async def test_user_user_achivements(self,login,steam_id,app_id,status_code,expected):
+        new_client = login["client"]
+        response = await new_client.get(url=f"{self.base_url}/user_achivements",
+                                        params={
+                                            "app_id":app_id,
+                                            "steam_id":steam_id
+                                        }
+                                        )
+
+        assert response.status_code == status_code
+        if expected:
+            assert response.json()['detail'] == expected
+        else:
+            assert response.json() != None
 
     @pytest.mark.parametrize(
         "url,status_code,expected",
