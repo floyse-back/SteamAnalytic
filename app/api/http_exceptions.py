@@ -50,3 +50,15 @@ async def steam_user_not_found_handler(request:Request,exc:SteamUserNotFound):
         status_code=404,
         content={"detail": f"Steam user not found"}
     )
+
+async def user_not_permitions_handler(request:Request,exc:UserNotPermitions):
+    return JSONResponse(
+        status_code=401,
+        content={"detail": f"User not permitions"}
+    )
+
+async def user_register_handler(request:Request,exc:UserRegisterError):
+    return JSONResponse(
+        status_code=401,
+        content={"detail": f"User email or username already exists"}
+    )

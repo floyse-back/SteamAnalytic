@@ -13,6 +13,12 @@ class TokenNotFound(Exception):
 class BlacklistToken(Exception):
     pass
 
+class UserNotPermitions(Exception):
+    pass
+
+class UserRegisterError(Exception):
+    pass
+
 class ProfilePrivate(Exception):
     def __init__(self, user_profile):
         self.user_profile = user_profile

@@ -5,7 +5,6 @@ from typing import AsyncGenerator
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy import text
-from fastapi import Request
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncConnection, AsyncTransaction, \
     async_sessionmaker
 from app.infrastructure.db.database import Base, get_async_db
@@ -15,7 +14,7 @@ from app.main import app
 from app.utils.utils import hashed_password
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///test.db"
-engine = create_async_engine(TEST_DATABASE_URL,echo=True)
+engine = create_async_engine(TEST_DATABASE_URL)
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def prepare_database():
@@ -37,6 +36,7 @@ async def transaction(connection: AsyncConnection):
 async def session(connection: AsyncConnection, transaction: AsyncTransaction):
     async_session = async_sessionmaker(bind=connection,
                                        join_transaction_mode="create_savepoint",
+                                       expire_on_commit=False,
                                        )
     yield async_session
     await transaction.rollback()
@@ -92,6 +92,9 @@ async def users(session: async_sessionmaker[AsyncSession]):
     async with session() as s:
         await s.execute(text("DELETE FROM users"))
         users = [
+            UserModel(username="floysefake", hashed_password=hashed_password("password"),
+                      email="new@_gmail.com",role="user", is_active=True, steamid="4353454336",
+                      steamname="NewSte"),
             UserModel(username="admin_ivan", hashed_password=hashed_password("hashedpass1"),
                       email="ivan.admin@example.com", is_active=True, role="admin", steamid="76561198123456789",
                       steamname="AdminIvan"),
@@ -127,19 +130,25 @@ async def users(session: async_sessionmaker[AsyncSession]):
     await s.commit()
 
 @pytest_asyncio.fixture(scope="function")
-async def login(request:Request,client:AsyncClient,session: async_sessionmaker[AsyncSession]):
-    async with session() as s:
-        await s.execute(text("DELETE FROM users"))
-        user = UserModel(username="floysefake", hashed_password=hashed_password("password"),
-                      email="new_gmail.com", is_active=True, steamid="4353454336",
-                      steamname="NewSte")
-        s.add(user)
-        await s.commit()
+async def login(client:AsyncClient,users):
 
     response = await client.post("/auth/login",params={"username":"floysefake","password":"password"})
     data = response.json()
+    print(data.get("access_token"))
     return {
         "client":client,
         "username":"floysefake",
+        "access_token":data.get("access_token")
+    }
+
+@pytest_asyncio.fixture(scope="function")
+async def login_admin(client:AsyncClient,users):
+    response = await client.post("/auth/login",params={"username":"admin_ivan","password":"hashedpass1"})
+
+    data = response.json()
+
+    return {
+        "client":client,
+        "username":"admin_ivan",
         "access_token":data.get("access_token")
     }

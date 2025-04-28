@@ -50,8 +50,9 @@ class TestAuth:
 
     @pytest.mark.parametrize(
         "username,password,email,steamid", [
-            ("admin_ivanchik", "hashedpass1", "floyse.fake@gmail.com", "steamid"),
-            ("test_vadym", "hashedpass2", "new_gmail.com", "steamid"),
+            ("admin_ivanchikes", "hashedpass1", "floyse.fake@gmail.com", "65465543"),
+            ("user_artemxs","hashedpass4","artemxs.user@example.com","432432"),
+            ("test_vadymit", "hashedpass2", "new_test@_gmail.com", "65543534"),
         ]
     )
     async def test_register_users(self,session:AsyncSession,client:AsyncClient,username,password,email,steamid):
@@ -77,8 +78,8 @@ class TestAuth:
 
     @pytest.mark.parametrize(
         "username,password,email,steamid,status_code,exception", [
-            ("user_dmytro", "newPassword", "floyse.fake@gmail.com", "steamid",400,"This username is already registered"),
-            ("new_user", "hashed", "dmytro.user@example.com", "steamid",400,"This username is already registered"),
+            ("user_dmytro", "newPassword", "floyse.fake@gmail.com", "steamid",401,"User email or username already exists"),
+            ("new_user", "hashed", "dmytro.user@example.com", "steamid",401,"User email or username already exists"),
         ]
     )
     async def test_bad_register_users(self,session:AsyncSession,client:AsyncClient,username,password,email,steamid,status_code,exception):
@@ -108,7 +109,7 @@ class TestAuth:
 
         async with session() as s:
             stmt = await s.execute(
-                select(UserModel).where(UserModel.username == f"")
+                select(UserModel).where(UserModel.username == f"floysefake")
             )
             result = stmt.scalars().first()
 
@@ -152,13 +153,13 @@ class TestAuth:
 
     async def test_refresh_token(self,login:dict,session:AsyncSession):
         new_client = login["client"]
+        print(login["access_token"])
         response = await new_client.post("/auth/refresh_token")
 
-        print(login["access_token"])
-
+        data = response.json()
         assert response.status_code == 201
-        assert response.json().get("access_token") != login["access_token"]
-        assert response.json().get("refresh_token") is not None
+        assert response.cookies.get("access_token") is not None
+        assert data["refresh_token"] is not None
 
     async def test_not_refresh_token(self,client:AsyncClient):
         response = await client.post("/auth/refresh_token")

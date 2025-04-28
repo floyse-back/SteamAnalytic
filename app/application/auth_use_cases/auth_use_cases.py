@@ -1,8 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.exceptions.exception_handler import PasswordIncorrect, UserNotFound, UserNotAuthorized, \
-    BlacklistToken, TokenNotFound
+    BlacklistToken, TokenNotFound, UserRegisterError
 from app.domain.users.repository import IUserRepository, IRefreshTokenRepository, IBlackListRepository
+from app.infrastructure.exceptions.exception_handler import InfrastructureUserNotFound, InfrastructureUserRegister
 from app.utils.config import TokenConfig
 from app.infrastructure.db.models.users_models import UserModel
 from app.application.dto.user_dto import User, TokenType
@@ -55,7 +56,12 @@ class AuthService:
 
     async def register_user(self,user:User,session:AsyncSession):
         user.hashed_password = hashed_password(user.hashed_password)
-        await self.user_repository.create_user(session, user)
+
+        try:
+            await self.user_repository.create_user(session, user)
+        except InfrastructureUserRegister:
+            raise UserRegisterError("User not registered")
+
         return {"message":"Register successful"}
 
     async def delete_from_user(self,access_token,user_password,session:AsyncSession):

@@ -1,13 +1,9 @@
-from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.infrastructure.db.models.users_models import UserModel
 from app.application.dto.user_dto import User, UserMe
 from app.domain.users.repository import IUserRepository
-
-
-class UserNotFound(Exception):
-    pass
+from app.infrastructure.exceptions.exception_handler import InfrastructureUserNotFound,InfrastructureUserRegister
 
 
 class UserRepository(IUserRepository):
@@ -23,10 +19,10 @@ class UserRepository(IUserRepository):
                 steamid = user.steamid,
             )
 
-        user_check = await self.get_user(session,user_model.username)
+        user_check = await self.get_user(session,username=user.username,email=user.email)
 
         if user_check:
-            raise HTTPException(status_code=400, detail="This username is already registered")
+            raise InfrastructureUserRegister()
         session.add(user_model)
         await session.commit()
 
@@ -41,8 +37,11 @@ class UserRepository(IUserRepository):
         await session.flush()
         await session.commit()
 
-    async def get_user(self,session:AsyncSession,username:str) -> UserModel:
-        result = await session.execute(select(UserModel).filter(UserModel.username == username))
+    async def get_user(self,session:AsyncSession,username:str,email :str|None = None) -> UserModel:
+        if email is None:
+            result = await session.execute(select(UserModel).where(UserModel.username == username))
+        else:
+            result = await session.execute(select(UserModel).where(or_(UserModel.username == username, UserModel.email == email)))
         return result.scalars().first()
 
     async def user_update(self,session,my_user,user:UserMe):
@@ -60,7 +59,7 @@ class UserRepository(IUserRepository):
             my_user.email = user.email
             my_user.steamid = user.steamid
         else:
-             raise UserNotFound(f"User {user.username} not found")
+             raise InfrastructureUserNotFound(f"User {user.username} not found")
 
         await session.commit()
 

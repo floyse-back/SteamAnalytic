@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from app.domain.users.repository import IUserRepository, IBlackListRepository, IRefreshTokenRepository
-from app.infrastructure.db.repository.user_repository import UserNotFound
+from app.infrastructure.db.repository.user_repository import InfrastructureUserNotFound
 from app.application.dto.user_dto import TokenType, UserMe, UserPublic
 from app.infrastructure.redis.redis_repository import redis_cache
 from app.utils.auth_utils import create_access_token, create_refresh_token
@@ -28,12 +28,12 @@ class UserService:
         try:
             user_model = await self.user_repository.get_user_for_id(user_id=id_element,session=session)
             if user_model is None:
-                raise UserNotFound("User don`t found")
+                raise InfrastructureUserNotFound("User don`t found")
             if not verify_password(password,user_model.hashed_password):
-                raise UserNotFound("Password incorrect")
+                raise InfrastructureUserNotFound("Password incorrect")
 
             user = await self.user_repository.user_update(session=session, my_user=user_model, user=user)
-        except UserNotFound as error:
+        except InfrastructureUserNotFound as error:
             raise HTTPException(
                 detail=f"{error}",
                 status_code=status.HTTP_404_NOT_FOUND

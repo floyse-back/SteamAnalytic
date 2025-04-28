@@ -1,4 +1,4 @@
-from app.application.exceptions.exception_handler import UserNotFound, TokenNotFound
+from app.application.exceptions.exception_handler import UserNotFound, TokenNotFound, UserNotPermitions
 from app.domain.users.repository import IUserRepository
 from app.domain.users.schemas import UserModel
 from app.utils.utils import decode_jwt
@@ -25,6 +25,9 @@ class AdminService:
     async def delete_user(self,session,user_id:int,username:str):
         user_model =await self.get_user(session,user_id,username)
 
+        if user_model.role == "admin":
+            raise UserNotPermitions()
+
         await self.user_repository.delete_user(session,user_model)
 
     async def role_check_user(self,session,token):
@@ -35,9 +38,10 @@ class AdminService:
         user_id = token_decoded["user_id"]
 
         user_model =await self.get_user(session=session,user_id=user_id,username="")
+        print(user_model)
         if user_model.role == "admin":
             return True
-        return False
+        raise UserNotPermitions("Not Permitted")
 
     async def get_user_info(self,session,username:str,user_id:int):
         data =  await self.get_user(session,user_id,username)
