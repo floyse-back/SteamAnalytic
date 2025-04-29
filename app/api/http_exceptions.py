@@ -62,3 +62,9 @@ async def user_register_handler(request:Request,exc:UserRegisterError):
         status_code=401,
         content={"detail": f"User email or username already exists"}
     )
+
+async def steam_achievements_not_found_details_handler(request:Request,exc:SteamGameAchievementsNotFoundDetails|SteamUserAchievementsNotFoundDetails):
+    return JSONResponse(
+        status_code=401,
+        content={"detail": f"Steam Achievements not found"}
+    )

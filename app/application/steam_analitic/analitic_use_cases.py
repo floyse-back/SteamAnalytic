@@ -63,5 +63,5 @@ class AnaliticService:
     @redis_cache(expire=1200)
     async def user_achivements(self,user:str,app_id:int):
         user_data,correct_user_id = await self.steam.get_user_info(user)
-        return self.steam.apps.get_user_achievements(int(correct_user_id),app_id)
+        return await self.steam.users_get_achievements(int(correct_user_id),app_id)
 

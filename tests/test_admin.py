@@ -31,7 +31,7 @@ class TestAdmin:
         "username,status_code,expected",
         [("user_dmytro",204,None),
          ("user_artem", 204, None),
-         ("admin_ivan",401,"Not Permitions"),
+         ("admin_ivan",401,"User not permitions"),
          ("baduser",404,"User Not Found"),
          ]
     )

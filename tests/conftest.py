@@ -134,7 +134,7 @@ async def login(client:AsyncClient,users):
 
     response = await client.post("/auth/login",params={"username":"floysefake","password":"password"})
     data = response.json()
-    print(data.get("access_token"))
+
     return {
         "client":client,
         "username":"floysefake",

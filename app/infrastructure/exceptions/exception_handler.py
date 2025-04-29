@@ -7,6 +7,12 @@ class SteamUserNotFound(Exception):
 class SteamUserNotAuthorized(Exception):
     pass
 
+class SteamGameAchievementsNotFoundDetails(Exception):
+    pass
+
+class SteamUserAchievementsNotFoundDetails(Exception):
+    pass
+
 class InfrastructureUserRegister(Exception):
     pass
 

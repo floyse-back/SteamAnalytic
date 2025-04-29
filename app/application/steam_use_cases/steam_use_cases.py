@@ -64,7 +64,7 @@ class SteamService:
     async def user_games_play(self,user:str):
         user_data,user = await self.steam.get_user_info(user)
 
-        response = self.steam.users.get_owned_games(f"{user}")
+        response = await self.steam.users_get_owned_games(f"{user}")
 
         return response
 

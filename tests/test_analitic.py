@@ -13,7 +13,7 @@ class TestAnalitic:
         [
             ("floysefake","76561199054741771"),
             ("76561199054741771","floysefake"),
-            ("76561199054741771","76561199190491252"),
+            ("76561199054741771","76561199093545741"),
             ("floysefake","pacukevich")
         ]
     )
@@ -110,7 +110,7 @@ class TestAnalitic:
     @pytest.mark.parametrize(
         "app_id,steam_id,status_code,expected",
         [
-            ("760","76561199054741771",200,None),
+            ("730","76561199054741771",200,None),
             ("760","54546576543rgrgrer", 404, "Steam user not found"),
             ("740", "76561199054741771", 404, None),
             ("745", "54546576543rgrgrer", 404, "Steam user not found")
