@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.exceptions.exception_handler import PasswordIncorrect, UserNotFound, UserNotAuthorized, \
     BlacklistToken, TokenNotFound, UserRegisterError
 from app.domain.users.repository import IUserRepository, IRefreshTokenRepository, IBlackListRepository
-from app.infrastructure.exceptions.exception_handler import InfrastructureUserNotFound, InfrastructureUserRegister
+from app.infrastructure.exceptions.exception_handler import InfrastructureUserRegister
 from app.utils.config import TokenConfig
 from app.infrastructure.db.models.users_models import UserModel
 from app.application.dto.user_dto import User, TokenType

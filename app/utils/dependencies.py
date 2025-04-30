@@ -8,6 +8,7 @@ from app.infrastructure.db.repository.blacklist_repository import BlackListRepos
 from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
 from app.infrastructure.db.repository.steam_repository import SteamRepository
 from app.infrastructure.db.repository.user_repository import UserRepository
+from app.infrastructure.redis.redis_repository import RedisRepository
 from app.utils.config import STEAM_API_KEY
 from app.application.steam_analitic.analitic_use_cases import AnaliticService
 from app.infrastructure.db.database import get_async_db
@@ -26,6 +27,7 @@ async def get_steam_service(steam_client:SteamClient = Depends(get_steam_client)
     return SteamService(
         steam=steam_client,
         steam_repository = SteamRepository(),
+        cache_repository = RedisRepository()
     )
 
 async def get_analitic_service(
@@ -34,7 +36,8 @@ async def get_analitic_service(
 ):
     return AnaliticService(
         steam = steam_client,
-        steam_service = steam_service
+        steam_service = steam_service,
+        cache_repository = RedisRepository()
     )
 
 async def get_users_service():
@@ -42,6 +45,7 @@ async def get_users_service():
         user_repository = UserRepository(),
         refresh_token_repository = RefreshTokenRepository(),
         blacklist_repository = BlackListRepository(),
+        cache_repository = RedisRepository()
     )
 
 async def get_auth_service():
