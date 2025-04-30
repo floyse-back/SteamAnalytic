@@ -1,4 +1,3 @@
-# conftest.py
 import random
 from typing import AsyncGenerator
 
@@ -11,18 +10,26 @@ from app.infrastructure.db.database import Base, get_async_db
 from app.infrastructure.db.models import steam_models
 from app.infrastructure.db.models.users_models import UserModel
 from app.main import app
+from app.utils.config import TEST_DATABASE_URL
 from app.utils.utils import hashed_password
+import asyncio
 
-TEST_DATABASE_URL = "sqlite+aiosqlite:///test.db"
+#TEST_DATABASE_URL = "sqlite+aiosqlite:///test.db"
 engine = create_async_engine(TEST_DATABASE_URL)
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="session")
+def event_loop():
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+@pytest_asyncio.fixture(scope="function", autouse=True)
 async def prepare_database():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def connection():
     async with engine.connect() as conn:
         yield conn
@@ -37,6 +44,7 @@ async def session(connection: AsyncConnection, transaction: AsyncTransaction):
     async_session = async_sessionmaker(bind=connection,
                                        join_transaction_mode="create_savepoint",
                                        expire_on_commit=False,
+                                       autoflush=False,
                                        )
     yield async_session
     await transaction.rollback()
@@ -126,8 +134,8 @@ async def users(session: async_sessionmaker[AsyncSession]):
             UserModel(username="user_oleh", hashed_password=hashed_password("hashedpass10"),
                       email="oleh.user@example.com", is_active=True, steamid="76561198123456780", steamname="Oleh_Pro"),
         ]
-    s.add_all(users)
-    await s.commit()
+        s.add_all(users)
+        await s.commit()
 
 @pytest_asyncio.fixture(scope="function")
 async def login(client:AsyncClient,users):

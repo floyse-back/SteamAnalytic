@@ -42,6 +42,7 @@ class UserService:
         my_user = await self.user_repository.delete_refresh_tokens(session, id_element)
         await self.blacklist_repository.add_blacklist_tokens(refresh_tokens=my_user.refresh_tokens, session=session)
         await self.refresh_token_repository.delete_refresh_from_id(session=session, user_id=id_element)
+
         access_token=create_access_token(user)
         refresh_token=create_refresh_token(user)
 

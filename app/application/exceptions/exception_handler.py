@@ -19,6 +19,10 @@ class UserNotPermitions(Exception):
 class UserRegisterError(Exception):
     pass
 
+class PageNotFound(Exception):
+    def __init__(self,page):
+        self.page = page
+
 class ProfilePrivate(Exception):
     def __init__(self, user_profile):
         self.user_profile = user_profile

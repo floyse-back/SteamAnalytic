@@ -68,3 +68,9 @@ async def steam_achievements_not_found_details_handler(request:Request,exc:Steam
         status_code=401,
         content={"detail": f"Steam Achievements not found"}
     )
+
+async def page_not_found_handler(request:Request,exc:PageNotFound):
+    return JSONResponse(
+        status_code=404,
+        content = {"detail":f"{exc.page} Page Not Found"}
+    )

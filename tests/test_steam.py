@@ -117,33 +117,39 @@ class TestGameAchivements:
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("steamgames")
 @pytest.mark.parametrize(
-    "page,status_code,limit,elements",[
-        (1,200,10,10),
-        (1,200,25,25),
-        (3,200,50,50),
-        (3,200,100,100),
+    "page,status_code,limit,elements,expected",[
+        (1,200,10,10,None),
+        (1,200,25,25,None),
+        (3,404,50,0,"3 Page Not Found"),
+        (4,404,100,0,"4 Page Not Found"),
     ]
 )
 class TestSteamGames:
     base_url = "/api/v1/steam/"
 
-    async def test_best_games(self,client:AsyncClient,page,status_code,limit,elements):
+    async def test_best_games(self,client:AsyncClient,page,status_code,limit,elements,expected):
         response = await client.get(f"{self.base_url}best_sallers/?page={page}&limit={limit}")
 
         assert response.status_code == status_code
-        assert isinstance(response.json(),list)
-        assert len(response.json()) == elements
+        if isinstance(response.json(),dict) and status_code !=200:
+            assert response.json()["detail"] == expected
+        else:
+            assert isinstance(response.json(),list)
+            assert len(response.json()) == elements
 
 
 
-    async def test_get_top_games(self,client:AsyncClient,page,status_code,limit,elements):
+    async def test_get_top_games(self,client:AsyncClient,page,status_code,limit,elements,expected):
         response = await client.get(f"{self.base_url}get_top_games/?page={page}&limit={limit}")
 
         data = response.json()
 
         assert response.status_code == status_code
-        assert isinstance(data,list)
-        for i in range(0,min(limit-1,10)):
-            assert data[i]["positive"] >= data[i+1]["positive"]
+        if isinstance(response.json(),dict) and status_code !=200:
+            assert response.json()["detail"] == expected
+        else:
+            assert isinstance(data,list)
+            for i in range(0,min(limit-1,10)):
+                assert data[i]["positive"] >= data[i+1]["positive"]
 
-        assert len(data) == elements
+            assert len(data) == elements

@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.steam_dto import SteamUser,SteamBase,transform_to_dto
-from app.application.exceptions.exception_handler import ProfilePrivate
+from app.application.exceptions.exception_handler import ProfilePrivate, PageNotFound
 from app.domain.steam.repository import ISteamRepository
 from app.infrastructure.steam_api.client import SteamClient
 from app.infrastructure.redis.redis_repository import redis_cache
@@ -17,6 +17,9 @@ class SteamService:
     @redis_cache(expire=2400)
     async def best_sallers(self,session:AsyncSession,page,limit):
         result = await self.steam_repository.get_most_discount_games(session = session,page = page,limit = limit)
+        if result == []:
+            raise PageNotFound(page)
+
         new_result = [transform_to_dto(SteamBase,i) for i in result]
 
         return new_result
@@ -49,6 +52,9 @@ class SteamService:
     @redis_cache(expire=1200)
     async def get_top_games(self,session:AsyncSession,limit:int,page:int):
         result = await self.steam_repository.get_top_games(session,page,limit)
+
+        if result == []:
+            raise PageNotFound(page)
 
         serialize_result = [ transform_to_dto(SteamBase,i) for i in result]
 
