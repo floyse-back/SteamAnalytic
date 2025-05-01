@@ -1,10 +1,10 @@
-from .games_for_you import GamesForYou, SallingForYou
-from .user_rating import UserRating
-from .users_battle import UsersBattle
-from ..steam_use_cases.steam_use_cases import SteamService
-from ..decorators.cache import cache_data
-from ...domain.redis_repository import ICacheRepository
-from ...infrastructure.steam_api.client import SteamClient
+from app.application.steam_analitic.games_for_you import GamesForYou, SallingForYou
+from app.application.steam_analitic.user_rating import UserRating
+from app.application.steam_analitic.users_battle import UsersBattle
+from app.application.services.steam_service.steam_service import SteamService
+from app.application.decorators.cache import cache_data
+from app.domain.redis_repository import ICacheRepository
+from app.infrastructure.steam_api.client import SteamClient
 
 
 

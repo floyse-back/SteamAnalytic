@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from app.application.exceptions.exception_handler import *
 from app.infrastructure.exceptions.exception_handler import *
+from app.utils.exceptions.exceptions import ExpiredToken
 
 
 async def user_not_found_handler(request:Request,exc:UserNotFound):
@@ -57,7 +58,7 @@ async def user_not_permitions_handler(request:Request,exc:UserNotPermitions):
         content={"detail": f"User not permitions"}
     )
 
-async def user_register_handler(request:Request,exc:UserRegisterError):
+async def user_register_handler(request:Request,exc:UserRegisterError|InfrastructureUserRegister):
     return JSONResponse(
         status_code=401,
         content={"detail": f"User email or username already exists"}
@@ -73,4 +74,16 @@ async def page_not_found_handler(request:Request,exc:PageNotFound):
     return JSONResponse(
         status_code=404,
         content = {"detail":f"{exc.page} Page Not Found"}
+    )
+
+async def expired_token_handler(request:Request,exc:ExpiredToken):
+    return JSONResponse(
+        status_code=401,
+        content={"detail": f"Unauthorized user"}
+    )
+
+async def games_not_found_handler(request:Request,exc:GamesNotFound):
+    return JSONResponse(
+        status_code=404,
+        content = {"detail":f"User Not Analize Games"}
     )

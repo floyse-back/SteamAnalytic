@@ -1,4 +1,5 @@
 import random
+from datetime import date
 from typing import AsyncGenerator
 
 import pytest_asyncio
@@ -8,6 +9,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncConne
     async_sessionmaker
 from app.infrastructure.db.database import Base, get_async_db
 from app.infrastructure.db.models import steam_models
+from app.infrastructure.db.models.steam_models import Game
 from app.infrastructure.db.models.users_models import UserModel
 from app.main import app
 from app.utils.config import TEST_DATABASE_URL
@@ -93,6 +95,34 @@ async def steamgames(session: async_sessionmaker[AsyncSession]):
             ) for i in range(0,100)
         ]
         s.add_all(steam_games)
+        await s.commit()
+
+@pytest_asyncio.fixture(scope="function")
+async def games(session: async_sessionmaker[AsyncSession]):
+    async with session() as s:
+        await s.execute(text("DELETE FROM gamesdetails"))
+        games = [
+            Game(
+                steam_appid=i,
+                name=f"Item {i}",
+                is_free=random.choice([True, False]),
+                short_description=f"This is a test description for Game {i}.",
+                requirements={
+                    "minimum": f"Minimum system requirements for Game {i}",
+                    "recommended": f"Recommended system requirements for Game {i}"
+                },
+                initial_price=random.randint(0, 5000),
+                final_price=random.randint(0, 5000),
+                final_formatted_price=f"${random.randint(0, 60)}.99",
+                metacritic=str(random.randint(50, 100)) if random.choice([True, False]) else None,
+                discount=random.randint(0, 90),
+                achievements={"count": random.randint(0, 100)} if random.choice([True, False]) else {},
+                recomendations=random.randint(0, 100000),
+                img_url=f"https://cdn.fakeimage.com/game{i}.jpg",
+                last_updated=date.today()
+            ) for i in range(100)
+        ]
+        s.add_all(games)
         await s.commit()
 
 @pytest_asyncio.fixture(scope="function")

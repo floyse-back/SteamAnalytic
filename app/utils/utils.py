@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from jwt import ExpiredSignatureError
 
 from app.utils.config import TokenConfig
+from app.utils.exceptions.exceptions import ExpiredToken
 
 token_config = TokenConfig()
 
@@ -16,10 +17,7 @@ def decode_jwt(
     try:
         return jwt.decode(encoded_jwt, public_key,algorithms=[algorithm])
     except ExpiredSignatureError:
-        raise HTTPException(
-            status_code = 401,
-            detail = "Unauthorized user",
-        )
+        raise ExpiredToken()
 
 
 def encode_jwt(

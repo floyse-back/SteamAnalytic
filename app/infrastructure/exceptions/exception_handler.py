@@ -18,3 +18,6 @@ class InfrastructureUserRegister(Exception):
 
 class InfrastructureUserNotFound(Exception):
     pass
+
+class InfrastructureUserNotAuthorized(Exception):
+    pass

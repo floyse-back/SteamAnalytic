@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from starlette import status
-from app.application.admin_use_cases.admin_use_cases import AdminService
+from app.application.services.admin_service.admin_service import AdminService
 from app.infrastructure.db.database import get_async_db
 from app.utils.dependencies import get_admin_service,user_admin_check
 

@@ -59,7 +59,7 @@ class UserRepository(IUserRepository):
             my_user.email = user.email
             my_user.steamid = user.steamid
         else:
-             raise InfrastructureUserNotFound(f"User {user.username} not found")
+             raise InfrastructureUserRegisterError(f"User {user.username} not found")
 
         await session.commit()
 

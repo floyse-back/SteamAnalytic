@@ -26,3 +26,6 @@ class PageNotFound(Exception):
 class ProfilePrivate(Exception):
     def __init__(self, user_profile):
         self.user_profile = user_profile
+
+class GamesNotFound(Exception):
+    pass

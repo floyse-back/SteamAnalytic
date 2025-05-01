@@ -39,7 +39,7 @@ class TestUser:
             headers=headers
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 201
 
 
     #Працює але не коректно (сил виправити вже немає)

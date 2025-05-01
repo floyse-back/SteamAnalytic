@@ -94,7 +94,7 @@ class TestAnalitic:
           ("salling_for_you", "54546576543rgrgrer", 404, "Steam user not found")
          ]
     )
-    @pytest.mark.usefixtures("steamgames")
+    @pytest.mark.usefixtures("steamgames","games")
     async def test_block_for_you(self,login,user,status_code,expected,new_url):
         new_client = login["client"]
         response = await new_client.get(url=f"{self.base_url}/{new_url}",

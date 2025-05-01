@@ -42,7 +42,8 @@ class AnaliticRepository(IAnaliticsRepository):
 
     async def salling_for_you(self,session:AsyncSession,ganres_data:List,category_data:List,steam_appids:List):
         ganre_cases = [ (Ganres.ganres_name == f'{ganre[0]}',ganre[1]) for ganre in ganres_data ]
-        category_case = [ (Category.category_name == f'{category[0]}',category[1]) for category in category_data ]
+        category_cases = [ (Category.category_name == f'{category[0]}',category[1]) for category in category_data ]
+
 
         query = (select(
             Game.steam_appid,
@@ -50,7 +51,7 @@ class AnaliticRepository(IAnaliticsRepository):
             Game.img_url,
             Game.discount,
             func.sum(
-                case(*ganre_cases,else_=0) + case(*category_case,else_=0)
+                case(*ganre_cases,else_=0) + case(*category_cases,else_=0)
             ).label("total")
         ).join(GanreToMany,GanreToMany.game_id==Game.steam_appid) \
         .join(Ganres,Ganres.ganres_id==GanreToMany.ganre_id) \

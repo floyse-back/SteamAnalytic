@@ -1,10 +1,11 @@
 from datetime import datetime, timezone, timedelta
 
+from app.application.dto.user_dto import UserElementToken
 from app.infrastructure.db.models.users_models import UserModel
 from app.utils.utils import token_config, encode_jwt
 
 
-def create_refresh_token(user: UserModel) -> str:
+def create_refresh_token(user: UserModel|UserElementToken) -> str:
     payload = {
         "user_id": user.id,
         "sub": user.username,
@@ -17,7 +18,7 @@ def create_refresh_token(user: UserModel) -> str:
     return token
 
 
-def create_access_token(user: UserModel) -> str:
+def create_access_token(user: UserModel|UserElementToken) -> str:
     payload = {
         "user_id" : user.id,
         "sub": user.username,
