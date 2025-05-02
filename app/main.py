@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from app.api.v1 import steam, auth, analytics,users,admin
 from app.api.http_exceptions import *
-from app.infrastructure.email_sender.email_sender import EmailSender
+from app.infrastructure.celery_app.steam_tasks import send_email
+
 app = FastAPI()
 
 @app.get("/health_check")
 async def health_check():
-    email_sender = EmailSender()
-    email_sender.health_live("floyse.fake@gmail.com")
+    send_email.delay("floyse.fake@gmail.com","Auth")
     return {"status": "ok"}
 
 app.include_router(steam.router, tags=["steam"])

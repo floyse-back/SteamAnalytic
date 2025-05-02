@@ -11,6 +11,8 @@ from sqlalchemy import text,cast,Integer,select,delete,update
 
 import logging
 
+from app.infrastructure.email_sender.email_sender import EmailSender
+
 logger = logging.getLogger(__name__)
 
 @app.task
@@ -120,3 +122,10 @@ def update_gamesdetails_from_discount():
         session.close()
 
     logger.info("Finished task update_gamesdetails_from_discount!")
+
+@app.task
+def send_email(receiver,type):
+    logger.info("Starting task send_email!")
+    email_sender = EmailSender()
+    email_sender.health_live(receiver)
+    logger.info("Finished task send_email!")

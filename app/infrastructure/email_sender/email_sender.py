@@ -34,18 +34,26 @@ class EmailSender(IEmailSender):
 
     def health_live(self,receiver):
         html ="""
-        <html>
-        <body>
-            <p>Hi,<br></p>
-            Server Start.</p>
-        </body>
-        </html>
+            <!DOCTYPE html>
+            <html lang="en">
+            <body style="background-color: rgb(245, 237, 237);width: 100%;margin: 0;padding: 0;align-items: center;">
+                <header style="background-color: rgb(35, 93, 179);;margin: 0;padding: 5px;">
+                    <h1 style="text-align: center;color: white;">Steam Analitic</h1>
+                </header>
+                <div style="text-align: center;">
+                    <h3>Hello User you need verify account</h3>
+                </div>
+                <div style= "display: flex;justify-content: center;margin-top:50px;">
+                    <div style="">
+                        <a style="background-color: rgb(35, 93, 179); border-radius: 0.75em;border: solid 0px;padding:10px 60px;text-align: center;color: white; font-size: 2em;font-family: Arial, Helvetica, sans-serif;">Get Started</a>
+                    </div>
+                </div>
+            </body>
+            </html>
         """
         part = MIMEText(html,'html')
 
         self.send_email(receiver,part)
-
-
 
     def forgout_password(self):
         pass
