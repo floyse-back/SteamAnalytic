@@ -1,8 +1,14 @@
 from fastapi import FastAPI
 from app.api.v1 import steam, auth, analytics,users,admin
 from app.api.http_exceptions import *
-
+from app.infrastructure.email_sender.email_sender import EmailSender
 app = FastAPI()
+
+@app.get("/health_check")
+async def health_check():
+    email_sender = EmailSender()
+    email_sender.health_live("floyse.fake@gmail.com")
+    return {"status": "ok"}
 
 app.include_router(steam.router, tags=["steam"])
 app.include_router(analytics.router, tags=["analytics"])

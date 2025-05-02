@@ -4,12 +4,12 @@ from typing import AsyncGenerator
 
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy import text
+from sqlalchemy import text, select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncConnection, AsyncTransaction, \
     async_sessionmaker
 from app.infrastructure.db.database import Base, get_async_db
 from app.infrastructure.db.models import steam_models
-from app.infrastructure.db.models.steam_models import Game
+from app.infrastructure.db.models.steam_models import Game, Category, Publisher, Ganres
 from app.infrastructure.db.models.users_models import UserModel
 from app.main import app
 from app.utils.config import TEST_DATABASE_URL
@@ -97,12 +97,31 @@ async def steamgames(session: async_sessionmaker[AsyncSession]):
         s.add_all(steam_games)
         await s.commit()
 
+
 @pytest_asyncio.fixture(scope="function")
 async def games(session: async_sessionmaker[AsyncSession]):
+    async def get_or_create(s:AsyncSession,model,**kwargs):
+        instance = await s.execute(select(model).filter_by(**kwargs))
+        instance = instance.scalars().first()
+
+        if instance:
+            return instance
+        else:
+            instance = model(**kwargs)
+            s.add(instance)
+
+            await s.flush()
+            return instance
+
+
     async with session() as s:
         await s.execute(text("DELETE FROM gamesdetails"))
-        games = [
-            Game(
+        # await s.execute(text("DELETE FROM categories"))
+        # await s.execute(text("DELETE FROM publishers"))
+        # await s.execute(text("DELETE FROM ganres"))
+        games_list=[]
+        for i in range(100):
+            game = Game(
                 steam_appid=i,
                 name=f"Item {i}",
                 is_free=random.choice([True, False]),
@@ -120,9 +139,34 @@ async def games(session: async_sessionmaker[AsyncSession]):
                 recomendations=random.randint(0, 100000),
                 img_url=f"https://cdn.fakeimage.com/game{i}.jpg",
                 last_updated=date.today()
-            ) for i in range(100)
-        ]
-        s.add_all(games)
+            )
+            for k in range(0,random.randint(0,10)):
+                game.game_categories.append(
+                    await get_or_create(
+                        s=s,
+                        model=Category,
+                        category_name=f"Random Category {k}"
+                    )
+                )
+                game.game_publisher.append(
+                    await get_or_create(
+                        s=s,
+                        model=Publisher,
+                        publisher_name = f"Random Publisher {k}"
+                    )
+                )
+                game.game_ganre.append(
+                    await get_or_create(
+                        s=s,
+                        model=Ganres,
+                        ganres_name = f"Random Ganre {k}"
+                    )
+                )
+
+            games_list.append(
+                game
+            )
+        s.add_all(games_list)
         await s.commit()
 
 @pytest_asyncio.fixture(scope="function")
