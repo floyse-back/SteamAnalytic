@@ -25,7 +25,6 @@ class TestAuth:
         )
 
         data = response.json()
-        print(data)
         assert response.status_code == 201
         assert data.get("access_token")
         assert data.get("refresh_token")

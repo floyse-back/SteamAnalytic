@@ -124,8 +124,8 @@ def update_gamesdetails_from_discount():
     logger.info("Finished task update_gamesdetails_from_discount!")
 
 @app.task
-def send_email(receiver,type):
-    logger.info("Starting task send_email!")
+def send_email(receiver,url,type):
+    logger.info("Starting task send_email {receiver} {type}!")
     email_sender = EmailSender()
-    email_sender.health_live(receiver)
+    email_sender.send_email(receiver,url,type)
     logger.info("Finished task send_email!")

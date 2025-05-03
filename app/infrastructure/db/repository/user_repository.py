@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.infrastructure.db.models.users_models import UserModel
 from app.application.dto.user_dto import User, UserMe
 from app.domain.users.repository import IUserRepository
-from app.infrastructure.exceptions.exception_handler import InfrastructureUserNotFound,InfrastructureUserRegister
+from app.infrastructure.exceptions.exception_handler import InfrastructureUserRegister
 
 
 class UserRepository(IUserRepository):
@@ -28,6 +28,12 @@ class UserRepository(IUserRepository):
 
     async def get_user_for_id(self,user_id:int,session:AsyncSession) -> UserModel:
         stmt = select(UserModel).filter(UserModel.id == user_id)
+        result = await session.execute(stmt)
+
+        return result.scalars().first()
+
+    async def get_user_for_email(self,email:str,session:AsyncSession)->UserModel:
+        stmt = select(UserModel).filter(UserModel.email == email)
         result = await session.execute(stmt)
 
         return result.scalars().first()
@@ -59,7 +65,7 @@ class UserRepository(IUserRepository):
             my_user.email = user.email
             my_user.steamid = user.steamid
         else:
-             raise InfrastructureUserRegisterError(f"User {user.username} not found")
+             raise InfrastructureUserRegister(f"User {user.username} not found")
 
         await session.commit()
 
@@ -74,5 +80,6 @@ class UserRepository(IUserRepository):
         my_user = user_model.scalars().first()
 
         return my_user
+
 
 

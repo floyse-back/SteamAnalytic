@@ -107,6 +107,21 @@ class TestAnalitic:
         if expected:
             assert response.json()['detail'] == expected
 
+    async def test_get_free_games(self,login,steamgames):
+        new_client = login["client"]
+        response = await new_client.get(f"{self.base_url}/free_games")
+
+        assert response.status_code == 200
+        if response.json():
+            assert response.json() != False
+
+    async def test_bad_free_games(self,login):
+        new_client = login["client"]
+        response = await new_client.get(f"{self.base_url}/free_games")
+
+        assert response.status_code == 200
+        assert response.json()["detail"] == False
+
     @pytest.mark.parametrize(
         "app_id,steam_id,status_code,expected",
         [
@@ -132,6 +147,7 @@ class TestAnalitic:
         else:
             assert response.json() != None
 
+
     @pytest.mark.parametrize(
         "url,status_code,expected",
         [
@@ -141,6 +157,7 @@ class TestAnalitic:
             ("/games_for_you?user=76561199054741771", 401, "Token not found"),
             ("/salling_for_you?user=76561199054741771", 401, "Token not found"),
             ("/user_achivements?steam_id=760&app_id=76561199054741771", 401, "Token not found"),
+            ("/free_games",401,"Token not found")
         ]
     )
     async def test_not_authenticated_endpoints(self,client:AsyncClient,url,status_code,expected):

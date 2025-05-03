@@ -28,6 +28,10 @@ class IUserRepository(ABC):
     async def delete_refresh_tokens(self,session,id):
         pass
 
+    @abstractmethod
+    async def get_user_for_email(self,email:str,session)->UserModel:
+        pass
+
 class IRefreshTokenRepository(ABC):
     @abstractmethod
     async def verify_refresh_token(self,session,refresh_token):
@@ -53,5 +57,15 @@ class IBlackListRepository(ABC):
     @abstractmethod
     async def verify_blacklist_token(self,session,token) -> bool:
         pass
+
+class IEmailConfirmationRepository(ABC):
+    @abstractmethod
+    async def create_confirm_token(self,session,token:str,type:str,user_model:UserModel):
+        pass
+
+    @abstractmethod
+    async def verify_confirm_token(self,session,token:str,type:str):
+        pass
+
 
 

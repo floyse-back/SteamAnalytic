@@ -15,6 +15,12 @@ class EmailSender(IEmailSender):
         self.email_sender = EMAIL_SENDER
         self.server = self.connect_server()
 
+        self.type_handlers = {
+            "verify_email": self.email_verify,
+            "forgot_password": self.forgot_password,
+            "delete_user": self.delete_account
+        }
+
     def connect_server(self):
         server = smtplib.SMTP(self.email_server,self.email_port)
         server.esmtp_features['auth'] = "LOGIN PLAIN"
@@ -22,7 +28,9 @@ class EmailSender(IEmailSender):
 
         return server
 
-    def send_email(self,receiver,part):
+    def send_email(self,receiver,url,type):
+        part = self.type_handlers[type](receiver,url)
+
         message = MIMEMultipart()
         message['From'] = self.email_sender
         message['To'] = receiver
@@ -32,8 +40,8 @@ class EmailSender(IEmailSender):
 
         self.server.sendmail(self.email_sender,receiver,message.as_string())
 
-    def health_live(self,receiver):
-        html ="""
+    def forgot_password(self,receiver,url):
+        html = f"""
             <!DOCTYPE html>
             <html lang="en">
             <body style="background-color: rgb(245, 237, 237);width: 100%;margin: 0;padding: 0;align-items: center;">
@@ -45,21 +53,58 @@ class EmailSender(IEmailSender):
                 </div>
                 <div style= "display: flex;justify-content: center;margin-top:50px;">
                     <div style="">
-                        <a style="background-color: rgb(35, 93, 179); border-radius: 0.75em;border: solid 0px;padding:10px 60px;text-align: center;color: white; font-size: 2em;font-family: Arial, Helvetica, sans-serif;">Get Started</a>
+                        <a href="{url}" style="background-color: rgb(35, 93, 179); border-radius: 0.75em;border: solid 0px;padding:10px 60px;text-align: center;color: white; font-size: 2em;font-family: Arial, Helvetica, sans-serif;">Get Started</a>
                     </div>
                 </div>
             </body>
             </html>
         """
-        part = MIMEText(html,'html')
+        part = MIMEText(html, 'html')
 
-        self.send_email(receiver,part)
+        return part
 
-    def forgout_password(self):
-        pass
+    def delete_account(self,receiver,url):
+        html = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <body style="background-color: rgb(245, 237, 237);width: 100%;margin: 0;padding: 0;align-items: center;">
+                <header style="background-color: rgb(35, 93, 179);;margin: 0;padding: 5px;">
+                    <h1 style="text-align: center;color: white;">Steam Analitic</h1>
+                </header>
+                <div style="text-align: center;">
+                    <h3>Hello User you need verify account</h3>
+                </div>
+                <div style= "display: flex;justify-content: center;margin-top:50px;">
+                    <div style="">
+                        <a href="{url}" style="background-color: rgb(35, 93, 179); border-radius: 0.75em;border: solid 0px;padding:10px 60px;text-align: center;color: white; font-size: 2em;font-family: Arial, Helvetica, sans-serif;">Get Started</a>
+                    </div>
+                </div>
+            </body>
+            </html>
+        """
+        part = MIMEText(html, 'html')
 
-    def delete_account(self):
-        pass
+        return part
 
-    def authenticate(self):
-        pass
+    def email_verify(self,receiver,url):
+        html = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <body style="background-color: rgb(245, 237, 237);width: 100%;margin: 0;padding: 0;align-items: center;">
+                <header style="background-color: rgb(35, 93, 179);;margin: 0;padding: 5px;">
+                    <h1 style="text-align: center;color: white;">Steam Analitic</h1>
+                </header>
+                <div style="text-align: center;">
+                    <h3>Hello User you need verify account</h3>
+                </div>
+                <div style= "display: flex;justify-content: center;margin-top:50px;">
+                    <div style="">
+                        <a href="{url}" style="background-color: rgb(35, 93, 179); border-radius: 0.75em;border: solid 0px;padding:10px 60px;text-align: center;color: white; font-size: 2em;font-family: Arial, Helvetica, sans-serif;">Get Started</a>
+                    </div>
+                </div>
+            </body>
+            </html>
+        """
+        part = MIMEText(html, 'html')
+
+        return part

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass(frozen=True)
@@ -38,4 +39,8 @@ class UserModel:
 class RefreshToken:
     pass
 
-
+@dataclass(frozen=True)
+class EmailConfirmation:
+    token: str
+    email: str
+    expire_at: datetime

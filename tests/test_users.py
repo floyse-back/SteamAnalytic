@@ -55,8 +55,6 @@ class TestUser:
             user_model = await s.execute(select(UserModel).where(UserModel.username==user))
             result = user_model.scalars().first()
 
-        print(result)
-
         response = await new_client.get(f"{self.base_url}/user_profile/{result.id}")
 
         assert response.status_code == status_code

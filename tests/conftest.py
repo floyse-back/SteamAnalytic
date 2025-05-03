@@ -90,7 +90,7 @@ async def steamgames(session: async_sessionmaker[AsyncSession]):
                 median_2weeks=random.randint(1,500),
                 median_forever=random.randint(1,400),
                 price=random.randint(0,1000),
-                discount=random.randint(0,100),
+                discount=100 if i==1 else random.randint(0,100),
                 img_url="img.connect//"
             ) for i in range(0,100)
         ]
@@ -116,9 +116,7 @@ async def games(session: async_sessionmaker[AsyncSession]):
 
     async with session() as s:
         await s.execute(text("DELETE FROM gamesdetails"))
-        # await s.execute(text("DELETE FROM categories"))
-        # await s.execute(text("DELETE FROM publishers"))
-        # await s.execute(text("DELETE FROM ganres"))
+
         games_list=[]
         for i in range(100):
             game = Game(
@@ -134,7 +132,7 @@ async def games(session: async_sessionmaker[AsyncSession]):
                 final_price=random.randint(0, 5000),
                 final_formatted_price=f"${random.randint(0, 60)}.99",
                 metacritic=str(random.randint(50, 100)) if random.choice([True, False]) else None,
-                discount=random.randint(0, 90),
+                discount=100 if i==1 else random.randint(0, 90),
                 achievements={"count": random.randint(0, 100)} if random.choice([True, False]) else {},
                 recomendations=random.randint(0, 100000),
                 img_url=f"https://cdn.fakeimage.com/game{i}.jpg",

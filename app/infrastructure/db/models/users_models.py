@@ -2,6 +2,7 @@ from datetime import timedelta, datetime, timezone
 
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped,MappedColumn
 
 
 from app.infrastructure.db.database import Base
@@ -24,6 +25,7 @@ class UserModel(Base):
 
     blacklist_token = relationship("BlackList", back_populates="user", cascade="all,delete-orphan")
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all,delete-orphan", lazy="joined") #name changed to refresh_tokens
+    email_confirmed = relationship("EmailConfirmed",back_populates="user", cascade="all,delete-orphan")
 
 class RefreshToken(Base):
     __tablename__ = 'refreshtokens'
@@ -46,3 +48,14 @@ class BlackList(Base):
     reason = Column(String)
 
     user = relationship("UserModel", back_populates="blacklist_token")
+
+class EmailConfirmed(Base):
+    __tablename__ = "email_confirmation"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    type = Column(String, nullable=False)
+    token = Column(String, index=True, nullable=False)
+    expires_at = Column(DateTime,default=lambda: (datetime.now(timezone.utc) + timedelta(minutes=15)).replace(tzinfo=None))
+
+    user_id = Column(ForeignKey("users.id"))
+    user = relationship("UserModel",back_populates="email_confirmed")

@@ -2,9 +2,12 @@ from fastapi import Depends,Request
 from fastapi.params import Form
 
 from app.application.services.admin_service.admin_service import AdminService
+from app.application.services.email_service.email_service import EmailService
 from app.application.services.steam_service.steam_service import SteamService
 from app.application.services.users_service.users_service import UserService
+from app.infrastructure.celery_app.senders.celery_sender import CelerySender
 from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
+from app.infrastructure.db.repository.email_confirmation_repository import EmailConfirmationRepository
 from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
 from app.infrastructure.db.repository.steam_repository import SteamRepository
 from app.infrastructure.db.repository.user_repository import UserRepository
@@ -37,7 +40,8 @@ async def get_analitic_service(
     return AnaliticService(
         steam = steam_client,
         steam_service = steam_service,
-        cache_repository = RedisRepository()
+        cache_repository = RedisRepository(),
+        steam_repository = SteamRepository()
     )
 
 async def get_users_service():
@@ -60,6 +64,12 @@ async def get_admin_service():
         user_repository = UserRepository()
     )
 
+async def get_email_service():
+    return EmailService(
+        email_confirmation_repository=EmailConfirmationRepository(),
+        celery_sender=CelerySender(),
+        user_repository=UserRepository()
+    )
 
 
 """Other Depends"""

@@ -1,17 +1,21 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.application.steam_analitic.games_for_you import GamesForYou, SallingForYou
 from app.application.steam_analitic.user_rating import UserRating
 from app.application.steam_analitic.users_battle import UsersBattle
 from app.application.services.steam_service.steam_service import SteamService
 from app.application.decorators.cache import cache_data
 from app.domain.redis_repository import ICacheRepository
+from app.domain.steam.repository import ISteamRepository
 from app.infrastructure.steam_api.client import SteamClient
 
 
 
 class AnaliticService:
-    def __init__(self, steam:SteamClient,steam_service: SteamService,cache_repository: ICacheRepository):
+    def __init__(self, steam:SteamClient,steam_service: SteamService,cache_repository: ICacheRepository,steam_repository:ISteamRepository):
         self.steam = steam
         self.cache_repository = cache_repository
+        self.steam_repository = steam_repository
         self.steam_service = steam_service
 
         self.user_rating = UserRating()
@@ -65,4 +69,10 @@ class AnaliticService:
     async def user_achivements(self,user:str,app_id:int):
         user_data,correct_user_id = await self.steam.get_user_info(user)
         return await self.steam.users_get_achievements(int(correct_user_id),app_id)
+
+    async def free_games(self,session):
+        result = await self.steam_repository.get_free_discount_games(session=session)
+        if result:
+            return result
+        return False
 

@@ -20,4 +20,8 @@ class SteamRepository(ISteamRepository):
         result = await session.execute(statement)
         return result.scalars().all()
 
+    async def get_free_discount_games(self,session:AsyncSession):
+        statement = select(SteamBase).where(SteamBase.discount>=100)
 
+        result = await session.execute(statement)
+        return result.scalars().all()

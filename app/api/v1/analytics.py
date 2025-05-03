@@ -1,6 +1,8 @@
 from datetime import date
 
 from fastapi import APIRouter,Depends
+from starlette.responses import JSONResponse
+
 from app.infrastructure.db.database import get_async_db
 from app.utils.dependencies import user_auth_check, get_analitic_service
 
@@ -37,3 +39,13 @@ async def user_achivements(steam_id:str, app_id:int,analitic_service = Depends(g
 async def games_change_for_time(history_date:date, auth = Depends(user_auth_check)):
     return {"history_date": history_date}
 
+@router.get("/free_games")
+async def free_games(auth=Depends(user_auth_check),analitic_service=Depends(get_analitic_service),session=Depends(get_async_db)):
+    result = await analitic_service.free_games(session=session)
+    if result:
+        return result
+    else:
+        return JSONResponse(
+            status_code=200,
+            content={"detail":False}
+        )
