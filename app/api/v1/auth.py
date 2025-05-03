@@ -50,11 +50,11 @@ async def register_user(user:User,auth_service = Depends(get_auth_service),sessi
     return await auth_service.register_user(user=user,session=session)
 
 
-@router.delete("/delete_user",status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(password:str,request:Request,response:Response,auth_service = Depends(get_auth_service),session = Depends(get_async_db)):
+@router.delete("/delete_user/{token}",status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(token:str,password:str,request:Request,response:Response,auth_service = Depends(get_auth_service),session = Depends(get_async_db)):
     access_token = request.cookies.get("access_token")
 
-    await auth_service.delete_from_user(access_token=access_token,user_password=password,session=session)
+    await auth_service.delete_from_user(token=token,access_token=access_token,user_password=password,session=session)
 
     response.delete_cookie("access_token",httponly=True,secure=True)
     response.delete_cookie("refresh_token",httponly=True,secure=True)
@@ -74,4 +74,11 @@ async def refresh_token(request:Request,response:Response,auth_service = Depends
 
     return result
 
+@router.get("/verify_email/{token}",status_code=status.HTTP_200_OK)
+async def verify_email(token:str,auth=Depends(user_auth_check),auth_service=Depends(get_auth_service),session=Depends(get_async_db)):
+    return await auth_service.verify_email(session=session,token=token)
+
+@router.put("/forgot_password/{token}")
+async def forgot_password(token:str,new_password,auth_service=Depends(get_auth_service),session=Depends(get_async_db)):
+    return await auth_service.forgot_password(session=session,token=token,new_password=new_password)
 

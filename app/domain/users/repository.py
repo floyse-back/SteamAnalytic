@@ -32,6 +32,13 @@ class IUserRepository(ABC):
     async def get_user_for_email(self,email:str,session)->UserModel:
         pass
 
+    @abstractmethod
+    async def user_verify_update(self,session,status:bool,user_model:UserModel):
+        pass
+
+    async def user_password_update(self,session,user_model,new_password):
+        pass
+
 class IRefreshTokenRepository(ABC):
     @abstractmethod
     async def verify_refresh_token(self,session,refresh_token):
@@ -66,6 +73,11 @@ class IEmailConfirmationRepository(ABC):
     @abstractmethod
     async def verify_confirm_token(self,session,token:str,type:str):
         pass
+
+    @abstractmethod
+    async def delete_confirm_token(self,session,type:str,user_id:int):
+        pass
+
 
 
 

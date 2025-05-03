@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, delete, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.users.repository import IEmailConfirmationRepository
@@ -27,4 +27,11 @@ class EmailConfirmationRepository(IEmailConfirmationRepository):
 
         if not instance:
             raise Exception
-        return True
+        return instance
+
+    async def delete_confirm_token(self,session,type:str,user_id:int):
+        statement = delete(EmailConfirmed).where(or_(EmailConfirmed.type == type,EmailConfirmed.user_id == user_id))
+
+        await session.execute(statement)
+        await session.commit()
+

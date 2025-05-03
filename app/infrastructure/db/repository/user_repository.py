@@ -4,6 +4,7 @@ from app.infrastructure.db.models.users_models import UserModel
 from app.application.dto.user_dto import User, UserMe
 from app.domain.users.repository import IUserRepository
 from app.infrastructure.exceptions.exception_handler import InfrastructureUserRegister
+from app.utils.utils import hashed_password
 
 
 class UserRepository(IUserRepository):
@@ -80,6 +81,15 @@ class UserRepository(IUserRepository):
         my_user = user_model.scalars().first()
 
         return my_user
+
+    async def user_verify_update(self,session,status:bool,user_model:UserModel):
+        user_model.is_active = status
+        await session.commit()
+
+    async def user_password_update(self,session:AsyncSession,new_password:str,user_model:UserModel):
+        user_model.hashed_password = hashed_password(new_password)
+
+        await session.commit()
 
 
 

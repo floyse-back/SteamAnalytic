@@ -27,7 +27,3 @@ async def update_user_me(user:UserMe,request:Request,response:Response,user_serv
 @router.get("/user_profile/{user_id}")
 async def user_profile(user_id:int,user_service = Depends(get_users_service),session = Depends(get_async_db)):
     return await user_service.get_user_public_profile(user_id,session)
-
-@router.put("/forgout_password")
-async def forgout_password(password:str,session:AsyncSession = Depends(get_async_db)):
-    pass

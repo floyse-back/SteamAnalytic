@@ -56,7 +56,8 @@ async def get_auth_service():
     return AuthService(
         user_repository = UserRepository(),
         refresh_token_repository = RefreshTokenRepository(),
-        black_list_repository = BlackListRepository()
+        black_list_repository = BlackListRepository(),
+        email_repository=EmailConfirmationRepository(),
     )
 
 async def get_admin_service():

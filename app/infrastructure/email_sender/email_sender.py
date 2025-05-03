@@ -49,7 +49,8 @@ class EmailSender(IEmailSender):
                     <h1 style="text-align: center;color: white;">Steam Analitic</h1>
                 </header>
                 <div style="text-align: center;">
-                    <h3>Hello User you need verify account</h3>
+                    <h1>You Forgot Password</h1>
+                    <h3>Hello User you forgot password</h3>
                 </div>
                 <div style= "display: flex;justify-content: center;margin-top:50px;">
                     <div style="">
@@ -72,11 +73,11 @@ class EmailSender(IEmailSender):
                     <h1 style="text-align: center;color: white;">Steam Analitic</h1>
                 </header>
                 <div style="text-align: center;">
-                    <h3>Hello User you need verify account</h3>
+                    <h3>Hello User you delete user account???</h3>
                 </div>
                 <div style= "display: flex;justify-content: center;margin-top:50px;">
                     <div style="">
-                        <a href="{url}" style="background-color: rgb(35, 93, 179); border-radius: 0.75em;border: solid 0px;padding:10px 60px;text-align: center;color: white; font-size: 2em;font-family: Arial, Helvetica, sans-serif;">Get Started</a>
+                        <a href="{url}" style="background-color: red; border-radius: 0.75em;border: solid 0px;padding:10px 60px;text-align: center;color: white; font-size: 2em;font-family: Arial, Helvetica, sans-serif;">Get Started</a>
                     </div>
                 </div>
             </body>
