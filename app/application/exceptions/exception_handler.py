@@ -29,3 +29,7 @@ class ProfilePrivate(Exception):
 
 class GamesNotFound(Exception):
     pass
+
+class IncorrectType(Exception):
+    pass
+

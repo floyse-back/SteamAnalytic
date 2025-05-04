@@ -1,4 +1,5 @@
 import random
+import uuid
 from datetime import date
 from typing import AsyncGenerator
 
@@ -10,14 +11,13 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncConne
 from app.infrastructure.db.database import Base, get_async_db
 from app.infrastructure.db.models import steam_models
 from app.infrastructure.db.models.steam_models import Game, Category, Publisher, Ganres
-from app.infrastructure.db.models.users_models import UserModel
+from app.infrastructure.db.models.users_models import UserModel, EmailConfirmed
 from app.main import app
 from app.utils.config import TEST_DATABASE_URL
 from app.utils.utils import hashed_password
 import asyncio
 
-#TEST_DATABASE_URL = "sqlite+aiosqlite:///test.db"
-engine = create_async_engine(TEST_DATABASE_URL)
+engine = create_async_engine(TEST_DATABASE_URL,echo=True)
 
 @pytest_asyncio.fixture(scope="session")
 def event_loop():
@@ -232,3 +232,37 @@ async def login_admin(client:AsyncClient,users):
         "username":"admin_ivan",
         "access_token":data.get("access_token")
     }
+
+@pytest_asyncio.fixture(scope="function")
+async def create_tokens(session:async_sessionmaker[AsyncSession],users):
+    async with session() as s:
+        user_model =await s.execute(select(UserModel).where(UserModel.username == "floysefake"))
+
+        user  = user_model.scalars().first()
+
+        delete_user_model = EmailConfirmed(
+            type = "delete_user",
+            token = str(uuid.uuid4()),
+            user_id = user.id
+        )
+        verify_email_model = EmailConfirmed(
+            type = "verify_email",
+            token = str(uuid.uuid4()),
+            user_id = user.id
+        )
+        forgot_password_model = EmailConfirmed(
+            type = "forgot_password",
+            token=str(uuid.uuid4()),
+            user_id = user.id,
+        )
+        s.add(delete_user_model)
+        s.add(verify_email_model)
+        s.add(forgot_password_model)
+        data_dict = {
+            "delete_token":delete_user_model.token,
+            "verify_token":verify_email_model.token,
+            "forgot_password":forgot_password_model.token,
+        }
+        await s.commit()
+
+    return data_dict

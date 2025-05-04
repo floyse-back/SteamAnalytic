@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.db.models.users_models import UserModel
+from app.utils.utils import verify_password
 
 
 @pytest.mark.asyncio
@@ -95,10 +96,10 @@ class TestAuth:
         assert response.status_code == status_code
         assert response.json().get("detail") == exception
 
-    async def test_delete_users(self,login:AsyncClient,session:AsyncSession):
+    async def test_delete_users(self,login:dict,create_tokens,session:AsyncSession):
         new_client = login["client"]
         response = await new_client.delete(
-            url=f"/auth/delete_user",
+            url=f"/auth/delete_user/{create_tokens['delete_token']}",
             params={"password":"password"}
         )
 
@@ -114,10 +115,10 @@ class TestAuth:
 
         assert result is None
 
-    async def test_incorrect_password_delete_users(self,login:AsyncClient,session:AsyncSession):
+    async def test_incorrect_password_delete_users(self,login:AsyncClient,create_tokens,session:AsyncSession):
         new_client = login["client"]
         response = await new_client.delete(
-            url=f"/auth/delete_user",
+            url=f"/auth/delete_user/{create_tokens['delete_token']}",
             params={"password":"bad_password"}
         )
 
@@ -126,10 +127,27 @@ class TestAuth:
         assert new_client.cookies.get("access_token") is not None
         assert new_client.cookies.get("refresh_token") is not None
 
+    @pytest.mark.parametrize(
+        "token_type,status_code,password,excepted",
+        [
+            ("verify_token",401,"password","Token not found"),
+            ("forgot_password",401,"password","Token not found"),
+        ]
+    )
+    async def test_bad_create_tokens(self,login:dict,create_tokens,session:AsyncSession,token_type,status_code,password,excepted):
+        new_client = login["client"]
+        response = await new_client.delete(
+            url=f"/auth/delete_user/{create_tokens[f'{token_type}']}",
+            params={"password":f"{password}"}
+        )
 
-    async def test_not_auth_delete_users(self,client:AsyncClient):
+        assert response.status_code == status_code
+        assert response.json().get("detail") == excepted
+
+
+    async def test_not_auth_delete_users(self,client:AsyncClient,create_tokens):
         response = await client.delete(
-            url=f"/auth/delete_user",
+            url=f"/auth/delete_user/{create_tokens['delete_token']}",
             params={"password":"password"}
         )
 
@@ -165,3 +183,28 @@ class TestAuth:
 
         assert response.status_code == 401
         assert response.json().get("detail") == "Token not found"
+
+    @pytest.mark.parametrize(
+        "token_type,status_code,password,excepted",
+        [
+        ("verify_token",401,"password","Token not found"),
+        ("delete_token",401,"password","Token not found"),
+        ("forgot_password",204,"new_password",None)
+        ]
+    )
+    async def test_forgot_password(self,login:dict,session,create_tokens:dict,token_type,status_code,password,excepted):
+        new_client = login["client"]
+        response = await new_client.put(
+            url=f"/auth/forgot_password/{create_tokens[f'{token_type}']}",
+            params = {"new_password":f"{password}"}
+        )
+
+        assert response.status_code == status_code
+        if excepted:
+            assert response.json().get("detail") == excepted
+        else:
+            async with session() as s:
+                stmt = await s.execute(select(UserModel).filter(UserModel.username == login["username"]))
+                result = stmt.scalars().first()
+
+                assert verify_password(password=password,hashed_password=result.hashed_password)

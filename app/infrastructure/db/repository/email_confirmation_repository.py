@@ -6,6 +6,9 @@ from app.infrastructure.db.models.users_models import EmailConfirmed, UserModel
 
 import datetime
 
+from app.infrastructure.exceptions.exception_handler import InfrastructureUserRegister, InfrastructureTokenNotFound
+
+
 class EmailConfirmationRepository(IEmailConfirmationRepository):
 
     async def create_confirm_token(self,session:AsyncSession,token:str,type:str,user_model:UserModel):
@@ -26,7 +29,7 @@ class EmailConfirmationRepository(IEmailConfirmationRepository):
         instance = result.scalars().first()
 
         if not instance:
-            raise Exception
+            raise InfrastructureTokenNotFound
         return instance
 
     async def delete_confirm_token(self,session,type:str,user_id:int):

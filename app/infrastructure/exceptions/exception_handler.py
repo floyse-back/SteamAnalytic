@@ -21,3 +21,6 @@ class InfrastructureUserNotFound(Exception):
 
 class InfrastructureUserNotAuthorized(Exception):
     pass
+
+class InfrastructureTokenNotFound(Exception):
+    pass

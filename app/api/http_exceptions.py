@@ -22,7 +22,7 @@ async def password_incorrect_handler(request:Request,exc:PasswordIncorrect):
         content={"detail": "Incorrect password"}
     )
 
-async def token_not_found_handler(request:Request,exc:TokenNotFound):
+async def token_not_found_handler(request:Request,exc:TokenNotFound|InfrastructureTokenNotFound):
     return JSONResponse(
         status_code=401,
         content={"detail": "Token not found"}
@@ -86,4 +86,10 @@ async def games_not_found_handler(request:Request,exc:GamesNotFound):
     return JSONResponse(
         status_code=404,
         content = {"detail":f"User Not Analize Games"}
+    )
+
+async def incorrect_type_handler(request:Request,exc:IncorrectType):
+    return JSONResponse(
+        status_code = 401,
+        content = {"detail":f"Incorrect type","type_correct":["verify_email","delete_user","forgot_password"]}
     )

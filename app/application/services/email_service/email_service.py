@@ -23,9 +23,12 @@ class EmailService:
             "delete_user":'verify_url/delete_user/'
         }
 
-    async def send_email(self,session,id,type:str):
+    async def send_email(self,session,email,type:str):
+        if self.url[type] != None:
+            raise IncorrectType()
+
         verify_token = await self.create_email_code()
-        user_model = await self.user_repository.get_user_for_id(id,session)
+        user_model = await self.user_repository.get_user_for_email(email,session)
         receiver = user_model.email
         url = self.base_url+self.url[f"{type}"]+f"?token={verify_token}"
         if user_model is None:

@@ -78,7 +78,7 @@ async def refresh_token(request:Request,response:Response,auth_service = Depends
 async def verify_email(token:str,auth=Depends(user_auth_check),auth_service=Depends(get_auth_service),session=Depends(get_async_db)):
     return await auth_service.verify_email(session=session,token=token)
 
-@router.put("/forgot_password/{token}")
+@router.put("/forgot_password/{token}",status_code=status.HTTP_204_NO_CONTENT)
 async def forgot_password(token:str,new_password,auth_service=Depends(get_auth_service),session=Depends(get_async_db)):
     return await auth_service.forgot_password(session=session,token=token,new_password=new_password)
 
