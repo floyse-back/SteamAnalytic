@@ -173,7 +173,7 @@ async def users(session: async_sessionmaker[AsyncSession]):
         await s.execute(text("DELETE FROM users"))
         users = [
             UserModel(username="floysefake", hashed_password=hashed_password("password"),
-                      email="new@_gmail.com",role="user", is_active=True, steamid="4353454336",
+                      email="new@gmail.com",role="user", is_active=True, steamid="4353454336",
                       steamname="NewSte"),
             UserModel(username="admin_ivan", hashed_password=hashed_password("hashedpass1"),
                       email="ivan.admin@example.com", is_active=True, role="admin", steamid="76561198123456789",
@@ -181,7 +181,6 @@ async def users(session: async_sessionmaker[AsyncSession]):
             UserModel(username="admin_olena", hashed_password=hashed_password("hashedpass2"),
                       email="olena.admin@example.com", is_active=True, role="admin", steamid="76561198123456788",
                       steamname="AdminOlena"),
-
             UserModel(username="user_dmytro", hashed_password=hashed_password("hashedpass3"),
                       email="dmytro.user@example.com", is_active=False, steamid="76561198123456787",
                       steamname="DmytroTheGreat"),

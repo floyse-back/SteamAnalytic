@@ -208,3 +208,27 @@ class TestAuth:
                 result = stmt.scalars().first()
 
                 assert verify_password(password=password,hashed_password=result.hashed_password)
+
+    @pytest.mark.parametrize(
+            "token_type,status_code,excepted",
+            [
+            ("verify_token",200,None),
+            ("delete_token",401,"Token not found"),
+            ("forgot_password",401,"Token not found")
+            ]
+        )
+    async def test_verify_email(self,login:dict,session,create_tokens:dict,token_type,status_code,excepted):
+        new_client = login["client"]
+        response = await new_client.get(
+            url=f"/auth/verify_email/{create_tokens[f'{token_type}']}",
+        )
+
+        assert response.status_code == status_code
+        if excepted:
+            assert response.json().get("detail") == excepted
+        else:
+            async with session() as s:
+                stmt = await s.execute(select(UserModel).filter(UserModel.username == login["username"]))
+                result = stmt.scalars().first()
+
+                assert result.is_active == True

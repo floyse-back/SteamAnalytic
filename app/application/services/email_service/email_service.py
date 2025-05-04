@@ -1,3 +1,4 @@
+from app.application.exceptions.exception_handler import IncorrectType, UserNotFound
 from app.domain.users.repository import IEmailConfirmationRepository, IUserRepository
 from app.domain.celery_sender import ICelerySender
 import uuid
@@ -24,11 +25,14 @@ class EmailService:
         }
 
     async def send_email(self,session,email,type:str):
-        if self.url[type] != None:
+        if self.url[type] == None:
             raise IncorrectType()
 
         verify_token = await self.create_email_code()
         user_model = await self.user_repository.get_user_for_email(email,session)
+        if not user_model:
+            raise UserNotFound()
+
         receiver = user_model.email
         url = self.base_url+self.url[f"{type}"]+f"?token={verify_token}"
         if user_model is None:
