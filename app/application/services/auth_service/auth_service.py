@@ -70,19 +70,19 @@ class AuthService:
         if not access_token:
             raise UserNotAuthorized("Access token is invalid")
 
-        refresh_token_data = decode_jwt(access_token)
-        user = await self.user_repository.get_user_for_id(user_id=refresh_token_data.get("user_id"),session=session)
+        access_token_data = decode_jwt(access_token)
+        print(access_token_data)
+        user = await self.user_repository.get_user_for_id(user_id=access_token_data.get("user_id"),session=session)
 
-        #Перевірка на правильність введеного пароля
-        if not user:
-            raise UserNotFound(f"User Not Found")
+        # if not user:
+        #     raise UserNotFound(f"User Not Found")
 
         if not verify_password(user_password, user.hashed_password):
             raise PasswordIncorrect("Incorrect password")
 
         email_model = await self.email_repository.verify_confirm_token(token=token,session=session,type="delete_user")
         if email_model:
-            raise TokenNotFound("Token not found")
+            raise UserNotFound("Token not found")
 
         await self.user_repository.delete_user(session,user)
 

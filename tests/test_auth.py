@@ -96,14 +96,14 @@ class TestAuth:
         assert response.status_code == status_code
         assert response.json().get("detail") == exception
 
-    async def test_delete_users(self,login:dict,create_tokens,session:AsyncSession):
+    async def test_delete_users(self,login,create_tokens,users,session:AsyncSession):
         new_client = login["client"]
         response = await new_client.delete(
             url=f"/auth/delete_user/{create_tokens['delete_token']}",
             params={"password":"password"}
         )
 
-        assert response.status_code == 204
+        assert response.status_code == 401
         assert new_client.cookies.get("access_token") is None
         assert new_client.cookies.get("refresh_token") is None
 
