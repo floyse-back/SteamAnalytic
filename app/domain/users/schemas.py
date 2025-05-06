@@ -33,7 +33,12 @@ class UserPublic:
 
 @dataclass(frozen=True)
 class UserModel:
-    pass
+    id: int
+    username: str
+    steamid: str
+    email: str
+    steam_name:str
+    hashed_password: str
 
 @dataclass(frozen=True)
 class RefreshToken:

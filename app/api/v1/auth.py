@@ -51,10 +51,11 @@ async def register_user(user:User,auth_service = Depends(get_auth_service),sessi
 
 
 @router.delete("/delete_user/{token}",status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(token:str,password:str,request:Request,response:Response,auth_service = Depends(get_auth_service),session = Depends(get_async_db)):
-    access_token = request.cookies.get("access_token")
+async def delete_user(token:str,password:str,response:Response,auth_service = Depends(get_auth_service),session = Depends(get_async_db)):
 
-    await auth_service.delete_from_user(token=token,access_token=access_token,user_password=password,session=session)
+    #Реалізувати видалення за допомогою ось цієї ідеї
+    #https://chatgpt.com/c/6819ae77-bba8-8000-8c3e-6aafb70fa8a8
+    await auth_service.delete_from_user(token=token,user_password=password,session=session)
 
     response.delete_cookie("access_token",httponly=True,secure=True)
     response.delete_cookie("refresh_token",httponly=True,secure=True)
@@ -81,4 +82,3 @@ async def verify_email(token:str,auth=Depends(user_auth_check),auth_service=Depe
 @router.put("/forgot_password/{token}",status_code=status.HTTP_204_NO_CONTENT)
 async def forgot_password(token:str,new_password,auth_service=Depends(get_auth_service),session=Depends(get_async_db)):
     return await auth_service.forgot_password(session=session,token=token,new_password=new_password)
-

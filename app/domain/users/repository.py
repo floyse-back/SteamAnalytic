@@ -9,7 +9,7 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_user_for_id(self,user_id:int,session)->tuple[UserModel]:
+    async def get_user_for_id(self,user_id:int,session)->UserModel:
         pass
 
     @abstractmethod

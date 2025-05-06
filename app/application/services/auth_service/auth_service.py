@@ -66,25 +66,20 @@ class AuthService:
 
         return {"message":"Register successful"}
 
-    async def delete_from_user(self,token,access_token,user_password,session:AsyncSession):
-        if not access_token:
-            raise UserNotAuthorized("Access token is invalid")
-
-        access_token_data = decode_jwt(access_token)
-        print(access_token_data)
-        user = await self.user_repository.get_user_for_id(user_id=access_token_data.get("user_id"),session=session)
-
-        # if not user:
-        #     raise UserNotFound(f"User Not Found")
-
-        if not verify_password(user_password, user.hashed_password):
-            raise PasswordIncorrect("Incorrect password")
-
+    async def delete_from_user(self,token,user_password,session:AsyncSession):
         email_model = await self.email_repository.verify_confirm_token(token=token,session=session,type="delete_user")
-        if email_model:
-            raise UserNotFound("Token not found")
+        if not email_model:
+            raise TokenNotFound("Token not found")
 
-        await self.user_repository.delete_user(session,user)
+        user_model = await self.user_repository.get_user_for_id(session=session,user_id=email_model.user_id)
+
+        if not user_model:
+            raise UserNotFound("User not found")
+
+        if not verify_password(user_password, user_model.hashed_password):
+            raise PasswordIncorrect("Password incorrect")
+
+        await self.user_repository.delete_user(session,user_model)
 
     async def refresh_token(self,refresh_token:str,user:str,session:AsyncSession):
         user_model = await self.user_repository.get_user_for_id(user_id=int(user), session=session)

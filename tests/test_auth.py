@@ -103,7 +103,7 @@ class TestAuth:
             params={"password":"password"}
         )
 
-        assert response.status_code == 401
+        assert response.status_code == 204
         assert new_client.cookies.get("access_token") is None
         assert new_client.cookies.get("refresh_token") is None
 
@@ -143,16 +143,6 @@ class TestAuth:
 
         assert response.status_code == status_code
         assert response.json().get("detail") == excepted
-
-
-    async def test_not_auth_delete_users(self,client:AsyncClient,create_tokens):
-        response = await client.delete(
-            url=f"/auth/delete_user/{create_tokens['delete_token']}",
-            params={"password":"password"}
-        )
-
-        assert response.status_code == 401
-        assert response.json().get("detail") == "User Not Authorized"
 
     async def test_logout_users(self,login:dict,session:AsyncSession):
         new_client = login["client"]
