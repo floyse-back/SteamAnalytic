@@ -21,7 +21,7 @@ async def user_score_generate(user:str,analitic_service = Depends(get_analitic_s
 
 @router.get("/friends_list")
 async def friend_game_list(user:str,analitic_service = Depends(get_analitic_service), auth = Depends(user_auth_check)):
-    return await analitic_service.friends_game_list(user)
+    return await analitic_service.friends_game_list(user=user)
 
 @router.get("/games_for_you")
 async def games_for_you(user:str,session = Depends(get_async_db),analitic_service = Depends(get_analitic_service), auth = Depends(user_auth_check)):

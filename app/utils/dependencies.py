@@ -6,6 +6,7 @@ from app.application.services.email_service.email_service import EmailService
 from app.application.services.steam_service.steam_service import SteamService
 from app.application.services.users_service.users_service import UserService
 from app.infrastructure.celery_app.senders.celery_sender import CelerySender
+from app.infrastructure.db.repository.analitic_repository import AnaliticRepository
 from app.infrastructure.db.repository.blacklist_repository import BlackListRepository
 from app.infrastructure.db.repository.email_confirmation_repository import EmailConfirmationRepository
 from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
@@ -13,7 +14,7 @@ from app.infrastructure.db.repository.steam_repository import SteamRepository
 from app.infrastructure.db.repository.user_repository import UserRepository
 from app.infrastructure.redis.redis_repository import RedisRepository
 from app.utils.config import STEAM_API_KEY
-from app.application.services.analitic_service.analitic_service import AnaliticService
+from app.application.services.analitic_service.analitic_service import AnalyticService
 from app.infrastructure.db.database import get_async_db
 from app.application.services.auth_service.auth_service import AuthService
 from app.infrastructure.steam_api.client import SteamClient
@@ -35,13 +36,12 @@ async def get_steam_service(steam_client:SteamClient = Depends(get_steam_client)
 
 async def get_analitic_service(
         steam_client:SteamClient = Depends(get_steam_client),
-        steam_service:SteamService = Depends(get_steam_service),
 ):
-    return AnaliticService(
+    return AnalyticService(
         steam = steam_client,
-        steam_service = steam_service,
         cache_repository = RedisRepository(),
-        steam_repository = SteamRepository()
+        steam_repository = SteamRepository(),
+        analitic_repository=AnaliticRepository(),
     )
 
 async def get_users_service():

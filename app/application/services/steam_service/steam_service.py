@@ -5,8 +5,8 @@ from app.application.usecases.get_best_sallers import GetBestSallersUseCase
 from app.application.usecases.get_game_achivements import GetGameAchievementsUseCase
 from app.application.usecases.get_game_stats import GetGameStatsUseCase
 from app.application.usecases.get_top_games import GetTopGamesUseCase
-from app.application.usecases.get_user_full_stats import GetUserFullStats
-from app.application.usecases.get_user_games_play import GetUserGamesPlayUseCase
+from app.application.usecases.get_player_full_stats import GetUserFullStats
+from app.application.usecases.get_player_games_play import GetUserGamesPlayUseCase
 from app.domain.redis_repository import ICacheRepository
 from app.domain.steam.repository import ISteamRepository
 from app.infrastructure.steam_api.client import SteamClient
@@ -39,7 +39,6 @@ class SteamService:
     @cache_data(expire=2400)
     async def best_sallers(self,session:AsyncSession,page,limit):
         result = await self.get_best_sallers_use_case.execute(session = session,page = page,limit = limit)
-
         new_result = [transform_to_dto(SteamBase,i) for i in result]
 
         return new_result
@@ -55,7 +54,6 @@ class SteamService:
     @cache_data(expire=2400)
     async def get_top_games(self,session:AsyncSession,limit:int,page:int):
         result = await self.get_top_games_use_case.execute(session = session,limit = limit,page = page)
-
         new_result = [transform_to_dto(SteamBase,i) for i in result]
 
         return new_result
