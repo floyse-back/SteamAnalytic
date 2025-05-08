@@ -2,7 +2,7 @@
 
 
 
-class GetUserAchivementsUseCase:
+class GetPlayerAchivementsUseCase:
     def __init__(self,steam):
         self.steam = steam
 

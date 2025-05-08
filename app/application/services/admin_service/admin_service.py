@@ -1,5 +1,5 @@
 from app.application.exceptions.exception_handler import UserNotFound, TokenNotFound, UserNotPermitions
-from app.application.usecases.delete_user import DeleteUserUseCase
+from app.application.usecases.delete_admin_user import DeleteUserUseCase
 from app.domain.users.repository import IUserRepository
 from app.domain.users.schemas import UserModel
 from app.utils.utils import decode_jwt

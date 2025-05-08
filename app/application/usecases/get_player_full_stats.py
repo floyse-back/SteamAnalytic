@@ -2,7 +2,7 @@ from app.application.dto.steam_dto import SteamUser
 from app.application.exceptions.exception_handler import ProfilePrivate
 
 
-class GetUserFullStats:
+class GetUserFullStatsUseCase:
     def __init__(self,steam):
         self.steam = steam
 

@@ -5,8 +5,8 @@ from app.application.usecases.get_best_sallers import GetBestSallersUseCase
 from app.application.usecases.get_game_achivements import GetGameAchievementsUseCase
 from app.application.usecases.get_game_stats import GetGameStatsUseCase
 from app.application.usecases.get_top_games import GetTopGamesUseCase
-from app.application.usecases.get_player_full_stats import GetUserFullStats
-from app.application.usecases.get_player_games_play import GetUserGamesPlayUseCase
+from app.application.usecases.get_player_full_stats import GetUserFullStatsUseCase
+from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUseCase
 from app.domain.redis_repository import ICacheRepository
 from app.domain.steam.repository import ISteamRepository
 from app.infrastructure.steam_api.client import SteamClient
@@ -20,7 +20,7 @@ class SteamService:
         self.get_best_sallers_use_case = GetBestSallersUseCase(
             steam_repository = steam_repository
         )
-        self.get_user_full_stats = GetUserFullStats(
+        self.get_user_full_stats = GetUserFullStatsUseCase(
             steam = steam
         )
         self.get_game_stats = GetGameStatsUseCase(
@@ -32,7 +32,7 @@ class SteamService:
         self.get_game_achievements = GetGameAchievementsUseCase(
             steam = steam
         )
-        self.get_user_games_play = GetUserGamesPlayUseCase(
+        self.get_user_games_play = GetPlayerGamesPlayUseCase(
             steam = steam
         )
 

@@ -1,7 +1,7 @@
 from app.application.dto.steam_dto import SteamUser
 
 
-class GetUserBattleUseCase:
+class GetPlayerBattleUseCase:
     """Порівняння 2 профілів"""
     async def execute(self, user1_data: SteamUser, user2_data: SteamUser,user1_rating:int,user2_rating:int):
         data = dict()

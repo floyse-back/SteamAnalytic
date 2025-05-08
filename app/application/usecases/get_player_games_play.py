@@ -2,7 +2,7 @@
 
 
 
-class GetUserGamesPlayUseCase:
+class GetPlayerGamesPlayUseCase:
     def __init__(self,steam):
         self.steam = steam
 

@@ -4,10 +4,10 @@ from app.application.usecases.get_free_games import GetFreeGamesUseCase
 from app.application.usecases.get_friends_game_list import GetFriendsGameListUseCase
 from app.application.usecases.get_games_for_you import GetGamesForYouUseCase
 from app.application.usecases.get_salling_for_you import GetSallingForYouUseCase
-from app.application.usecases.get_player_achievemts import GetUserAchivementsUseCase
-from app.application.usecases.get_player_battle import GetUserBattleUseCase
-from app.application.usecases.get_player_full_stats import GetUserFullStats
-from app.application.usecases.get_player_games_play import GetUserGamesPlayUseCase
+from app.application.usecases.get_player_achievemts import GetPlayerAchivementsUseCase
+from app.application.usecases.get_player_battle import GetPlayerBattleUseCase
+from app.application.usecases.get_player_full_stats import GetUserFullStatsUseCase
+from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUseCase
 from app.application.usecases.get_players_rating import GetUserRatingUseCase
 from app.domain.redis_repository import ICacheRepository
 from app.domain.steam.repository import ISteamRepository, IAnaliticsRepository
@@ -20,17 +20,17 @@ class AnalyticService:
         self.steam = steam
         self.cache_repository = cache_repository
 
-        self.get_user_full_stats = GetUserFullStats(
+        self.get_user_full_stats = GetUserFullStatsUseCase(
             steam = steam
         )
-        self.get_user_games_play = GetUserGamesPlayUseCase(
+        self.get_user_games_play = GetPlayerGamesPlayUseCase(
             steam = steam
         )
         self.get_user_rating = GetUserRatingUseCase()
         self.get_free_games = GetFreeGamesUseCase(
             steam_repository=steam_repository
         )
-        self.get_user_achivements = GetUserAchivementsUseCase(
+        self.get_user_achivements = GetPlayerAchivementsUseCase(
             steam=steam
         )
         self.get_friends_game_list = GetFriendsGameListUseCase(
@@ -42,7 +42,7 @@ class AnalyticService:
         self.get_salling_for_you = GetSallingForYouUseCase(
             analitic_repository=analitic_repository
         )
-        self.get_user_battle = GetUserBattleUseCase()
+        self.get_user_battle = GetPlayerBattleUseCase()
 
     @cache_data(expire=1200)
     async def analitic_user_rating(self,user:str):
