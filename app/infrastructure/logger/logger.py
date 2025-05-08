@@ -11,23 +11,23 @@ class Logger(ILogger):
     def logger_config(self,level):
         logging.basicConfig(level=level,
                             datefmt="%Y:%m:%d %H:%M:%S",
-                            format="%(asctime)s - %(module)s:(lineno)%d  - %(levelname)s - %(message)s)"
+                            format="%(asctime)s - %(module)s:(%(lineno)d) - %(levelname)s - %(message)s"
                             )
 
-    def info(self,msg,*args,**kwargs):
-        self.logger.info(msg,*args, **kwargs)
+    def info(self,msg,*args):
+        self.logger.info(msg,*args)
 
-    def error(self,msg,*args,**kwargs):
-        self.logger.error(msg,*args,**kwargs)
+    def error(self,msg,*args):
+        self.logger.error(msg,*args)
 
-    def warning(self,msg,*args,**kwargs):
-        self.logger.warning(msg,*args,**kwargs)
+    def warning(self,msg,*args):
+        self.logger.warning(msg,*args)
 
-    def critical(self,msg,*args,**kwargs):
-        self.logger.critical(msg,*args,**kwargs)
+    def critical(self,msg,*args):
+        self.logger.critical(msg,*args)
 
-    def debug(self,msg,*args,**kwargs):
-        self.logger.debug(msg,*args,**kwargs)
+    def debug(self,msg,*args):
+        self.logger.debug(msg,*args)
 
-    def exception(self,msg,*args,**kwargs):
-        self.logger.exception(msg,*args,**kwargs)
+    def exception(self,msg,*args):
+        self.logger.exception(msg,*args)

@@ -17,7 +17,7 @@ from app.utils.config import TEST_DATABASE_URL
 from app.utils.utils import hashed_password
 import asyncio
 
-engine = create_async_engine(TEST_DATABASE_URL,echo=True)
+engine = create_async_engine(TEST_DATABASE_URL)
 
 @pytest_asyncio.fixture(scope="session")
 def event_loop():

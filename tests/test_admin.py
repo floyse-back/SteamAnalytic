@@ -9,16 +9,18 @@ from app.infrastructure.db.models.users_models import UserModel
 @pytest.mark.usefixtures("users")
 class TestAdmin:
     @pytest.mark.parametrize(
-        "username,status_code,expected",
-        [("admin_ivan",200,None),
-         ("floysefake",200,None),
-         ("baduser",404,"User Not Found"),
-         ("ivanka",404,"User Not Found"),
+        "username,email,status_code,expected",
+        [("admin_ivan",None,200,None),
+         ("floysefake",None,200,None),
+         (None,"ivan.admin@example.com",200,None),
+         ("baduser",None,404,"User Not Found"),
+         ("ivanka",None,404,"User Not Found"),
          ]
     )
-    async def test_user_info(self,login_admin:dict,username,status_code,expected):
+    async def test_user_info(self,login_admin:dict,username,email,status_code,expected):
         new_client = login_admin["client"]
-        response = await new_client.get("/admin/user_info",params={"username":username})
+        params = {"email":email} if username is None else {"username": username}
+        response = await new_client.get("/admin/user_info",params=params)
         data = response.json()
 
         assert response.status_code == status_code
@@ -28,15 +30,17 @@ class TestAdmin:
             assert data["username"] == username
 
     @pytest.mark.parametrize(
-        "username,status_code,expected",
-        [("user_dmytro",204,None),
-         ("user_artem", 204, None),
-         ("admin_ivan",401,"User not permitions"),
-         ("baduser",404,"User Not Found"),
+        "username,email,status_code,expected",
+        [("user_dmytro",None,204,None),
+         ("user_artem",None, 204, None),
+         (None,"dmytro.user@example.com",204,None),
+         ("admin_ivan",None,401,"User not permitions"),
+         ("baduser",None,404,"User Not Found"),
          ]
     )
-    async def test_user_delete(self,session,login_admin,username,status_code,expected):
+    async def test_user_delete(self,session,login_admin,username,email,status_code,expected):
         new_client = login_admin["client"]
+        params = {"username": username} if username is None else {"email": email}
         response = await new_client.delete("/admin/user_delete", params={"username": username})
 
         assert response.status_code == status_code

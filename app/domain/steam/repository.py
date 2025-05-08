@@ -23,4 +23,3 @@ class IAnaliticsRepository(ABC):
     async def games_for_you(self,session,ganre_data,category_data,steam_appids) ->List:
         pass
 
-
