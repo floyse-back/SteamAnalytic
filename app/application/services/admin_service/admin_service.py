@@ -8,12 +8,11 @@ from app.application.usecases.get_user import GetUserUseCase
 class AdminService:
     """Service для реалізації Адмінки"""
     def __init__(self,user_repository:IUserRepository):
-        self.user_repository = user_repository
         self.get_user_usecase = GetUserUseCase(
-            user_repository = self.user_repository
+            user_repository = user_repository
         )
         self.delete_user_usecase = DeleteUserUseCase(
-            user_repository = self.user_repository
+            user_repository = user_repository
         )
 
     async def get_user_info(self,session,user_id:int|None,username:str|None,email:str|None=None)->UserModel:

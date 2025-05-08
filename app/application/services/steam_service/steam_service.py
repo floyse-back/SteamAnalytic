@@ -1,7 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.steam_dto import SteamUser,SteamBase,transform_to_dto
-from app.application.exceptions.exception_handler import ProfilePrivate, PageNotFound
+from app.application.dto.steam_dto import SteamBase,transform_to_dto
+from app.application.usecases.get_best_sallers import GetBestSallersUseCase
+from app.application.usecases.get_game_achivements import GetGameAchievementsUseCase
+from app.application.usecases.get_game_stats import GetGameStatsUseCase
+from app.application.usecases.get_top_games import GetTopGamesUseCase
+from app.application.usecases.get_user_full_stats import GetUserFullStats
+from app.application.usecases.get_user_games_play import GetUserGamesPlayUseCase
 from app.domain.redis_repository import ICacheRepository
 from app.domain.steam.repository import ISteamRepository
 from app.infrastructure.steam_api.client import SteamClient
@@ -10,15 +15,30 @@ from app.application.decorators.cache import cache_data
 
 class SteamService:
     def __init__(self,steam_repository: ISteamRepository,steam: SteamClient,cache_repository: ICacheRepository):
-        self.steam_repository = steam_repository
         self.cache_repository = cache_repository
-        self.steam = steam
+
+        self.get_best_sallers_use_case = GetBestSallersUseCase(
+            steam_repository = steam_repository
+        )
+        self.get_user_full_stats = GetUserFullStats(
+            steam = steam
+        )
+        self.get_game_stats = GetGameStatsUseCase(
+            steam = steam
+        )
+        self.get_top_games_use_case = GetTopGamesUseCase(
+            steam_repository = steam_repository
+        )
+        self.get_game_achievements = GetGameAchievementsUseCase(
+            steam = steam
+        )
+        self.get_user_games_play = GetUserGamesPlayUseCase(
+            steam = steam
+        )
 
     @cache_data(expire=2400)
     async def best_sallers(self,session:AsyncSession,page,limit):
-        result = await self.steam_repository.get_most_discount_games(session = session,page = page,limit = limit)
-        if result == []:
-            raise PageNotFound(page)
+        result = await self.get_best_sallers_use_case.execute(session = session,page = page,limit = limit)
 
         new_result = [transform_to_dto(SteamBase,i) for i in result]
 
@@ -26,53 +46,27 @@ class SteamService:
 
     @cache_data(expire=2400)
     async def user_full_stats(self, user,user_badges:bool = True,friends_details:bool = True,user_games:bool = True):
-        user_data,user = await self.steam.get_user_info(user)
-
-        if user_data["player"].get("communityvisibilitystate") == 3:
-            user_friends_list = self.steam.users.get_user_friends_list(f"{user}", enriched=friends_details)
-            user_badges = self.steam.users.get_user_badges(f"{user}") if user_badges else None
-            user_games = self.steam.users.get_owned_games(f"{user}") if user_games else None
-
-            return SteamUser(
-                user_data = user_data,
-                user_friends_list = user_friends_list,
-                user_badges = user_badges,
-                user_games = user_games,
-            ).model_dump()
-
-        raise ProfilePrivate(user_profile=user_data["player"].get("personaname"))
+        return await self.get_user_full_stats.execute(user = user, user_badges=user_badges,friends_details=friends_details,user_games=user_games)
 
     @cache_data(expire=2400)
     async def game_stats(self,steam_id:int):
-        filters = 'basic,controller_support,dlc,fullgame,developers,demos,price_overview,metacritic,categories,genres,recommendations,achievements'
-        result = self.steam.apps.get_app_details(steam_id, filters=filters)
-
-        return result
+        return await self.get_game_stats.execute(steam_id = steam_id)
 
     @cache_data(expire=2400)
     async def get_top_games(self,session:AsyncSession,limit:int,page:int):
-        result = await self.steam_repository.get_top_games(session,page,limit)
+        result = await self.get_top_games_use_case.execute(session = session,limit = limit,page = page)
 
-        if result == []:
-            raise PageNotFound(page)
+        new_result = [transform_to_dto(SteamBase,i) for i in result]
 
-        serialize_result = [ transform_to_dto(SteamBase,i) for i in result]
-
-        return serialize_result
+        return new_result
 
     @cache_data(expire=2400)
     async def game_achivements(self,game_id):
-        response = await self.steam.get_global_achievements(game_id)
-
-        return response
+        return await self.get_game_achievements.execute(game_id = game_id)
 
     @cache_data(expire=2400)
     async def user_games_play(self,user:str):
-        user_data,user = await self.steam.get_user_info(user)
-
-        response = await self.steam.users_get_owned_games(f"{user}")
-
-        return response
+        return await self.get_user_games_play.execute(user = user)
 
     @cache_data(expire=600)
     async def games_filter(self,session:AsyncSession):

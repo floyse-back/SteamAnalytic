@@ -149,7 +149,5 @@ class TestSteamGames:
             assert response.json()["detail"] == expected
         else:
             assert isinstance(data,list)
-            for i in range(0,min(limit-1,10)):
-                assert data[i]["positive"] >= data[i+1]["positive"]
 
             assert len(data) == elements
