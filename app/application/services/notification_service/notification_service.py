@@ -4,7 +4,7 @@ from app.domain.celery_sender import ICelerySender
 
 
 
-class EmailService:
+class NotificationService:
     def __init__(self,user_repository:IUserRepository,email_confirmation_repository: IEmailConfirmationRepository,celery_sender:ICelerySender):
         self.send_email_use_case = SendEmailUseCase(
             email_repository=email_confirmation_repository,

@@ -19,15 +19,17 @@ class TestAdmin:
     )
     async def test_user_info(self,login_admin:dict,username,email,status_code,expected):
         new_client = login_admin["client"]
-        params = {"email":email} if username is None else {"username": username}
+        params = {"email":email} if username == None else {"username": username}
         response = await new_client.get("/admin/user_info",params=params)
         data = response.json()
 
         assert response.status_code == status_code
         if expected:
             assert data["detail"] == expected
-        else:
+        elif username:
             assert data["username"] == username
+        else:
+            assert data["email"] == email
 
     @pytest.mark.parametrize(
         "username,email,status_code,expected",
@@ -40,8 +42,8 @@ class TestAdmin:
     )
     async def test_user_delete(self,session,login_admin,username,email,status_code,expected):
         new_client = login_admin["client"]
-        params = {"username": username} if username is None else {"email": email}
-        response = await new_client.delete("/admin/user_delete", params={"username": username})
+        params = {"email":email} if username == None else {"username": username}
+        response = await new_client.delete("/admin/user_delete", params=params)
 
         assert response.status_code == status_code
         if expected:

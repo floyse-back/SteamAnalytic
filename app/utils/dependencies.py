@@ -2,7 +2,7 @@ from fastapi import Depends,Request
 from fastapi.params import Form
 
 from app.application.services.admin_service.admin_service import AdminService
-from app.application.services.email_service.email_service import EmailService
+from app.application.services.notification_service.notification_service import NotificationService
 from app.application.services.steam_service.steam_service import SteamService
 from app.application.services.users_service.users_service import UserService
 from app.infrastructure.celery_app.senders.celery_sender import CelerySender
@@ -66,7 +66,7 @@ async def get_admin_service():
     )
 
 async def get_email_service():
-    return EmailService(
+    return NotificationService(
         email_confirmation_repository=EmailConfirmationRepository(),
         celery_sender=CelerySender(),
         user_repository=UserRepository()
