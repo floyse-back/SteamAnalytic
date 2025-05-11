@@ -1,8 +1,12 @@
 import pytest
 
+from app.utils.config import ServicesConfig
 
+service_config = ServicesConfig()
 
-class TestEmail:
+class TestNotification:
+    PATH = f"{service_config.notification_service.path}"
+
     @pytest.mark.parametrize(
         "type,status_code,email",
         [
@@ -14,7 +18,7 @@ class TestEmail:
     async def test_send_email(self,login,type,users,status_code,email):
         new_client = login["client"]
         response = await new_client.post(
-            url=f"/api/v1/send_email/{type}",
+            url=f"{self.PATH}/send_email/{type}",
             params={"email": email}
         )
 
@@ -33,7 +37,7 @@ class TestEmail:
     async def test_not_valid_email(self,type,users,login,status_code,email):
         new_client = login["client"]
         response = await new_client.post(
-            url=f"/api/v1/send_email/{type}",
+            url=f"{self.PATH}/send_email/{type}",
             params={"email": email}
         )
 
@@ -50,7 +54,7 @@ class TestEmail:
     )
     async def test_send_email_not_auth(self,client,users, type, status_code, email,excepted):
         response = await client.post(
-            url=f"/api/v1/send_email/{type}",
+            url=f"{self.PATH}/send_email/{type}",
             params = {"email": email}
         )
 

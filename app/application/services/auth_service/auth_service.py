@@ -26,7 +26,6 @@ class AuthService:
         )
         self.delete_user_use_case = DeleteUserUseCase(
             user_repository=user_repository,
-            email_repository=email_repository
         )
         self.user_login_use_case = UserLoginUseCase(
             refresh_token_repository=refresh_token_repository
@@ -70,7 +69,8 @@ class AuthService:
         return await self.user_register_use_case.execute(session,user=user)
 
     async def delete_from_user(self,token,user_password,session:AsyncSession):
-        return await self.delete_user_use_case.execute(session=session,token=token,user_password=user_password)
+        user_model = await self.email_verify_confirm_use_case.execute(session,type="delete_user",token=token)
+        return await self.delete_user_use_case.execute(session=session,user_password=user_password,user_model=user_model)
 
     async def refresh_token(self,refresh_token:str,user:str,session:AsyncSession):
         return await self.get_refresh_token_use_case.execute(refresh_token=refresh_token,user=user,session=session)

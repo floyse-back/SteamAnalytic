@@ -9,11 +9,9 @@ from app.infrastructure.celery_app.utils.steam_parser import SteamParser
 from app.infrastructure.celery_app.utils.steam_details_parser import SteamDetailsParser
 from sqlalchemy import text,cast,Integer,select,delete,update
 
-import logging
+from app.infrastructure.email_sender.new_email_sender import EmailSender
+from app.infrastructure.logger.logger import logger
 
-from app.infrastructure.email_sender.email_sender import EmailSender
-
-logger = logging.getLogger(__name__)
 
 @app.task
 def update_steam_games():
@@ -125,7 +123,7 @@ def update_gamesdetails_from_discount():
 
 @app.task
 def send_email(receiver,url,type):
-    logger.info("Starting task send_email {receiver} {type}!")
+    logger.info("Starting task send_email %s %s!",receiver,type)
     email_sender = EmailSender()
     email_sender.send_email(receiver,url,type)
     logger.info("Finished task send_email!")

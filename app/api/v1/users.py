@@ -6,7 +6,7 @@ from app.application.dto.user_dto import UserMe
 from app.infrastructure.db.database import get_async_db
 from starlette import status
 
-router = APIRouter(prefix="/users")
+router = APIRouter()
 
 @router.get("/user_me",response_model=UserMe,status_code=status.HTTP_200_OK)
 async def user_me(request:Request,user_service = Depends(get_users_service),auth = Depends(user_auth_check),session:AsyncSession = Depends(get_async_db)):

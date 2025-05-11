@@ -6,7 +6,9 @@ from app.utils.config import STEAM_API_KEY
 from app.infrastructure.celery_app.steam_tasks import update_or_add_game
 from app.utils.dependencies import get_steam_service
 
-router = APIRouter(prefix="/api/v1/steam")
+from typing import List, Optional
+
+router = APIRouter()
 
 steam = Steam(STEAM_API_KEY)
 
@@ -43,7 +45,8 @@ async def user_games_play(user:str,steam_service = Depends(get_steam_service)):
 async def games_100_filter(steam_service = Depends(get_steam_service),session = Depends(get_async_db)):
     return await steam_service.games_filter(
         session=session
-
-
-
     )
+
+@router.get("/search_game/{name}")
+async def search_game(name,category: Optional[List],ganre:Optional[List],discount:Optional[List],publisher:Optional[List],session = Depends(get_async_db)):
+    return {"В розробці":"В ЄБАНУТІЙ РОЗРОБЦІ"}

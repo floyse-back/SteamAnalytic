@@ -5,7 +5,7 @@ from app.application.services.admin_service.admin_service import AdminService
 from app.infrastructure.db.database import get_async_db
 from app.utils.dependencies import get_admin_service,user_admin_check
 
-router = APIRouter(prefix="/admin")
+router = APIRouter()
 
 
 @router.get("/user_info",status_code=status.HTTP_200_OK)

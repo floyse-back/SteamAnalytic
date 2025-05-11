@@ -23,7 +23,11 @@ app.conf.beat_schedule = {
     "update_game_icon_url":{
         'task': 'app.infrastructure.celery_app.steam_tasks.update_game_icon_url',
         'schedule': crontab(hour ="1",minute="0")
+    },
+    "upgrade_tokens":{
+        "task": "app.infrastructure.celery_app.users_tasks.upgrade_tokens",
+        "schedule": crontab(hour="12",minute="36")
     }
 }
 
-app.autodiscover_tasks(["app.infrastructure.celery_app.steam_tasks"])
+app.autodiscover_tasks(["app.infrastructure.celery_app.steam_tasks","app.infrastructure.celery_app.users_tasks"])

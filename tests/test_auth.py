@@ -4,12 +4,16 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.db.models.users_models import UserModel
+from app.utils.config import ServicesConfig
 from app.utils.utils import verify_password
 
+service_config = ServicesConfig()
 
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("users")
 class TestAuth:
+    PATH = service_config.auth_service.path
+
     @pytest.mark.parametrize(
         "username,password", [
             ("admin_ivan", "hashedpass1"),
@@ -22,7 +26,7 @@ class TestAuth:
     )
     async def test_login_users(self,client:AsyncClient,username,password):
         response = await client.post(
-            url=f"/auth/login?username={username}&password={password}",
+            url=f"{self.PATH}/login?username={username}&password={password}",
         )
 
         data = response.json()
@@ -40,7 +44,7 @@ class TestAuth:
     )
     async def test_not_login_users(self,client:AsyncClient,username,status_code,password,exception):
         response = await client.post(
-            url=f"/auth/login?username={username}&password={password}",
+            url=f"{self.PATH}/login?username={username}&password={password}",
         )
 
         data = response.json()
@@ -63,7 +67,7 @@ class TestAuth:
             "steamid": f"{steamid}",
         }
         response = await client.post(
-            url = "/auth/register_user/",
+            url = f"{self.PATH}/register_user/",
             json=data
         )
         assert response.status_code == 201
@@ -90,7 +94,7 @@ class TestAuth:
             "steamid": f"{steamid}",
         }
         response = await client.post(
-            url = "/auth/register_user/",
+            url = f"{self.PATH}/register_user/",
             json=data
         )
         assert response.status_code == status_code
@@ -99,7 +103,7 @@ class TestAuth:
     async def test_delete_users(self,login,create_tokens,users,session:AsyncSession):
         new_client = login["client"]
         response = await new_client.delete(
-            url=f"/auth/delete_user/{create_tokens['delete_token']}",
+            url=f"{self.PATH}/delete_user/{create_tokens['delete_token']}",
             params={"password":"password"}
         )
 
@@ -118,7 +122,7 @@ class TestAuth:
     async def test_incorrect_password_delete_users(self,login:AsyncClient,create_tokens,session:AsyncSession):
         new_client = login["client"]
         response = await new_client.delete(
-            url=f"/auth/delete_user/{create_tokens['delete_token']}",
+            url=f"{self.PATH}/delete_user/{create_tokens['delete_token']}",
             params={"password":"bad_password"}
         )
 
@@ -137,7 +141,7 @@ class TestAuth:
     async def test_bad_create_tokens(self,login:dict,create_tokens,session:AsyncSession,token_type,status_code,password,excepted):
         new_client = login["client"]
         response = await new_client.delete(
-            url=f"/auth/delete_user/{create_tokens[f'{token_type}']}",
+            url=f"{self.PATH}/delete_user/{create_tokens[f'{token_type}']}",
             params={"password":f"{password}"}
         )
 
@@ -146,14 +150,14 @@ class TestAuth:
 
     async def test_logout_users(self,login:dict,session:AsyncSession):
         new_client = login["client"]
-        response = await new_client.get("/auth/logout/")
+        response = await new_client.get(f"{self.PATH}/logout/")
 
         assert response.status_code == 204
         assert new_client.cookies.get("access_token") is None
         assert new_client.cookies.get("refresh_token") is None
 
     async  def test_not_auth_logout_users(self,client:AsyncClient):
-        response = await client.get("/auth/logout/")
+        response = await client.get(f"{self.PATH}/logout/")
 
         assert response.status_code == 401
         assert response.json().get("detail") == "Could not validate credentials"
@@ -161,7 +165,7 @@ class TestAuth:
     async def test_refresh_token(self,login:dict,session:AsyncSession):
         new_client = login["client"]
         print(login["access_token"])
-        response = await new_client.post("/auth/refresh_token")
+        response = await new_client.post(f"{self.PATH}/refresh_token")
 
         data = response.json()
         assert response.status_code == 201
@@ -169,7 +173,7 @@ class TestAuth:
         assert data["refresh_token"] is not None
 
     async def test_not_refresh_token(self,client:AsyncClient):
-        response = await client.post("/auth/refresh_token")
+        response = await client.post(f"{self.PATH}/refresh_token")
 
         assert response.status_code == 401
         assert response.json().get("detail") == "Token not found"
@@ -185,7 +189,7 @@ class TestAuth:
     async def test_forgot_password(self,login:dict,session,create_tokens:dict,token_type,status_code,password,excepted):
         new_client = login["client"]
         response = await new_client.put(
-            url=f"/auth/forgot_password/{create_tokens[f'{token_type}']}",
+            url=f"{self.PATH}/forgot_password/{create_tokens[f'{token_type}']}",
             params = {"new_password":f"{password}"}
         )
 
@@ -210,7 +214,7 @@ class TestAuth:
     async def test_verify_email(self,login:dict,session,create_tokens:dict,token_type,status_code,excepted):
         new_client = login["client"]
         response = await new_client.get(
-            url=f"/auth/verify_email/{create_tokens[f'{token_type}']}",
+            url=f"{self.PATH}/verify_email/{create_tokens[f'{token_type}']}",
         )
 
         assert response.status_code == status_code

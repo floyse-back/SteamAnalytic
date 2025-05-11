@@ -1,9 +1,7 @@
 from app.application.dto.user_dto import UserModel
 from app.application.exceptions.exception_handler import UserNotFound
 from app.domain.users.repository import IUserRepository
-from app.infrastructure.logger.logger import Logger
-
-logger = Logger()
+from app.infrastructure.logger.logger import logger
 
 class GetUserUseCase:
     def __init__(self,user_repository:IUserRepository):

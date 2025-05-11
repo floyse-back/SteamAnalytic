@@ -16,4 +16,6 @@ class EmailVerifyConfirmUseCase:
         if not user_model:
             raise UserNotFound()
 
+        await self.email_repository.delete_confirm_token(session=session,type=type,user_id=email_model.user_id)
+
         return user_model

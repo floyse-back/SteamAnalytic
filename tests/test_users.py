@@ -3,16 +3,17 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.infrastructure.db.models.users_models import UserModel
+from tests.conftest import service_config
 
 
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("users")
 class TestUser:
-    base_url = "/users"
+    PATH = f"{service_config.users_service.path}"
 
     async def test_users_me_get(self,login):
         new_client = login["client"]
-        response = await new_client.get(f"{self.base_url}/user_me")
+        response = await new_client.get(f"{self.PATH}/user_me")
 
         assert response.status_code == 200
         assert response.json()["username"]
@@ -33,7 +34,7 @@ class TestUser:
         }
 
         response = await new_client.put(
-            f"{self.base_url}/user_me",
+            f"{self.PATH}/user_me",
             params={"password": "password"},
             json=data,
             headers=headers
@@ -55,7 +56,7 @@ class TestUser:
             user_model = await s.execute(select(UserModel).where(UserModel.username==user))
             result = user_model.scalars().first()
 
-        response = await new_client.get(f"{self.base_url}/user_profile/{result.id}")
+        response = await new_client.get(f"{self.PATH}/user_profile/{result.id}")
 
         assert response.status_code == status_code
         if expected:

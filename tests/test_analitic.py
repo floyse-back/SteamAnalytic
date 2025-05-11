@@ -2,11 +2,16 @@ from httpx import AsyncClient
 
 import pytest
 
+from app.utils.config import ServiceConfig, ServicesConfig
+
 host = "http://127.0.0.1:8000"
+
+service_config = ServicesConfig()
+
 
 @pytest.mark.asyncio
 class TestAnalitic:
-    base_url = f"/api/v1/analytics"
+    PATH = f"{service_config.analytic_service.path}"
 
     @pytest.mark.parametrize(
         "user1,user2",
@@ -19,7 +24,7 @@ class TestAnalitic:
     )
     async def test_user_battle(self,login,user1,user2):
         new_client = login["client"]
-        response = await new_client.get(url=f"{self.base_url}/user_battle",
+        response = await new_client.get(url=f"{self.PATH}/user_battle",
                                         params={
                                             f"user1_id":user1,
                                             f"user2_id":user2,
@@ -34,7 +39,7 @@ class TestAnalitic:
     )
     async def test_bad_user_battle(self,login,user1,user2,expected):
         new_client = login["client"]
-        response = await new_client.get(url=f"{self.base_url}/user_battle",
+        response = await new_client.get(url=f"{self.PATH}/user_battle",
                                         params={
                                             f"user1_id":f"{user1}",
                                             f"user2_id":f"{user2}",
@@ -53,7 +58,7 @@ class TestAnalitic:
     )
     async def test_user_score_list(self, login, user, status_code, expected):
         new_client = login["client"]
-        response = await new_client.get(url=f"{self.base_url}/user_score",
+        response = await new_client.get(url=f"{self.PATH}/user_score",
                                         params={
                                             f"user":user,
                                         }
@@ -73,7 +78,7 @@ class TestAnalitic:
     )
     async def test_user_friends_list(self,login,user,status_code,expected):
         new_client = login["client"]
-        response = await new_client.get(url=f"{self.base_url}/friends_list",
+        response = await new_client.get(url=f"{self.PATH}/friends_list",
                                         params={
                                             "user":user,
                                         }
@@ -88,16 +93,16 @@ class TestAnalitic:
     @pytest.mark.parametrize(
         "new_url,user,status_code,expected",
         [
-        ("games_for_you","76561199054741771",200,None),
-         ("games_for_you","54546576543rgrgrer", 404, "Steam user not found"),
-         ("salling_for_you", "76561199054741771", 200, None),
-          ("salling_for_you", "54546576543rgrgrer", 404, "Steam user not found")
+        ("/games_for_you","76561199054741771",200,None),
+         ("/games_for_you","54546576543rgrgrer", 404, "Steam user not found"),
+         ("/salling_for_you", "76561199054741771", 200, None),
+          ("/salling_for_you", "54546576543rgrgrer", 404, "Steam user not found")
          ]
     )
     @pytest.mark.usefixtures("steamgames","games")
     async def test_block_for_you(self,login,user,status_code,expected,new_url):
         new_client = login["client"]
-        response = await new_client.get(url=f"{self.base_url}/{new_url}",
+        response = await new_client.get(url=f"{self.PATH}{new_url}",
                                         params={
                                             "user":user,
                                         }
@@ -109,7 +114,7 @@ class TestAnalitic:
 
     async def test_get_free_games(self,login,steamgames):
         new_client = login["client"]
-        response = await new_client.get(f"{self.base_url}/free_games")
+        response = await new_client.get(f"{self.PATH}/free_games")
 
         assert response.status_code == 200
         if response.json():
@@ -117,7 +122,7 @@ class TestAnalitic:
 
     async def test_bad_free_games(self,login):
         new_client = login["client"]
-        response = await new_client.get(f"{self.base_url}/free_games")
+        response = await new_client.get(f"{self.PATH}/free_games")
 
         assert response.status_code == 200
         assert response.json()["detail"] == False
@@ -134,7 +139,7 @@ class TestAnalitic:
     )
     async def test_user_user_achivements(self,login,steam_id,app_id,status_code,expected):
         new_client = login["client"]
-        response = await new_client.get(url=f"{self.base_url}/user_achivements",
+        response = await new_client.get(url=f"{self.PATH}/user_achivements",
                                         params={
                                             "app_id":app_id,
                                             "steam_id":steam_id
@@ -161,7 +166,7 @@ class TestAnalitic:
         ]
     )
     async def test_not_authenticated_endpoints(self,client:AsyncClient,url,status_code,expected):
-        response = await client.get(f"{self.base_url}{url}")
+        response = await client.get(f"{self.PATH}{url}")
 
         assert response.status_code == status_code
         assert response.json()["detail"] == expected

@@ -1,10 +1,13 @@
 import pytest
 from httpx import AsyncClient
 
+from app.utils.config import ServicesConfig
+
+service_config = ServicesConfig()
 
 @pytest.mark.asyncio
 class TestUsersFullStats:
-    base_url = "/api/v1/steam/users_full_stats/"
+    PATH = f"{service_config.steam_service.path}/users_full_stats"
     @pytest.mark.parametrize(
         "user, status_code,expected",[
             ("floysefake",200,None),
@@ -14,7 +17,7 @@ class TestUsersFullStats:
         ]
     )
     async def test_default_request(self,client:AsyncClient,user,status_code,expected):
-        response = await client.get(f"{self.base_url}{user}")
+        response = await client.get(f"{self.PATH}/{user}")
 
         assert response.status_code == status_code
 
@@ -44,7 +47,7 @@ class TestUsersFullStats:
          ]
     )
     async def test_query_request(self,client:AsyncClient,user,status_code,user_badges,friends_details,user_games):
-        response = await client.get(f"{self.base_url}{user}?user_badges={user_badges}&friends_details={friends_details}&user_games={user_games}")
+        response = await client.get(f"{self.PATH}/{user}?user_badges={user_badges}&friends_details={friends_details}&user_games={user_games}")
 
         assert response.status_code == status_code
 
@@ -59,14 +62,14 @@ class TestUsersFullStats:
             assert response.json()["user_games"] == None
 
     async def test_private_user(self,client:AsyncClient):
-        response_1 = await client.get("/api/v1/steam/users_full_stats/76561198061916691")
+        response_1 = await client.get(f"{self.PATH}/76561198061916691")
 
         assert response_1.status_code == 403
         assert response_1.json().get("detail")
 
 @pytest.mark.asyncio
 class TestUserGamesPlay:
-    base_url = "/api/v1/steam/user_games_played"
+    PATH = f"{service_config.steam_service.path}/user_games_played"
 
     @pytest.mark.parametrize(
         "user, status_code,expected",[
@@ -77,7 +80,7 @@ class TestUserGamesPlay:
         ]
     )
     async def test_request(self,client:AsyncClient,user,status_code,expected):
-        response = await client.get(f"{self.base_url}?user={user}")
+        response = await client.get(f"{self.PATH}?user={user}")
 
         assert response.status_code == status_code
         if not expected:
@@ -87,14 +90,14 @@ class TestUserGamesPlay:
             assert response.json() == {"detail": expected}
 
     async def test_private_user(self,client:AsyncClient):
-        response = await client.get(f"{self.base_url}?user=76561198061916691")
+        response = await client.get(f"{self.PATH}?user=76561198061916691")
 
         assert response.status_code == 200
         assert response.json() == {}
 
 @pytest.mark.asyncio
 class TestGameAchivements:
-    base_url = "/api/v1/steam/game_achivements"
+    base_url = f"{service_config.steam_service.path}/game_achivements"
 
     @pytest.mark.parametrize(
         "game_id,status_code,expected",
@@ -125,10 +128,10 @@ class TestGameAchivements:
     ]
 )
 class TestSteamGames:
-    base_url = "/api/v1/steam/"
+    PATH = f"{service_config.steam_service.path}"
 
     async def test_best_games(self,client:AsyncClient,page,status_code,limit,elements,expected):
-        response = await client.get(f"{self.base_url}best_sallers/?page={page}&limit={limit}")
+        response = await client.get(f"{self.PATH}/best_sallers/?page={page}&limit={limit}")
 
         assert response.status_code == status_code
         if isinstance(response.json(),dict) and status_code !=200:
@@ -140,7 +143,7 @@ class TestSteamGames:
 
 
     async def test_get_top_games(self,client:AsyncClient,page,status_code,limit,elements,expected):
-        response = await client.get(f"{self.base_url}get_top_games/?page={page}&limit={limit}")
+        response = await client.get(f"{self.PATH}/get_top_games/?page={page}&limit={limit}")
 
         data = response.json()
 

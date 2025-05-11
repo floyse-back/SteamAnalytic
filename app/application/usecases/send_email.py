@@ -1,3 +1,4 @@
+import random
 import uuid
 
 from app.application.exceptions.exception_handler import IncorrectType, UserNotFound
@@ -31,14 +32,13 @@ class SendEmailUseCase:
             raise UserNotFound()
 
         receiver = user_model.email
-        url =f"?token={verify_token}"
         if user_model is None:
             raise Exception
 
         await self.email_repository.delete_confirm_token(session,type,user_model.id)
         await self.email_repository.create_confirm_token(session=session,token=verify_token,type=type,user_model=user_model)
-        await self.celery_sender.send_email(receiver=receiver,type=type,url=url)
+        await self.celery_sender.send_email(receiver=receiver,type=type,token=verify_token)
 
 
     def __create_email_code(self):
-        return str(uuid.uuid4())
+        return str(random.randint(100000,999999))

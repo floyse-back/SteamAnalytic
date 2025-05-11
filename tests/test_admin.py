@@ -3,11 +3,15 @@ from httpx import AsyncClient
 from sqlalchemy import select
 
 from app.infrastructure.db.models.users_models import UserModel
+from app.utils.config import ServicesConfig
 
+service_config = ServicesConfig()
 
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("users")
 class TestAdmin:
+    PATH = service_config.admin_service.path
+
     @pytest.mark.parametrize(
         "username,email,status_code,expected",
         [("admin_ivan",None,200,None),
@@ -20,7 +24,7 @@ class TestAdmin:
     async def test_user_info(self,login_admin:dict,username,email,status_code,expected):
         new_client = login_admin["client"]
         params = {"email":email} if username == None else {"username": username}
-        response = await new_client.get("/admin/user_info",params=params)
+        response = await new_client.get(f"{self.PATH}/user_info",params=params)
         data = response.json()
 
         assert response.status_code == status_code
@@ -43,7 +47,7 @@ class TestAdmin:
     async def test_user_delete(self,session,login_admin,username,email,status_code,expected):
         new_client = login_admin["client"]
         params = {"email":email} if username == None else {"username": username}
-        response = await new_client.delete("/admin/user_delete", params=params)
+        response = await new_client.delete(f"{self.PATH}/user_delete", params=params)
 
         assert response.status_code == status_code
         if expected:
@@ -55,12 +59,12 @@ class TestAdmin:
 
     @pytest.mark.parametrize(
         "url,method,status_code,expected",
-        [("/admin/user_info?username=admin_ivan","GET",401,"Token not found"),
-         ("/admin/user_delete?username=user_dmytro","DELETE",401,"Token not found"),
+        [(f"/user_info?username=admin_ivan","GET",401,"Token not found"),
+         ("/user_delete?username=user_dmytro","DELETE",401,"Token not found"),
          ]
     )
     async def test_user_not_auth(self,client:AsyncClient,url,method,status_code,expected):
-        response = await client.request(method=method,url=url)
+        response = await client.request(method=method,url=f"{self.PATH}{url}")
 
         assert response.status_code == status_code
         assert response.json()["detail"] == expected
@@ -74,10 +78,12 @@ class TestAdmin:
      ]
 )
 class TestBadRequest:
+    PATH = service_config.admin_service.path
+
     async def test_bad_user_info(self, login: dict, session, username, status_code, expected):
         new_client = login["client"]
 
-        response = await new_client.get("/admin/user_info", params={"username": username})
+        response = await new_client.get(f"{self.PATH}/user_info", params={"username": username})
         data = response.json()
 
         assert response.status_code == status_code
@@ -86,7 +92,7 @@ class TestBadRequest:
     async def test_bad_user_delete(self,login,session,username,status_code,expected):
         new_client = login["client"]
 
-        response = await new_client.delete("/admin/user_delete", params={"username": username})
+        response = await new_client.delete(f"{self.PATH}/user_delete", params={"username": username})
         data = response.json()
 
         assert response.status_code == status_code

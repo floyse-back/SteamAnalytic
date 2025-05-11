@@ -8,7 +8,7 @@ from app.infrastructure.db.database import get_async_db
 from app.application.dto.user_dto import User, TokenType
 from starlette import status
 
-router = APIRouter(prefix="/auth",tags=["auth"])
+router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 

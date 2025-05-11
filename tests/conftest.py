@@ -13,11 +13,13 @@ from app.infrastructure.db.models import steam_models
 from app.infrastructure.db.models.steam_models import Game, Category, Publisher, Ganres
 from app.infrastructure.db.models.users_models import UserModel, EmailConfirmed
 from app.main import app
-from app.utils.config import TEST_DATABASE_URL
+from app.utils.config import TEST_DATABASE_URL, ServicesConfig
 from app.utils.utils import hashed_password
 import asyncio
 
 engine = create_async_engine(TEST_DATABASE_URL)
+
+service_config = ServicesConfig()
 
 @pytest_asyncio.fixture(scope="session")
 def event_loop():
@@ -211,7 +213,7 @@ async def users(session: async_sessionmaker[AsyncSession]):
 @pytest_asyncio.fixture(scope="function")
 async def login(client:AsyncClient,users):
 
-    response = await client.post("/auth/login",params={"username":"floysefake","password":"password"})
+    response = await client.post(f"{service_config.auth_service.path}/login",params={"username":"floysefake","password":"password"})
     data = response.json()
 
     return {
@@ -222,7 +224,7 @@ async def login(client:AsyncClient,users):
 
 @pytest_asyncio.fixture(scope="function")
 async def login_admin(client:AsyncClient,users):
-    response = await client.post("/auth/login",params={"username":"admin_ivan","password":"hashedpass1"})
+    response = await client.post(f"{service_config.auth_service.path}/login",params={"username":"admin_ivan","password":"hashedpass1"})
 
     data = response.json()
 

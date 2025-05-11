@@ -1,18 +1,18 @@
 from email.mime.text import MIMEText
 
 from app.domain.email_sender import IEmailSender
-from app.utils.config import EMAIL_PASSWORD, EMAIL_NAME,EMAIL_SERVER,EMAIL_PORT,EMAIL_SENDER
+from app.utils.config import EMAIL_PASSWORD, TEST_EMAIL_NAME,TEST_EMAIL_SERVER,TEST_EMAIL_PASSWORD,TEST_EMAIL_PORT,TEST_EMAIL_SENDER
 import smtplib
 from email.mime.multipart import MIMEMultipart
 
-class EmailSender(IEmailSender):
+class EmailSenderTest(IEmailSender):
     """Відправка EMAIL"""
     def __init__(self):
-        self.email_name = EMAIL_NAME
+        self.email_name = TEST_EMAIL_NAME
         self.email_password = EMAIL_PASSWORD
-        self.email_server = EMAIL_SERVER
-        self.email_port = EMAIL_PORT
-        self.email_sender = EMAIL_SENDER
+        self.email_server = TEST_EMAIL_SERVER
+        self.email_port = TEST_EMAIL_PORT
+        self.email_sender = TEST_EMAIL_SENDER
         self.server = self.connect_server()
 
         self.type_handlers = {
