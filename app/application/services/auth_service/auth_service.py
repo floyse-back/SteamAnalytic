@@ -12,8 +12,7 @@ from app.application.usecases.verify_email import VerifyEmailUseCase
 from app.application.usecases.verify_user import VerifyUserUseCase
 from app.domain.users.repository import IUserRepository, IRefreshTokenRepository, IBlackListRepository, \
     IEmailConfirmationRepository
-from app.infrastructure.db.models.users_models import UserModel
-from app.application.dto.user_dto import User, TokenType
+from app.application.dto.user_dto import User, TokenType, transform_to_dto,UserModelDTO
 from app.utils.utils import decode_jwt
 
 
@@ -48,7 +47,7 @@ class AuthService:
             user_repository=user_repository,
         )
 
-    async def verify_user(self,session:AsyncSession, username: str, password: str) -> UserModel:
+    async def verify_user(self,session:AsyncSession, username: str, password: str) -> UserModelDTO:
         return await self.verify_user_use_case.execute(session,username,password)
 
     async def user_auth_check(self,token, session:AsyncSession):
@@ -70,7 +69,7 @@ class AuthService:
 
     async def delete_from_user(self,token,user_password,session:AsyncSession):
         user_model = await self.email_verify_confirm_use_case.execute(session,type="delete_user",token=token)
-        return await self.delete_user_use_case.execute(session=session,user_password=user_password,user_model=user_model)
+        await self.delete_user_use_case.execute(session=session,user_password=user_password,user_model=user_model)
 
     async def refresh_token(self,refresh_token:str,user:str,session:AsyncSession):
         return await self.get_refresh_token_use_case.execute(refresh_token=refresh_token,user=user,session=session)

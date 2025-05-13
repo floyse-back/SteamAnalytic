@@ -4,26 +4,35 @@ from pydantic import BaseModel, constr, Field
 from typing import List, Optional
 
 
-class RefreshToken(BaseModel):
-    id: Optional[int]
-    user_id: Optional[int]
-    refresh_token: Optional[str]
-    delete_time: Optional[datetime]
+class RefreshTokenDTO(BaseModel):
+    id: int
+    refresh_token: str
+    delete_time: datetime
 
     class Config:
         from_attributes = True
 
-class BlacklistToken(BaseModel):
-    id: Optional[int]
-    user_id: Optional[int]
-    token: Optional[str]
-    expires_at: Optional[datetime]
+class BlackListDTO(BaseModel):
+    id: int
+    token: str
+    expires_at: datetime
     reason: Optional[str]
 
     class Config:
         from_attributes = True
 
-class UserModel(BaseModel):
+
+class EmailConfirmedDTO(BaseModel):
+    id: int
+    type: str
+    token: str
+    expires_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class UserModelDTO(BaseModel):
     id: Optional[int]
     username: Optional[str]
     hashed_password: Optional[str]
@@ -33,8 +42,9 @@ class UserModel(BaseModel):
     steamid: Optional[str]
     steamname: Optional[str]
 
-    blacklist_token: Optional[List[BlacklistToken]]
-    refresh_tokens: Optional[List[RefreshToken]]
+    blacklist_token: Optional[List[BlackListDTO]]
+    refresh_tokens: Optional[List[RefreshTokenDTO]]
+    email_confirmed: Optional[List[EmailConfirmedDTO]]
 
     class Config:
         from_attributes = True
@@ -71,6 +81,16 @@ class UserMe(BaseModel):
 class UserPublic(BaseModel):
     username: str = Field(default_factory=str)
     steamid: str = Field(default_factory=str)
+
+class UserShortDTO(BaseModel):
+    id: Optional[int]
+    username: Optional[str]
+    email: Optional[str]
+    hashed_password: Optional[str]
+    is_active: Optional[bool]
+
+    class Config:
+        from_attributes = True
 
 def transform_to_dto(model:BaseModel,orm):
     return model.model_validate(orm).model_dump()

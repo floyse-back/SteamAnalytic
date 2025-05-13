@@ -243,17 +243,17 @@ async def create_tokens(session:async_sessionmaker[AsyncSession],users):
 
         delete_user_model = EmailConfirmed(
             type = "delete_user",
-            token = str(uuid.uuid4()),
+            token = str(random.randint(100000,999999)),
             user_id = user.id
         )
         verify_email_model = EmailConfirmed(
             type = "verify_email",
-            token = str(uuid.uuid4()),
+            token = str(random.randint(100000,999999)),
             user_id = user.id
         )
         forgot_password_model = EmailConfirmed(
             type = "forgot_password",
-            token=str(uuid.uuid4()),
+            token=str(random.randint(100000,999999)),
             user_id = user.id,
         )
         s.add(delete_user_model)
