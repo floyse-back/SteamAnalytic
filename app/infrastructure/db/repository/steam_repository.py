@@ -1,7 +1,10 @@
+from typing import Optional, List
+
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.steam.repository import ISteamRepository
+from app.domain.steam.schemas import Game
 from app.infrastructure.db.models.steam_models import SteamBase
 
 
@@ -25,3 +28,7 @@ class SteamRepository(ISteamRepository):
 
         result = await session.execute(statement)
         return result.scalars().all()
+
+    async def search_game(self,*args,**kwargs) -> Optional[List[Game]]:
+        return "Search Game"
+

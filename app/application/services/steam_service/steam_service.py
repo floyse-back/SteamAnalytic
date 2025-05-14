@@ -4,6 +4,7 @@ from app.application.dto.steam_dto import SteamBase,transform_to_dto
 from app.application.usecases.get_best_sallers import GetBestSallersUseCase
 from app.application.usecases.get_game_achivements import GetGameAchievementsUseCase
 from app.application.usecases.get_game_stats import GetGameStatsUseCase
+from app.application.usecases.get_steam_search_games import GetSteamSearchGamesUseCase
 from app.application.usecases.get_top_games import GetTopGamesUseCase
 from app.application.usecases.get_player_full_stats import GetUserFullStatsUseCase
 from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUseCase
@@ -34,6 +35,9 @@ class SteamService:
         )
         self.get_user_games_play = GetPlayerGamesPlayUseCase(
             steam = steam
+        )
+        self.steam_games_use_case = GetSteamSearchGamesUseCase(
+            steam_repository = steam_repository
         )
 
     @cache_data(expire=2400)
@@ -67,5 +71,5 @@ class SteamService:
         return await self.get_user_games_play.execute(user = user)
 
     @cache_data(expire=600)
-    async def games_filter(self,session:AsyncSession):
-        pass
+    async def search_game(self,session,username = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None):
+        return await self.steam_games_use_case.execute(session,username,category,ganre,discount,publisher,to_price,out_price)

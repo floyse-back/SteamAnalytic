@@ -41,12 +41,6 @@ async def game_achivements(game_id,steam_service = Depends(get_steam_service)):
 async def user_games_play(user:str,steam_service = Depends(get_steam_service)):
     return await steam_service.user_games_play(user)
 
-@router.get("/games_filter")
-async def games_100_filter(steam_service = Depends(get_steam_service),session = Depends(get_async_db)):
-    return await steam_service.games_filter(
-        session=session
-    )
-
-@router.get("/search_game/{name}")
-async def search_game(name,category: Optional[List],ganre:Optional[List],discount:Optional[List],publisher:Optional[List],session = Depends(get_async_db)):
-    return {"В розробці":"В ЄБАНУТІЙ РОЗРОБЦІ"}
+@router.get("/search_game/")
+async def search_game(steam_service = Depends(get_steam_service),name:Optional[str] = Query(default=None),to_price = Query(default=None),out_price = Query(default=None),category: Optional[List] = Query(default=None),ganre:Optional[List] = Query(default=None),discount:Optional[List] = Query(default=None),publisher:Optional[List] = Query(default=None),session = Depends(get_async_db)):
+    return await steam_service.search_game(name,discount,publisher)

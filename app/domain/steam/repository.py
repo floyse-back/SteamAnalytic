@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 from app.domain.steam.schemas import SteamBase,Game
 
 class ISteamRepository(ABC):
@@ -13,6 +13,10 @@ class ISteamRepository(ABC):
 
     @abstractmethod
     async def get_free_discount_games(self, session: object) -> None:
+        pass
+
+    @abstractmethod
+    async def search_game(self,*args,**kwargs) -> Optional[List[Game]]:
         pass
 
 class IAnaliticsRepository(ABC):
