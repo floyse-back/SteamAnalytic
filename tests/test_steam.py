@@ -1,6 +1,7 @@
 import pytest
 from httpx import AsyncClient
 
+from app.infrastructure.logger.logger import logger
 from app.utils.config import ServicesConfig
 
 service_config = ServicesConfig()
@@ -154,3 +155,98 @@ class TestSteamGames:
             assert isinstance(data,list)
 
             assert len(data) == elements
+
+class TestSearchGames:
+    path = f"{service_config.steam_service.path}"
+
+
+    @pytest.mark.parametrize(
+        "params,status_code",[
+            (
+                {
+                    "name":"Item 55"
+                },200
+            ),
+            (
+                    {
+                        "name": "Item"
+                    }, 200
+            ),
+            (
+                    {
+                        "category":["Random Category 5","Random Category 2"],
+                    }, 200
+            ),
+            (
+                    {
+                        "publisher": ["Random Publisher 5", "Random Publisher 2"],
+                    }, 200
+            ),
+            (
+                    {
+                        "ganre": ["Random Ganre 5", "Random Ganre 2"],
+                    }, 200
+            ),
+            (
+                    {
+                        "name": "Item 25",
+                        "discount": 30,
+                        "to_price": 1599
+                    }, 200
+            ),
+            (
+                    {
+                        "ganre": ["Random Ganre 3"],
+                        "publisher": ["Random Publisher 2"],
+                        "discount": 50
+                    }, 200
+            ),
+            (
+                    {
+                        "name": "Item 17",
+                        "out_price": 349,
+                        "publisher": ["Random Publisher 4"]
+                    }, 200
+            ),
+            (
+                    {
+                        "ganre": ["Random Ganre 2", "Random Ganre 5"],
+                        "discount": 20,
+                        "out_price": 799
+                    }, 200
+            ),
+            (
+                    {
+                        "name": "Item 66",
+                        "ganre": ["Random Ganre 4"],
+                        "to_price": 1250,
+                        "discount": 0
+                    }, 200
+            ),
+            (
+                    {
+                        "publisher": ["Random Publisher 1"],
+                        "to_price": 999,
+                        "out_price": 499
+                    }, 200
+            ),
+            (
+                    {
+                        "name": "Item 90",
+                        "ganre": ["Random Ganre 1"],
+                        "publisher": ["Random Publisher 3"],
+                        "discount": 75,
+                        "to_price": 1400,
+                        "out_price": 250
+                    }, 200
+            ),
+
+        ]
+    )
+    async def test_search_games(self,games,client:AsyncClient,params,status_code):
+        response = await client.get(f"{self.path}/search_game/",params=params)
+
+        assert response.status_code == status_code
+        logger.debug("%s",response.json())
+        assert isinstance(response.json(),list)
+        assert len(response.json())<=20

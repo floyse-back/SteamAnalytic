@@ -16,7 +16,7 @@ class ISteamRepository(ABC):
         pass
 
     @abstractmethod
-    async def search_game(self,*args,**kwargs) -> Optional[List[Game]]:
+    async def search_game(self,session,name = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None) -> Optional[List[Game]]:
         pass
 
 class IAnaliticsRepository(ABC):

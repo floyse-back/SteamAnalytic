@@ -27,7 +27,7 @@ async def get_steam_client() -> SteamClient:
 
 
 """Service Depends"""
-async def get_steam_service(steam_client:SteamClient = Depends(get_steam_client)):
+async def get_steam_service(steam_client:SteamClient = Depends(get_steam_client)) -> SteamService:
     return SteamService(
         steam=steam_client,
         steam_repository = SteamRepository(),
@@ -36,7 +36,7 @@ async def get_steam_service(steam_client:SteamClient = Depends(get_steam_client)
 
 async def get_analitic_service(
         steam_client:SteamClient = Depends(get_steam_client),
-):
+) -> AnalyticService:
     return AnalyticService(
         steam = steam_client,
         cache_repository = RedisRepository(),
@@ -44,7 +44,7 @@ async def get_analitic_service(
         analitic_repository=AnaliticRepository(),
     )
 
-async def get_users_service():
+async def get_users_service() -> UserService:
     return UserService(
         user_repository = UserRepository(),
         refresh_token_repository = RefreshTokenRepository(),
@@ -52,7 +52,7 @@ async def get_users_service():
         cache_repository = RedisRepository()
     )
 
-async def get_auth_service():
+async def get_auth_service() -> AuthService:
     return AuthService(
         user_repository = UserRepository(),
         refresh_token_repository = RefreshTokenRepository(),
@@ -60,12 +60,12 @@ async def get_auth_service():
         email_repository=EmailConfirmationRepository(),
     )
 
-async def get_admin_service():
+async def get_admin_service() -> AdminService:
     return AdminService(
         user_repository = UserRepository()
     )
 
-async def get_email_service():
+async def get_email_service() -> NotificationService:
     return NotificationService(
         email_confirmation_repository=EmailConfirmationRepository(),
         celery_sender=CelerySender(),

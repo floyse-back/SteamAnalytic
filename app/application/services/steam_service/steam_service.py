@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.steam_dto import SteamBase,transform_to_dto
+from app.application.dto.steam_dto import SteamBase, transform_to_dto, Game
 from app.application.usecases.get_best_sallers import GetBestSallersUseCase
 from app.application.usecases.get_game_achivements import GetGameAchievementsUseCase
 from app.application.usecases.get_game_stats import GetGameStatsUseCase
@@ -71,5 +71,9 @@ class SteamService:
         return await self.get_user_games_play.execute(user = user)
 
     @cache_data(expire=600)
-    async def search_game(self,session,username = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None):
-        return await self.steam_games_use_case.execute(session,username,category,ganre,discount,publisher,to_price,out_price)
+    async def search_game(self,session,name = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None):
+        result =  await self.steam_games_use_case.execute(session=session,name=name,category=category,discount=discount,publisher=publisher,ganre=ganre,to_price=to_price,out_price=out_price)
+
+        serilaze_result = [transform_to_dto(Game, i) for i in result]
+
+        return serilaze_result

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Query, Path, Depends
 
+from app.application.dto.steam_dto import transform_to_dto, Game
 from app.infrastructure.db.database import get_async_db
 from steam_web_api import Steam
 from app.utils.config import STEAM_API_KEY
@@ -42,5 +43,6 @@ async def user_games_play(user:str,steam_service = Depends(get_steam_service)):
     return await steam_service.user_games_play(user)
 
 @router.get("/search_game/")
-async def search_game(steam_service = Depends(get_steam_service),name:Optional[str] = Query(default=None),to_price = Query(default=None),out_price = Query(default=None),category: Optional[List] = Query(default=None),ganre:Optional[List] = Query(default=None),discount:Optional[List] = Query(default=None),publisher:Optional[List] = Query(default=None),session = Depends(get_async_db)):
-    return await steam_service.search_game(name,discount,publisher)
+async def search_game(steam_service = Depends(get_steam_service),name:Optional[str] = Query(default=None),to_price: Optional[int] = Query(default=None),out_price:Optional[int] = Query(default=None),category: Optional[List] = Query(default=None),ganre:Optional[List] = Query(default=None),discount:Optional[int] = Query(default=None),publisher:Optional[List] = Query(default=None),session = Depends(get_async_db)):
+    return await steam_service.search_game(session=session,name=name,category=category,discount=discount,publisher=publisher,ganre=ganre,to_price=to_price,out_price=out_price)
+

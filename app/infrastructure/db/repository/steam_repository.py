@@ -2,10 +2,11 @@ from typing import Optional, List
 
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import lazyload
+from sqlalchemy.sql.operators import is_
 
 from app.domain.steam.repository import ISteamRepository
-from app.domain.steam.schemas import Game
-from app.infrastructure.db.models.steam_models import SteamBase
+from app.infrastructure.db.models.steam_models import SteamBase, Game, Category, Publisher, Ganres
 
 
 class SteamRepository(ISteamRepository):
@@ -29,6 +30,33 @@ class SteamRepository(ISteamRepository):
         result = await session.execute(statement)
         return result.scalars().all()
 
-    async def search_game(self,*args,**kwargs) -> Optional[List[Game]]:
-        return "Search Game"
+    async def search_game(self,session,name:str = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None) -> Optional[List[Game]]:
+        statement = (
+            select(Game)
+        )
+
+        if category:
+            statement = statement.filter(Category.category_name.in_(category))
+        if ganre:
+            statement = statement.filter(Ganres.ganres_name.in_(ganre))
+        if publisher:
+            statement = statement.filter(Publisher.publisher_name.in_(publisher))
+
+
+        if name:
+            name=name.lower()
+            statement = statement.filter(Game.name.ilike(f"%{name}%"))
+        if discount:
+            statement = statement.filter(Game.discount >= discount)
+        if to_price:
+            statement = statement.filter(Game.final_price >= to_price)
+        if out_price:
+            statement = statement.filter(Game.final_price <= out_price)
+
+        statement = statement.limit(20)
+
+        result = await session.execute(statement)
+
+        return result.unique().scalars().all()
+
 

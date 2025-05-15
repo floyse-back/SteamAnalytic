@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional,List
+from typing import Optional, List, Union, Dict
 from datetime import date
 
 
@@ -51,17 +51,17 @@ class PublisherOut(BaseModel):
         from_attributes = True
 
 class Game(BaseModel):
-    steam_appid: int
-    name: str
+    steam_appid: Optional[int]
+    name: Optional[str]
     is_free: Optional[bool] = None
     short_description: Optional[str] = None
-    requirements: dict
+    requirements: Optional[dict] = None
     initial_price: Optional[int] = None
     final_price: Optional[int] = None
     final_formatted_price: Optional[str] = None
     metacritic: Optional[str] = None
     discount: Optional[int] = None
-    achievements: Optional[dict] = None
+    achievements: Optional[Union[List,Dict]] = None
     recomendations: Optional[int] = None
     img_url: Optional[str] = None
     last_update: Optional[date] = None
