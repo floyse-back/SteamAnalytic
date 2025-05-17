@@ -33,3 +33,7 @@ class GamesNotFound(Exception):
 class IncorrectType(Exception):
     pass
 
+class SteamExceptionBase(Exception):
+    def __init__(self,exc):
+        self.exc = exc
+

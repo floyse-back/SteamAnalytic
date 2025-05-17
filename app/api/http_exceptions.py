@@ -93,3 +93,9 @@ async def incorrect_type_handler(request:Request,exc:IncorrectType):
         status_code = 401,
         content = {"detail":f"Incorrect type","type_correct":["verify_email","delete_user","forgot_password"]}
     )
+
+async def steam_base_exception_handler(request:Request,exc:SteamExceptionBase):
+    return JSONResponse(
+        status_code = 502,
+        content = {"detail": str(exc.exc)}
+    )

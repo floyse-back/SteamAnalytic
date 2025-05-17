@@ -10,12 +10,11 @@ from app.application.usecases.get_player_full_stats import GetUserFullStatsUseCa
 from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUseCase
 from app.domain.redis_repository import ICacheRepository
 from app.domain.steam.repository import ISteamRepository
-from app.infrastructure.steam_api.client import SteamClient
 from app.application.decorators.cache import cache_data
 
 
 class SteamService:
-    def __init__(self,steam_repository: ISteamRepository,steam: SteamClient,cache_repository: ICacheRepository):
+    def __init__(self,steam_repository: ISteamRepository,steam,cache_repository: ICacheRepository):
         self.cache_repository = cache_repository
 
         self.get_best_sallers_use_case = GetBestSallersUseCase(

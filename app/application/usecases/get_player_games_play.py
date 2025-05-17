@@ -1,10 +1,9 @@
-
-
+from app.infrastructure.steam_api.client import SteamClient
 
 
 class GetPlayerGamesPlayUseCase:
     def __init__(self,steam):
-        self.steam = steam
+        self.steam:SteamClient = steam
 
     async def execute(self,user):
         user_data,user = await self.steam.get_user_info(user)

@@ -1,5 +1,6 @@
 from steam_web_api import Steam
 
+from app.application.exceptions.exception_handler import SteamExceptionBase
 from app.infrastructure.exceptions.exception_handler import SteamGameNotFound, SteamUserNotFound, \
     SteamUserAchievementsNotFoundDetails
 from app.utils.config import STEAM_API_KEY
@@ -10,6 +11,13 @@ from httpx import AsyncClient
 class SteamClient(Steam):
     def __init__(self,steam_key = STEAM_API_KEY):
         super().__init__(key=steam_key)
+
+    def save_start_pool(self,func,*args,**kwargs):
+        try:
+            data = func(*args,**kwargs)
+            return data
+        except Exception as e:
+            raise SteamExceptionBase(exc=e)
 
     async def get_global_achievements(self,game_id):
         async with AsyncClient() as client:

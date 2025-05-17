@@ -1,4 +1,3 @@
-from app.application.services.steam_service.steam_service import SteamService
 from app.application.decorators.cache import cache_data
 from app.application.usecases.get_free_games import GetFreeGamesUseCase
 from app.application.usecases.get_friends_game_list import GetFriendsGameListUseCase
@@ -11,12 +10,11 @@ from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUse
 from app.application.usecases.get_players_rating import GetUserRatingUseCase
 from app.domain.redis_repository import ICacheRepository
 from app.domain.steam.repository import ISteamRepository, IAnaliticsRepository
-from app.infrastructure.steam_api.client import SteamClient
 
 
 
 class AnalyticService:
-    def __init__(self, steam:SteamClient,cache_repository: ICacheRepository,steam_repository:ISteamRepository,analitic_repository: IAnaliticsRepository):
+    def __init__(self,steam,cache_repository: ICacheRepository,steam_repository:ISteamRepository,analitic_repository: IAnaliticsRepository):
         self.steam = steam
         self.cache_repository = cache_repository
 
