@@ -30,7 +30,11 @@ TEST_EMAIL_NAME = getenv("TEST_EMAIL_NAME")
 TEST_EMAIL_PASSWORD = getenv("TEST_EMAIL_PASSWORD")
 TEST_EMAIL_SENDER = getenv("TEST_EMAIL_SENDER")
 
+
 HOST = getenv("HOST")
+
+HOST_PATH = getenv("HOST_PATH")
+PORT = getenv("PORT")
 
 class TokenConfig(BaseModel):
     private_key_link:Path = BASE_DIR  / "app" / "certs" / "jwt-private.pem"

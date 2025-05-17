@@ -1,9 +1,10 @@
+import uvicorn
 from fastapi import FastAPI
 
 from app.api.register_exceptions import register_exceptions
 from app.api.v1 import steam, auth, analytics,users,admin,email
 from app.api.middleware.register_middleware import register_middleware
-from app.utils.config import ServicesConfig
+from app.utils.config import ServicesConfig, PORT,HOST_PATH
 
 app = FastAPI()
 
@@ -22,3 +23,7 @@ app.include_router(email.router, prefix=f"{service_config.notification_service.p
 
 register_middleware(app)
 register_exceptions(app)
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host=HOST_PATH, port=int(PORT))
