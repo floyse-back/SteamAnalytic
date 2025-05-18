@@ -8,7 +8,10 @@ from app.infrastructure.db.models.users_models import EmailConfirmed, RefreshTok
 from app.infrastructure.logger.logger import logger
 
 
-@app.task
+@app.task(
+    max_retries=3,
+    time_limit=120,
+)
 def upgrade_tokens():
     logger.info("Starting task upgrade_tokens")
     db = next(get_db())

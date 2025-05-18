@@ -1,0 +1,75 @@
+services:
+  database:
+    image: postgres
+    restart: always
+    shm_size: 1024mb
+
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: postgres
+      POSTGRES_DB: SteamAnalitic
+
+    networks:
+      - app-network
+
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    networks:
+      - app-network
+
+  redis:
+    stdin_open: true
+    tty: true
+    image: redis
+    networks:
+      - app-network
+    ports:
+      - "6379:6379"
+
+  app:
+    depends_on:
+      - database
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    environment:
+      RUN_PRESTANT: 1
+      ASYNC_DATABASE_URL: "postgresql+asyncpg://postgres:admin@database/SteamAnalitic"
+      SYNC_DATABASE_URL: "postgresql://postgres:admin@database/SteamAnalitic"
+      TEST_DATABASE_URL: "postgresql+asyncpg://postgres:admin@database/test_steam_analytic"
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+      REDIS_HOST: "redis"
+    networks:
+      - app-network
+
+    ports:
+      - "8000:8000"
+
+  celery:
+    build: .
+    container_name: "celery_worker"
+    depends_on:
+      - redis
+      - app
+    environment:
+      RUN_PRESTANT: 0
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+    command: celery -A app.infrastructure.celery_app.celery_app worker --loglevel=info --pool=solo
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+

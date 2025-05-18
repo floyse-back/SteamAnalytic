@@ -1,8 +1,10 @@
 from redis import Redis
 
+from app.utils.config import REDIS_HOST
+
 
 class RedisDB:
-    def __init__(self,host='localhost',port=6379,db=0):
+    def __init__(self,host=f'{REDIS_HOST}',port=6379,db=0):
         self._client = Redis(host=host,
                              port=port,
                              db=db,

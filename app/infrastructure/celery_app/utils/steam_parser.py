@@ -2,6 +2,9 @@ import steamspypi
 from app.infrastructure.db.models.steam_models import SteamBase
 import time
 
+from app.infrastructure.logger.logger import logger
+
+
 class SteamParser:
     def __init__(self):
         self.startpage:int = 0
@@ -50,7 +53,7 @@ class SteamParser:
         return data
 
     def page_parse(self):
-        while self.current_page <80 and self.__empty_data_score < 3:
+        while self.current_page <80 and self.__empty_data_score < 5:
             try:
                 data = self.request_steampipy()
                 if data != {}:
@@ -58,21 +61,19 @@ class SteamParser:
                     new_data = self.create_data_list(data)
                     yield new_data
                 elif data == {}:
-                    print("Empty data")
-                    print(data)
                     self.__empty_data_score += 1
 
                 self.current_page += 1
                 self.__count_error = 0
                 time.sleep(70)
             except Exception as ex:
-                print(f"Error info: {ex}")
+                logger.debug(f"Error info: {ex}")
                 if self.__count_error >= 3:
                     return "Server don`t response"
                 self.__count_error += 1
                 time.sleep(200)
 
-            print(f"Current page: {self.current_page}")
+            logger.info(f"Current page: {self.current_page}")
 
 
 
