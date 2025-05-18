@@ -1,4 +1,4 @@
-from app.domain.redis_repository import ICacheRepository
+from app.domain.cache_repository import ICacheRepository
 from app.infrastructure.redis.redis_db import redis_client
 import json
 

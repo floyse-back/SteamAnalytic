@@ -1,6 +1,6 @@
 from app.application.exceptions.exception_handler import GamesNotFound
 from app.domain.steam.repository import IAnaliticsRepository
-from app.domain.usecases.game_for_you import IGameForYou
+from app.domain.steam.usecases.game_for_you import IGameForYou
 
 
 class GetSallingForYouUseCase(IGameForYou):

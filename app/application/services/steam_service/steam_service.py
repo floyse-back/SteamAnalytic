@@ -8,7 +8,7 @@ from app.application.usecases.get_steam_search_games import GetSteamSearchGamesU
 from app.application.usecases.get_top_games import GetTopGamesUseCase
 from app.application.usecases.get_player_full_stats import GetUserFullStatsUseCase
 from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUseCase
-from app.domain.redis_repository import ICacheRepository
+from app.domain.cache_repository import ICacheRepository
 from app.domain.steam.repository import ISteamRepository
 from app.application.decorators.cache import cache_data
 

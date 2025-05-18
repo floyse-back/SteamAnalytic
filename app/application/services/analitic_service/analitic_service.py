@@ -8,7 +8,7 @@ from app.application.usecases.get_player_battle import GetPlayerBattleUseCase
 from app.application.usecases.get_player_full_stats import GetUserFullStatsUseCase
 from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUseCase
 from app.application.usecases.get_players_rating import GetUserRatingUseCase
-from app.domain.redis_repository import ICacheRepository
+from app.domain.cache_repository import ICacheRepository
 from app.domain.steam.repository import ISteamRepository, IAnaliticsRepository
 
 

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.exceptions.exception_handler import UserNotFound, UserNotAuthorized
 from app.application.usecases.get_user import GetUserUseCase
 from app.application.usecases.put_user import PutUserUseCase
-from app.domain.redis_repository import ICacheRepository
+from app.domain.cache_repository import ICacheRepository
 from app.domain.users.repository import IUserRepository, IBlackListRepository, IRefreshTokenRepository
 from app.application.dto.user_dto import UserMe, UserPublic
 from app.application.decorators.cache import cache_data
