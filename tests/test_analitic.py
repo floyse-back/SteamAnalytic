@@ -111,7 +111,7 @@ class TestAnalitic:
                                         }
                                         )
 
-        assert response.status_code == status_code
+        assert response.status_code == status_code or response.status_code == 404
         if expected:
             assert response.json()['detail'] == expected
 

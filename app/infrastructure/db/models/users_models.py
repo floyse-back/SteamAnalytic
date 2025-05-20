@@ -34,8 +34,7 @@ class RefreshToken(Base):
     user_id = Column(ForeignKey("users.id", ondelete="CASCADE"))
     refresh_token = Column(String, index=True, nullable=False)
     delete_time = Column(DateTime, default=lambda: (
-                datetime.now(timezone.utc) + timedelta(minutes=token_config.refresh_token_expires)).replace(
-        tzinfo=None))
+                datetime.now() + timedelta(minutes=token_config.refresh_token_expires)))
     user = relationship("UserModel", back_populates="refresh_tokens")
 
 class BlackList(Base):
@@ -44,7 +43,7 @@ class BlackList(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(ForeignKey("users.id", ondelete="CASCADE"))
     token = Column(String, index=True, nullable=False)
-    expires_at = Column(DateTime, default=lambda: datetime.now(timezone.utc) + timedelta(minutes=token_config.refresh_token_expires))
+    expires_at = Column(DateTime, default=lambda: datetime.now() + timedelta(minutes=token_config.refresh_token_expires))
     reason = Column(String)
 
     user = relationship("UserModel", back_populates="blacklist_token")
@@ -55,7 +54,7 @@ class EmailConfirmed(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     type = Column(String, nullable=False)
     token = Column(String, index=True, nullable=False)
-    expires_at = Column(DateTime,default=lambda: (datetime.now(timezone.utc) + timedelta(minutes=15)).replace(tzinfo=None))
+    expires_at = Column(DateTime,default=lambda: datetime.now() + timedelta(minutes=10))
 
     user_id = Column(ForeignKey("users.id"))
     user = relationship("UserModel",back_populates="email_confirmed")

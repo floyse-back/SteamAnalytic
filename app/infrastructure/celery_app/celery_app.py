@@ -10,23 +10,23 @@ app.conf.broker_connection_retry_on_startup=True
 app.conf.beat_schedule = {
     "update_every_night":{
         'task':'app.infrastructure.celery_app.steam_tasks.update_steam_games',
-        'schedule':crontab(hour="10",minute="57")
+        'schedule':crontab(hour="0",minute="0")
     },
     "get_thousand_gamedetails":{
         'task':'app.infrastructure.celery_app.steam_tasks.get_game_details',
-        'schedule':crontab(hour="23",minute="00")
+        'schedule':crontab(hour="3,4",minute="00")
     },
     "delete_refresh_tokens_by_time":{
         'task':'app.infrastructure.celery_app.steam_tasks.delete_refresh_tokens_by_time',
-        'schedule': crontab(hour="0",minute="0")
+        'schedule': crontab(hour="2",minute="30")
     },
     "update_game_icon_url":{
         'task': 'app.infrastructure.celery_app.steam_tasks.update_game_icon_url',
-        'schedule': crontab(hour ="1",minute="0")
+        'schedule': crontab(hour ="5",minute="0")
     },
     "upgrade_tokens":{
         "task": "app.infrastructure.celery_app.users_tasks.upgrade_tokens",
-        "schedule": crontab(hour="12",minute="36")
+        "schedule": crontab(hour="2",minute="20")
     }
 }
 

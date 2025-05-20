@@ -23,7 +23,7 @@ class EmailConfirmationRepository(IEmailConfirmationRepository):
         await session.commit()
 
     async def verify_confirm_token(self,session:AsyncSession,token:str,type:str):
-        statement = select(EmailConfirmed).filter(EmailConfirmed.token == token).filter(EmailConfirmed.type == type).where(EmailConfirmed.expires_at <= datetime.datetime.now())
+        statement = select(EmailConfirmed).filter(EmailConfirmed.token == token).filter(EmailConfirmed.type == type).where(EmailConfirmed.expires_at >= datetime.datetime.now())
 
         result = await session.execute(statement)
         instance = result.scalars().first()
