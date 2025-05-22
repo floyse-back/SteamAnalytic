@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import List
 
 from load_dotenv import load_dotenv
 from pathlib import Path
@@ -19,19 +19,11 @@ CELERY_RESULT_BACKEND = getenv("CELERY_RESULT_BACKEND")
 REDIS_HOST = getenv("REDIS_HOST")
 
 STEAM_API_KEY = getenv("STEAM_API_KEY")
-STEAMDB_URL = getenv("STEAMDB_URL")
 
 EMAIL_SERVER = getenv("EMAIL_SERVER")
 EMAIL_PORT = getenv("EMAIL_PORT")
 EMAIL_PASSWORD = getenv("EMAIL_PASSWORD")
 EMAIL_SENDER = getenv("EMAIL_SENDER")
-
-TEST_EMAIL_SERVER = getenv("TEST_EMAIL_SERVER")
-TEST_EMAIL_PORT = getenv("TEST_EMAIL_PORT")
-TEST_EMAIL_NAME = getenv("TEST_EMAIL_NAME")
-TEST_EMAIL_PASSWORD = getenv("TEST_EMAIL_PASSWORD")
-TEST_EMAIL_SENDER = getenv("TEST_EMAIL_SENDER")
-
 
 HOST = getenv("HOST")
 

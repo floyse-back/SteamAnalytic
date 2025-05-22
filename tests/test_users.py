@@ -20,8 +20,6 @@ class TestUser:
         assert response.json()["email"]
         assert response.json()["steamid"]
 
-
-    #ПЕРЕРОБИТИ НЕ ПРАЦЮЄ
     async def test_users_me_put(self, login):
         data = {
             "username": "floysefake",
@@ -42,9 +40,6 @@ class TestUser:
 
         assert response.status_code == 201
 
-
-    #Працює але не коректно (сил виправити вже немає)
-    #Суть помилки потрібно переробити contest.py users так щоб коли ми створювали користувача створювались і юзери бо відбувається відкат і не працює
     @pytest.mark.parametrize(
         "user,status_code,expected",
         [("floysefake",200,None)]

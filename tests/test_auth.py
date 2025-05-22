@@ -164,7 +164,6 @@ class TestAuth:
 
     async def test_refresh_token(self,login:dict,session:AsyncSession):
         new_client = login["client"]
-        print(login["access_token"])
         response = await new_client.post(f"{self.PATH}/refresh_token")
 
         data = response.json()

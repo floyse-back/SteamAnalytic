@@ -45,7 +45,6 @@ class SteamParser:
         data_dict = dict()
         data_dict['request'] = 'all'
         data_dict['page'] = str(self.current_page)
-        print(data_dict)
         return data_dict
 
     def request_steampipy(self):

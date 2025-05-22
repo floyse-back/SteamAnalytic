@@ -5,3 +5,4 @@ celerybeat-schedule.dir
 app/certs
 ./htmlcov
 .coverage
+test.db

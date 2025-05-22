@@ -116,10 +116,8 @@ class SteamDetailsParser:
 
             if existing_game:
                 self.update_game_details(game, existing_game)
-                print(f"Гра з steam_appid {steam_appid} оновлена.")
             else:
                 self.add_new_game(game,steam_appid)
-                print(f"Нова гра з steam_appid {steam_appid} додана.")
 
 
 
