@@ -55,7 +55,7 @@ services:
     ports:
       - "8000:8000"
 
-  celery:
+  celery_worker:
     build: .
     container_name: "celery_worker"
     depends_on:
@@ -64,8 +64,22 @@ services:
     environment:
       RUN_PRESTANT: 0
       CELERY_BROKER_URL: "redis://redis:6379/0"
+      SYNC_DATABASE_URL: "postgresql://postgres:admin@database/SteamAnalitic"
       CELERY_RESULT_BACKEND: "redis://redis:6379/0"
     command: celery -A app.infrastructure.celery_app.celery_app worker --loglevel=info --pool=solo
+    networks:
+      - app-network
+  celery_beat:
+    build: .
+    container_name: "celery_beat"
+    depends_on:
+      - redis
+      - app
+    environment:
+      RUN_PRESTANT: 0
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+    command: celery -A app.infrastructure.celery_app.celery_app beat
     networks:
       - app-network
 

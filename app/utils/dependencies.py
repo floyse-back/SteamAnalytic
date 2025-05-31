@@ -79,6 +79,8 @@ async def verify_user(session = Depends(get_async_db),auth_service = Depends(get
 
 async def user_auth_check(request: Request,auth_service = Depends(get_auth_service), session = Depends(get_async_db)):
     token = request.cookies.get("refresh_token")
+    if not token:
+        token = request.headers.get("Authorization")
 
     return await auth_service.user_auth_check(token,session)
 

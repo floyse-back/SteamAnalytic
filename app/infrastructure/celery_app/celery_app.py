@@ -18,7 +18,7 @@ app.conf.beat_schedule = {
     },
     "delete_refresh_tokens_by_time":{
         'task':'app.infrastructure.celery_app.steam_tasks.delete_refresh_tokens_by_time',
-        'schedule': crontab(hour="2",minute="30")
+        'schedule': crontab(hour="16",minute="35")
     },
     "update_game_icon_url":{
         'task': 'app.infrastructure.celery_app.steam_tasks.update_game_icon_url',

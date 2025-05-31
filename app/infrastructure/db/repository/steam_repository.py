@@ -2,7 +2,7 @@ from typing import Optional, List
 
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import lazyload
+from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy.sql.operators import is_
 
 from app.domain.steam.repository import ISteamRepository
@@ -42,7 +42,6 @@ class SteamRepository(ISteamRepository):
         if publisher:
             statement = statement.filter(Publisher.publisher_name.in_(publisher))
 
-
         if name:
             name=name.lower()
             statement = statement.filter(Game.name.ilike(f"%{name}%"))
@@ -56,7 +55,7 @@ class SteamRepository(ISteamRepository):
         statement = statement.limit(20)
 
         result = await session.execute(statement)
-
+        print(statement)
         return result.unique().scalars().all()
 
 

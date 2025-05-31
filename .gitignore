@@ -6,3 +6,4 @@ app/certs
 ./htmlcov
 .coverage
 test.db
+/app/.idea

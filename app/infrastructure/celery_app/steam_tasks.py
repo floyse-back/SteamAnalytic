@@ -24,11 +24,6 @@ def update_steam_games():
     parser = SteamParser()
     generator_data = parser.page_parse()
 
-    session.execute(text("""
-        INSERT INTO historysteambase (data)
-        SELECT to_jsonb(array_agg(steambase.*))
-        FROM steambase;
-        """))
     session.query(SteamBase).delete()
 
     for data in generator_data:
