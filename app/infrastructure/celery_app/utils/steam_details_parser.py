@@ -27,7 +27,6 @@ class SteamDetailsParser:
         else:
             instance = model(**kwargs)
             session.add(instance)
-            session.flush()  # Ensure the instance is saved to the database and gets an ID
             return instance
 
     def update_game_details(self, game, existing_game):
@@ -124,12 +123,16 @@ class SteamDetailsParser:
     def parse(self,game_list_appid):
         new_list = []
         for i in game_list_appid:
-            result = self.steam.apps.get_app_details(int(i), filters=self.filters)
+            try:
+                result = self.steam.apps.get_app_details(int(i), filters=self.filters)
 
-            if result.get(f"{i}").get("success") == False:
-                continue
+                if result.get(f"{i}").get("success") == False:
+                    continue
 
-            new_list.append(result[f'{i}']['data'])
-            time.sleep(2)
+                new_list.append(result[f'{i}']['data'])
+                time.sleep(2)
+            except:
+                time.sleep(5)
+
 
         self.create_gamesdetails_model(new_list)

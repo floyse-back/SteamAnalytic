@@ -24,9 +24,8 @@ async def user_full_stats(user:str,user_badges:bool = Query(default=True),steam_
     return await steam_service.user_full_stats(user,user_badges,friends_details,user_games)
 
 @router.get("/game_stats/{steam_id}")
-async def game_stats(steam_id:int =Path(gt=-1),steam_service = Depends(get_steam_service)):
+async def game_stats(steam_id:int,steam_service = Depends(get_steam_service)):
     result = await steam_service.game_stats(steam_id)
-
     update_or_add_game.apply_async(args=[result,steam_id])
     return result
 

@@ -1,6 +1,12 @@
+from typing import List, Optional
+
 from app.application.decorators.cache import cache_data
+from app.application.dto.steam_dto import transform_to_dto, Game, GameShortModel
+from app.application.exceptions.exception_handler import GamesNotFound
 from app.application.usecases.get_free_games import GetFreeGamesUseCase
+from app.application.usecases.get_free_transform import GetFreeTransformUseCase
 from app.application.usecases.get_friends_game_list import GetFriendsGameListUseCase
+from app.application.usecases.get_game_stats import GetGameStatsUseCase
 from app.application.usecases.get_games_for_you import GetGamesForYouUseCase
 from app.application.usecases.get_salling_for_you import GetSallingForYouUseCase
 from app.application.usecases.get_player_achievemts import GetPlayerAchivementsUseCase
@@ -28,6 +34,7 @@ class AnalyticService:
         self.get_free_games = GetFreeGamesUseCase(
             steam_repository=steam_repository
         )
+        self.get_free_transform = GetFreeTransformUseCase()
         self.get_user_achivements = GetPlayerAchivementsUseCase(
             steam=steam
         )
@@ -39,6 +46,9 @@ class AnalyticService:
         )
         self.get_salling_for_you = GetSallingForYouUseCase(
             analitic_repository=analitic_repository
+        )
+        self.get_game_details = GetGameStatsUseCase(
+            steam = steam
         )
         self.get_user_battle = GetPlayerBattleUseCase()
 
@@ -82,7 +92,20 @@ class AnalyticService:
         return await self.get_user_achivements.execute(user=user,app_id=app_id)
 
     @cache_data(expire=1200)
-    async def free_games(self,session):
-        return await self.get_free_games.execute(session=session)
+    async def free_games(self,session)->Optional[List[GameShortModel]]:
+        data = await self.get_free_games.execute(session=session)
+        answer = []
+        if not data:
+            return False
+
+        for value in data:
+            game = await self.get_game_details.execute(steam_id=int(value['appid']))
+            answer.append(await self.get_free_transform.execute(game,game_id=int(value['appid'])))
+
+        print(answer)
+        return answer
+
+
+
 
 

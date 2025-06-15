@@ -50,6 +50,19 @@ class PublisherOut(BaseModel):
     class Config:
         from_attributes = True
 
+class GameShortModel(BaseModel):
+    name:str
+    steam_appid:Optional[int] = None
+    final_formatted_price:Optional[str]
+    discount:Union[int,str]
+    short_description:Optional[str]
+    url:Optional[str] = None
+
+    game_ganre:List[GanresOut]
+
+    class Config:
+        from_attributes = True
+
 class Game(BaseModel):
     steam_appid: Optional[int]
     name: Optional[str]

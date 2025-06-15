@@ -14,11 +14,11 @@ app.conf.beat_schedule = {
     },
     "get_thousand_gamedetails":{
         'task':'app.infrastructure.celery_app.steam_tasks.get_game_details',
-        'schedule':crontab(hour="3,4",minute="00")
+        'schedule':crontab(hour="18",minute="15")
     },
     "delete_refresh_tokens_by_time":{
         'task':'app.infrastructure.celery_app.steam_tasks.delete_refresh_tokens_by_time',
-        'schedule': crontab(hour="16",minute="35")
+        'schedule': crontab(hour="3",minute="25")
     },
     "update_game_icon_url":{
         'task': 'app.infrastructure.celery_app.steam_tasks.update_game_icon_url',

@@ -7,7 +7,7 @@ from app.infrastructure.db.models.steam_models import SteamBase, Game
 from app.infrastructure.db.models.users_models import RefreshToken
 from app.infrastructure.celery_app.utils.steam_parser import SteamParser
 from app.infrastructure.celery_app.utils.steam_details_parser import SteamDetailsParser
-from sqlalchemy import text,cast,Integer,select,delete,update
+from sqlalchemy import cast,Integer,select,delete,update
 
 from app.infrastructure.email_sender.new_email_sender import EmailSender
 from app.infrastructure.logger.logger import logger
@@ -45,7 +45,7 @@ def get_game_details():
     session = next(get_db())
 
     try:
-        statement = select(SteamBase.appid).join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).filter(Game.steam_appid.is_(None)).order_by(SteamBase.positive.desc()).limit(100)
+        statement = select(SteamBase.appid).join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).filter(Game.steam_appid.is_(None)).order_by(SteamBase.positive.desc()).limit(500)
         result = session.execute(statement)
         result = result.scalars().all()
         parser = SteamDetailsParser(session=session)
@@ -134,3 +134,4 @@ def send_email(receiver,url,type):
     email_sender = EmailSender()
     email_sender.send_email(receiver,url,type)
     logger.info("Finished task send_email!")
+

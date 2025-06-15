@@ -52,10 +52,9 @@ class SteamRepository(ISteamRepository):
         if out_price:
             statement = statement.filter(Game.final_price <= out_price)
 
-        statement = statement.limit(20)
+        statement = statement.limit(5)
 
         result = await session.execute(statement)
-        print(statement)
         return result.unique().scalars().all()
 
 

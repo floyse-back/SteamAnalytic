@@ -35,10 +35,6 @@ async def salling_for_games_you(user:str,analitic_service = Depends(get_analitic
 async def user_achivements(steam_id:str, app_id:int,analitic_service = Depends(get_analitic_service)):
     return await analitic_service.user_achivements(steam_id,app_id)
 
-@router.get("/games_change")
-async def games_change_for_time(history_date:date):
-    return {"history_date": history_date}
-
 @router.get("/free_games")
 async def free_games(analitic_service=Depends(get_analitic_service),session=Depends(get_async_db)):
     result = await analitic_service.free_games(session=session)
