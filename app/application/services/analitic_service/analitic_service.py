@@ -102,7 +102,6 @@ class AnalyticService:
             game = await self.get_game_details.execute(steam_id=int(value['appid']))
             answer.append(await self.get_free_transform.execute(game,game_id=int(value['appid'])))
 
-        print(answer)
         return answer
 
 

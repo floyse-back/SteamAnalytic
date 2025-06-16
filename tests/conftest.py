@@ -15,6 +15,7 @@ from app.main import app
 from app.utils.config import TEST_DATABASE_URL, ServicesConfig
 from app.utils.utils import hashed_password
 import asyncio
+import os
 
 engine = create_async_engine(TEST_DATABASE_URL)
 
@@ -69,6 +70,9 @@ async def client(connection:AsyncConnection,transaction:AsyncTransaction):
         base_url="http://test"
     ) as client:
         yield client
+
+    #Видалення Cache
+    os.system("redis-cli flushall")
 
 
     del app.dependency_overrides[get_async_db]

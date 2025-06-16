@@ -1,11 +1,9 @@
-from fastapi import APIRouter, Query, Path, Depends
+from fastapi import APIRouter, Query, Depends
 
-from app.application.dto.steam_dto import transform_to_dto, Game
-from app.infrastructure.db.database import get_async_db
 from steam_web_api import Steam
 from app.utils.config import STEAM_API_KEY
 from app.infrastructure.celery_app.steam_tasks import update_or_add_game
-from app.utils.dependencies import get_steam_service
+from app.utils.dependencies import get_steam_service,get_async_db
 
 from typing import List, Optional
 

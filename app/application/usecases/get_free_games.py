@@ -8,9 +8,6 @@ class GetFreeGamesUseCase():
 
     async def execute(self,session):
         result = await self.steam_repository.get_free_discount_games(session=session)
-
         new_result = [transform_to_dto(SteamBase,game) for game in result]
 
-        if new_result:
-            return new_result
-        return False
+        return new_result

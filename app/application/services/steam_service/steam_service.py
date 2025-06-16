@@ -57,8 +57,9 @@ class SteamService:
     @cache_data(expire=2400)
     async def get_top_games(self,session:AsyncSession,limit:int,page:int):
         result = await self.get_top_games_use_case.execute(session = session,limit = limit,page = page)
+        if len(result)==0 or result[0] is None:
+            return None
         new_result = [transform_to_dto(SteamBase,i) for i in result]
-
         return new_result
 
     @cache_data(expire=2400)

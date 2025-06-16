@@ -2,6 +2,7 @@ from httpx import AsyncClient
 
 import pytest
 
+from app.infrastructure.logger.logger import logger
 from app.utils.config import ServicesConfig
 
 host = "http://127.0.0.1:8000"
@@ -128,7 +129,7 @@ class TestAnalitic:
         response = await new_client.get(f"{self.PATH}/free_games")
 
         assert response.status_code == 200
-        assert response.json()["detail"] == False
+        assert response.json()['detail'] == False
 
     @pytest.mark.parametrize(
         "app_id,steam_id,status_code,expected",

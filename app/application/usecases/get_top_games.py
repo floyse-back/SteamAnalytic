@@ -7,7 +7,7 @@ class GetTopGamesUseCase:
         self.steam_repository = steam_repository
 
     async def execute(self,session,page,limit):
-        result = await self.steam_repository.get_most_discount_games(session = session,page = page,limit = limit)
+        result = await self.steam_repository.get_top_games(session = session,page = page,limit = limit)
         if result == []:
             raise PageNotFound(page)
 
