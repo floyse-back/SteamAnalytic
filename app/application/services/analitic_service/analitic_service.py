@@ -59,9 +59,9 @@ class AnalyticService:
         return await self.get_user_rating.execute(data=data)
 
     @cache_data(expire=1200)
-    async def analitic_games_for_you(self,user,session):
+    async def analitic_games_for_you(self,user,session,page:int = 1,limit:int = 15):
         user_data = await self.get_user_games_play.execute(user=user)
-        return await self.get_games_for_you.execute(data=user_data,session=session)
+        return await self.get_games_for_you.execute(data=user_data,session=session,page=page,limit=limit)
 
     @cache_data(expire=1200)
     async def analitic_user_battle(self,user1:str,user2:str):
@@ -79,7 +79,7 @@ class AnalyticService:
         return data
 
     @cache_data(expire=1200)
-    async def salling_for_you_games(self,user:str,session):
+    async def salling_for_you_games(self,user:str,session,page:int = 1,limit:int = 15):
         user_data = await self.get_user_games_play.execute(user=user)
         return await self.get_salling_for_you.execute(data=user_data, session=session)
 

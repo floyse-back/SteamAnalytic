@@ -1,6 +1,5 @@
 import functools
 
-from app.infrastructure.logger.logger import logger
 from app.utils.generators import key_generator_args_and_kwargs
 
 
@@ -15,7 +14,6 @@ def cache_data(expire: int = 3600):
             key = f"{func.__name__}:{new_args}:{new_kwargs}"
 
             redis_result = self.cache_repository.get_data(key)
-            logger.critical("%s",key)
             if redis_result:
                 return redis_result
 

@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter,Depends,Query
 from starlette.responses import JSONResponse
 
 from app.infrastructure.db.database import get_async_db
@@ -24,12 +24,12 @@ async def friend_game_list(user:str,analitic_service = Depends(get_analitic_serv
     return await analitic_service.friends_game_list(user=user)
 
 @router.get("/games_for_you")
-async def games_for_you(user:str,session = Depends(get_async_db),analitic_service = Depends(get_analitic_service)):
-    return await analitic_service.analitic_games_for_you(user,session = session)
+async def games_for_you(user:str,page:int=Query(default=1,gt=0),limit:int=Query(default=100,gt=-1),session = Depends(get_async_db),analitic_service = Depends(get_analitic_service)):
+    return await analitic_service.analitic_games_for_you(user,session = session,page=page,limit=limit)
 
 @router.get("/salling_for_you")
-async def salling_for_games_you(user:str,analitic_service = Depends(get_analitic_service),session = Depends(get_async_db)):
-    return await analitic_service.salling_for_you_games(user=user,session=session)
+async def salling_for_games_you(user:str,page:int=Query(default=1,gt=0),limit:int=Query(default=100,gt=-1),analitic_service = Depends(get_analitic_service),session = Depends(get_async_db)):
+    return await analitic_service.salling_for_you_games(user=user,session=session,page=page,limit=limit)
 
 @router.get("/user_achivements")
 async def user_achivements(steam_id:str, app_id:int,analitic_service = Depends(get_analitic_service)):

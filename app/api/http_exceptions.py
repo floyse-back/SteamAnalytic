@@ -99,3 +99,9 @@ async def steam_base_exception_handler(request:Request,exc:SteamExceptionBase):
         status_code = 502,
         content = {"detail": str(exc.exc)}
     )
+
+async def steam_nginx_exception_handler(request:Request,exc:SteamNginxException):
+    return JSONResponse(
+        status_code = 502,
+        content = {"detail": "Steam Nginx Error. Please try again later"}
+    )

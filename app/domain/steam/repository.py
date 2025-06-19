@@ -25,11 +25,11 @@ class IAnaliticsRepository(ABC):
         pass
 
     @abstractmethod
-    async def games_for_you(self,session,ganre_data,category_data,steam_appids) ->List:
+    async def games_for_you(self,session,ganres_data,category_data,steam_appids,page:int,limit:int) ->List:
         pass
 
     @abstractmethod
-    async def salling_for_you(self,session,ganre_data,category_data,steam_appids) ->List:
+    async def salling_for_you(self,session,ganres_data,category_data,steam_appids,page:int,limit:int) ->List:
         pass
 
 

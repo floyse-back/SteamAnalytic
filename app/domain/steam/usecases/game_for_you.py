@@ -8,19 +8,19 @@ class IGameForYou(ABC):
     def __init__(self,analitic_repository:IAnaliticsRepository):
         self.analitic_repository = analitic_repository
 
-    async def execute(self,data:dict,session):
+    async def execute(self,data:dict,session,page:int=1,limit:int=15):
         appid_list = self.__get_games_appid_list(data)
         games_details_list = await self.analitic_repository.get_games_for_appids(session,appid_list)
         count_dict = self.__count_games_elements(games_details_list)
 
-        data = await self.get_games(session,count_dict,appid_list)
+        data = await self.get_games(session,count_dict,appid_list,page,limit)
 
         return {
             "games":data,
         }
 
     @abstractmethod
-    async def get_games(self,session,count_dict,appid_list):
+    async def get_games(self,session,count_dict,appid_list,page:int=1,limit:int=15):
         pass
 
     def __get_games_appid_list(self,data:dict):

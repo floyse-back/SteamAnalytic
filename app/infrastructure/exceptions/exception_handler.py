@@ -24,3 +24,6 @@ class InfrastructureUserNotAuthorized(Exception):
 
 class InfrastructureTokenNotFound(Exception):
     pass
+
+class SteamNginxException(Exception):
+    pass

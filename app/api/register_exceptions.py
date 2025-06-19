@@ -21,3 +21,4 @@ def register_exceptions(app: FastAPI):
     app.add_exception_handler(GamesNotFound, games_not_found_handler)
     app.add_exception_handler(IncorrectType, incorrect_type_handler)
     app.add_exception_handler(SteamExceptionBase,steam_base_exception_handler)
+    app.add_exception_handler(SteamNginxException,steam_nginx_exception_handler)

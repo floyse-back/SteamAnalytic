@@ -1,8 +1,12 @@
+import asyncio
+from typing import Union, List
+
 from steam_web_api import Steam
 
 from app.application.exceptions.exception_handler import SteamExceptionBase
 from app.infrastructure.exceptions.exception_handler import SteamGameNotFound, SteamUserNotFound, \
-    SteamUserAchievementsNotFoundDetails
+    SteamUserAchievementsNotFoundDetails, SteamNginxException
+from app.infrastructure.logger.logger import logger
 from app.utils.config import STEAM_API_KEY
 import re
 from httpx import AsyncClient
@@ -11,6 +15,8 @@ from httpx import AsyncClient
 class SteamClient(Steam):
     def __init__(self,steam_key = STEAM_API_KEY):
         super().__init__(key=steam_key)
+        self.__steam_key = steam_key
+        self.__steam_http = "https://api.steampowered.com/"
 
     def save_start_pool(self,func,*args,**kwargs):
         try:
@@ -22,19 +28,50 @@ class SteamClient(Steam):
     async def get_global_achievements(self,game_id):
         async with AsyncClient() as client:
             response = await client.get(
-                f"https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid={game_id}")
+                f"{self.__steam_http}ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid={game_id}",
+                params = {"gameid": game_id}
+            )
 
         if response.status_code == 200:
             return response.json()
         else:
             raise SteamGameNotFound("Steam game not found")
 
+    async def get_user_details(self,steam_ids:Union[int,str,List[int]])->dict:
+        if type(steam_ids) == list:
+            steam_ids = ",".join(map(str,steam_ids))
+
+        async with AsyncClient(base_url=self.__steam_http) as client:
+            response = await client.get(
+                "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",
+                params={
+                    "key":self.__steam_key,
+                    "steamids":steam_ids,
+                }
+            )
+
+        if response.status_code == 429:
+            raise SteamNginxException()
+        data = response.json()
+        new_data= dict()
+        if data.get("response") and data.get("response").get("players"):
+            new_data["player"] = data["response"]["players"][0]
+        else:
+            raise SteamUserNotFound()
+
+        return new_data
+
+
     async def get_user_info(self, user: str) -> tuple[dict, str]:
         if re.fullmatch(r"7656119\d{10}", user):
             steam_id = user
-            user_data = self.users.get_user_details(steam_id)
-            if user_data is not None and user_data.get('player') is not None:
-                return user_data, steam_id
+        else:
+            steam_id = await self.get_vanity_user_url(user)
+
+        await asyncio.sleep(0.1)
+        user_data = await self.get_user_details(steam_id)
+        if user_data is not None and user_data.get('player') is not None:
+            return user_data, steam_id
 
         user_data = self.users.search_user(user)
 
@@ -43,6 +80,24 @@ class SteamClient(Steam):
 
         steam_id = user_data["player"]["steamid"]
         return user_data, steam_id
+
+    async def get_vanity_user_url(self,vanity_url):
+        """
+        Vanity URL format: This ID from url
+        """
+        async with AsyncClient() as client:
+            response = await client.get(
+                f"{self.__steam_http}/ISteamUser/ResolveVanityURL/v0001/",
+                params = {
+                    "key": self.__steam_key,
+                    "vanityurl":vanity_url
+                }
+            )
+            data = response.json()["response"]
+            logger.info(f"{data}")
+            if response.status_code == 200 and data["success"] == 1:
+                return data["steamid"]
+            raise SteamUserNotFound(f"User {vanity_url} not found")
 
     async def users_get_owned_games(self,users):
         try:

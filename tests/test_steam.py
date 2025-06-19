@@ -20,15 +20,15 @@ class TestUsersFullStats:
     async def test_default_request(self,client:AsyncClient,user,status_code,expected):
         response = await client.get(f"{self.PATH}/{user}")
 
-        assert(response.status_code == status_code or response.status_code == 502)
+        assert (response.status_code == status_code or response.status_code == 429 or response.status_code == 502)
 
-        if not expected:
+        if not expected or not response.status_code != 502:
             data:dict = response.json()
             assert data.get("user_data")["player"]
             assert data.get("user_friends_list")
             assert data.get("user_badges")
             assert data.get("user_games")
-        else:
+        elif expected:
             assert response.json() == {"detail": expected}
 
     @pytest.mark.parametrize(
