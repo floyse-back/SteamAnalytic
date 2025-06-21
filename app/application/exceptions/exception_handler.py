@@ -19,6 +19,9 @@ class UserNotPermitions(Exception):
 class UserRegisterError(Exception):
     pass
 
+class SteamRandomGameNotFound(Exception):
+    pass
+
 class PageNotFound(Exception):
     def __init__(self,page):
         self.page = page

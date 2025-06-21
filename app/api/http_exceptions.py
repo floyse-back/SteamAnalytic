@@ -1,3 +1,5 @@
+from typing import Union
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
@@ -40,7 +42,7 @@ async def profile_private_handler(request:Request,exc:ProfilePrivate):
         content={"detail": f"Profile Private {exc.user_profile}"}
     )
 
-async def steam_game_not_found_handler(request:Request,exc:SteamGameNotFound):
+async def steam_game_not_found_handler(request:Request,exc:Union[SteamGameNotFound,SteamRandomGameNotFound]):
     return JSONResponse(
         status_code=404,
         content={"detail": f"Steam game not found"}

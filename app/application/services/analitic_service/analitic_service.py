@@ -8,6 +8,7 @@ from app.application.usecases.get_free_transform import GetFreeTransformUseCase
 from app.application.usecases.get_friends_game_list import GetFriendsGameListUseCase
 from app.application.usecases.get_game_stats import GetGameStatsUseCase
 from app.application.usecases.get_games_for_you import GetGamesForYouUseCase
+from app.application.usecases.get_random_game import GetRandomGamesUseCase
 from app.application.usecases.get_salling_for_you import GetSallingForYouUseCase
 from app.application.usecases.get_player_achievemts import GetPlayerAchivementsUseCase
 from app.application.usecases.get_player_battle import GetPlayerBattleUseCase
@@ -51,6 +52,9 @@ class AnalyticService:
             steam = steam
         )
         self.get_user_battle = GetPlayerBattleUseCase()
+        self.get_random_games = GetRandomGamesUseCase(
+            analitic_repository=analitic_repository
+        )
 
     @cache_data(expire=1200)
     async def analitic_user_rating(self,user:str):
@@ -103,6 +107,10 @@ class AnalyticService:
             answer.append(await self.get_free_transform.execute(game,game_id=int(value['appid'])))
 
         return answer
+
+    async def random_games(self,session,limit:int=15):
+        return await self.get_random_games.execute(session=session,limit=limit)
+
 
 
 

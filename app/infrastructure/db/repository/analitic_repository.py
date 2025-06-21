@@ -70,3 +70,10 @@ class AnaliticRepository(IAnaliticsRepository):
         results = result.fetchall()
 
         return [{"appid":r[0],"name": r[1],"steam_img":r[2], "total": r[3],"discount":r[4]} for r in results]
+
+    async def get_random_games(self,session:AsyncSession,limit:int=15):
+        query = select(Game).order_by(func.random()).limit(limit)
+
+        data = await session.execute(query)
+
+        return data.scalars().unique().all()

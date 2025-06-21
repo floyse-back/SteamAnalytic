@@ -3,6 +3,7 @@ from datetime import date
 from fastapi import APIRouter,Depends,Query
 from starlette.responses import JSONResponse
 
+from app.application.dto.steam_dto import GameShortModel
 from app.infrastructure.db.database import get_async_db
 from app.utils.dependencies import user_auth_check, get_analitic_service
 
@@ -45,3 +46,7 @@ async def free_games(analitic_service=Depends(get_analitic_service),session=Depe
             status_code=200,
             content={"detail":False}
         )
+
+@router.get("/random_games")
+async def random_games(analitic_service=Depends(get_analitic_service),session=Depends(get_async_db)):
+    return await analitic_service.random_games(session=session,limit=1)

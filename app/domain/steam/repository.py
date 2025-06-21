@@ -32,4 +32,9 @@ class IAnaliticsRepository(ABC):
     async def salling_for_you(self,session,ganres_data,category_data,steam_appids,page:int,limit:int) ->List:
         pass
 
+    @abstractmethod
+    async def get_random_games(self,session,limit:int) ->List[Game]:
+        pass
+
+
 

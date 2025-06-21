@@ -42,4 +42,3 @@ async def user_games_play(user:str,steam_service = Depends(get_steam_service)):
 @router.get("/search_game/")
 async def search_game(steam_service = Depends(get_steam_service),name:Optional[str] = Query(default=None),to_price: Optional[int] = Query(default=None),out_price:Optional[int] = Query(default=None),category: Optional[List] = Query(default=None),ganre:Optional[List] = Query(default=None),discount:Optional[int] = Query(default=None),publisher:Optional[List] = Query(default=None),session = Depends(get_async_db)):
     return await steam_service.search_game(session=session,name=name,category=category,discount=discount,publisher=publisher,ganre=ganre,to_price=to_price,out_price=out_price)
-

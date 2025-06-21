@@ -30,5 +30,4 @@ class GetFreeTransformUseCase:
             game_ganre=[GanresOut(ganres_id=int(i.get('id')),ganres_name=i.get("description")) for i in data.get("genres",[])],
         )
 
-        print(data.get("ganres"))
         return game_short_model

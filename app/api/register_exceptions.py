@@ -11,6 +11,7 @@ def register_exceptions(app: FastAPI):
     app.add_exception_handler(ProfilePrivate, profile_private_handler)
     app.add_exception_handler(SteamUserNotFound, steam_user_not_found_handler)
     app.add_exception_handler(SteamGameNotFound, steam_game_not_found_handler)
+    app.add_exception_handler(SteamRandomGameNotFound, steam_game_not_found_handler)
     app.add_exception_handler(UserNotPermitions, user_not_permitions_handler)
     app.add_exception_handler(UserRegisterError, user_register_handler)
     app.add_exception_handler(InfrastructureUserRegister, user_register_handler)
