@@ -6,7 +6,7 @@ class GetPlayerGamesPlayUseCase:
         self.steam:SteamClient = steam
 
     async def execute(self,user):
-        user_data,user = await self.steam.get_user_info(user)
+        user = await self.steam.get_vanity_user_url(user)
         response = await self.steam.users_get_owned_games(f"{user}")
 
         return response

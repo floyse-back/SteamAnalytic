@@ -19,11 +19,12 @@ class TestUsersFullStats:
     )
     async def test_default_request(self,client:AsyncClient,user,status_code,expected):
         response = await client.get(f"{self.PATH}/{user}")
-
+        logger.info(f"response: {response.status_code}")
         assert (response.status_code == status_code or response.status_code == 429 or response.status_code == 502)
 
-        if not expected or not response.status_code != 502:
+        if not expected and not (response.status_code == 502 or response.status_code == 429):
             data:dict = response.json()
+            logger.info(data)
             assert data.get("user_data")["player"]
             assert data.get("user_friends_list")
             assert data.get("user_badges")
@@ -111,9 +112,13 @@ class TestGameAchivements:
         ]
     )
     async def test_request(self,client:AsyncClient,game_id,status_code,expected):
-        response = await client.get(f"{self.base_url}?game_id={game_id}")
+        response = await client.get(f"{self.base_url}",params={
+            "game": game_id,
+            "page":1,
+            "offset":5,
+        })
 
-        assert response.status_code == status_code or status_code == 502
+        assert response.status_code == status_code or response.status_code == 502
         if not expected:
             assert response.json().get("achievementpercentages")
         else:

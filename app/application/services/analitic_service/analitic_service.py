@@ -1,8 +1,8 @@
 from typing import List, Optional
 
 from app.application.decorators.cache import cache_data
-from app.application.dto.steam_dto import transform_to_dto, Game, GameShortModel
-from app.application.exceptions.exception_handler import GamesNotFound
+from app.application.dto.steam_dto import GameShortModel
+from app.application.usecases.get_appid_from_name import GetAppidFromNameUseCase
 from app.application.usecases.get_free_games import GetFreeGamesUseCase
 from app.application.usecases.get_free_transform import GetFreeTransformUseCase
 from app.application.usecases.get_friends_game_list import GetFriendsGameListUseCase
@@ -55,6 +55,9 @@ class AnalyticService:
         self.get_random_games = GetRandomGamesUseCase(
             analitic_repository=analitic_repository
         )
+        self.get_steam_appid = GetAppidFromNameUseCase(
+            steam_repository = steam_repository
+        )
 
     @cache_data(expire=1200)
     async def analitic_user_rating(self,user:str):
@@ -85,14 +88,14 @@ class AnalyticService:
     @cache_data(expire=1200)
     async def salling_for_you_games(self,user:str,session,page:int = 1,limit:int = 15):
         user_data = await self.get_user_games_play.execute(user=user)
-        return await self.get_salling_for_you.execute(data=user_data, session=session)
+        return await self.get_salling_for_you.execute(data=user_data, session=session,page=page,limit=limit)
 
-    @cache_data(expire=1200)
     async def friends_game_list(self,user):
         return await self.get_friends_game_list.execute(user)
 
     @cache_data(expire=1200)
-    async def user_achivements(self,user:str,app_id:int):
+    async def user_achivements(self,user:str,app:str,session):
+        app_id = await self.get_steam_appid.execute(app,session)
         return await self.get_user_achivements.execute(user=user,app_id=app_id)
 
     @cache_data(expire=1200)

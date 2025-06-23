@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy.sql.operators import is_
@@ -29,6 +29,12 @@ class SteamRepository(ISteamRepository):
 
         result = await session.execute(statement)
         return result.scalars().all()
+
+    async def get_steam_appid(self,session:AsyncSession,name:str):
+        statement = select(SteamBase.appid).filter(SteamBase.name.ilike(f"%{name}%")).limit(1)
+
+        result = await session.execute(statement)
+        return result.scalars().first()
 
     async def search_game(self,session,name:str = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None) -> Optional[List[Game]]:
         statement = (

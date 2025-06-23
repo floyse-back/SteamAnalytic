@@ -19,6 +19,11 @@ class ISteamRepository(ABC):
     async def search_game(self,session,name = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None) -> Optional[List[Game]]:
         pass
 
+    @abstractmethod
+    def get_steam_appid(self,name,session):
+        pass
+
+
 class IAnaliticsRepository(ABC):
     @abstractmethod
     async def get_games_for_appids(self,session,appid_list) ->List[Game]:

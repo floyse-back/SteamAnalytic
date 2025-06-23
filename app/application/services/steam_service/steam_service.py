@@ -1,6 +1,9 @@
+from typing import Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.steam_dto import SteamBase, transform_to_dto, Game
+from app.application.usecases.get_appid_from_name import GetAppidFromNameUseCase
 from app.application.usecases.get_best_sallers import GetBestSallersUseCase
 from app.application.usecases.get_game_achivements import GetGameAchievementsUseCase
 from app.application.usecases.get_game_stats import GetGameStatsUseCase
@@ -38,6 +41,9 @@ class SteamService:
         self.steam_games_use_case = GetSteamSearchGamesUseCase(
             steam_repository = steam_repository
         )
+        self.get_appid_games = GetAppidFromNameUseCase(
+            steam_repository = steam_repository
+        )
 
     @cache_data(expire=2400)
     async def best_sallers(self,session:AsyncSession,page,limit):
@@ -46,7 +52,6 @@ class SteamService:
 
         return new_result
 
-    @cache_data(expire=2400)
     async def user_full_stats(self, user,user_badges:bool = True,friends_details:bool = True,user_games:bool = True):
         return await self.get_user_full_stats.execute(user = user, user_badges=user_badges,friends_details=friends_details,user_games=user_games)
 
@@ -63,8 +68,9 @@ class SteamService:
         return new_result
 
     @cache_data(expire=2400)
-    async def game_achivements(self,game_id):
-        return await self.get_game_achievements.execute(game_id = game_id)
+    async def game_achivements(self,game:str,session,page:int=1,offset:int=10):
+        game_id:Optional[int] = await self.get_appid_games.execute(name = game,session=session)
+        return await self.get_game_achievements.execute(game_id = game_id,page=page,offset=offset)
 
     @cache_data(expire=2400)
     async def user_games_play(self,user:str):

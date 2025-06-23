@@ -23,7 +23,10 @@ from app.infrastructure.steam_api.client import SteamClient
 
 """Infrastucture Depends"""
 async def get_steam_client() -> SteamClient:
-    return SteamClient(STEAM_API_KEY)
+    return SteamClient(
+        cache_repository = RedisRepository(),
+        steam_key=STEAM_API_KEY
+        )
 
 
 """Service Depends"""

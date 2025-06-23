@@ -6,6 +6,6 @@ class GetFriendsGameListUseCase:
         self.steam:SteamClient = steam
 
     async def execute(self,user:str):
-        user_data,user_id = await self.steam.get_user_info(user)
-        result = self.steam.save_start_pool(self.steam.users.get_user_friends_list,steam_id=user_id)
+        user_id = await self.steam.get_vanity_user_url(user)
+        result = await self.steam.user_get_friends(user=user_id)
         return result
