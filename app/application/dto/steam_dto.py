@@ -63,6 +63,48 @@ class GameShortModel(BaseModel):
     class Config:
         from_attributes = True
 
+class AchivementModel(BaseModel):
+    name:str
+
+    class Config:
+        from_attributes = True
+
+class AchievementsModel(BaseModel):
+    total:Optional[int] = None
+    highlighted:List[AchivementModel]
+
+    class Config:
+        from_attributes = True
+
+class PriceOverviewModel(BaseModel):
+    initial:Optional[int] = None
+    final:Optional[int] = None
+    discount_percent:Optional[int] = None
+    initial_formatted:Optional[str] = None
+    final_formatted:Optional[str] = None
+
+class GameAchievementsModel(BaseModel):
+    name:str
+    steam_appid:Optional[int]
+    achievements:AchievementsModel = AchievementsModel(
+        total=0,
+        highlighted=[]
+    )
+    price_overview:Optional[PriceOverviewModel] = None
+    short_description:Optional[str]
+
+    class Config:
+        from_attributes = True
+
+class GamePriceModel(BaseModel):
+    name:str
+    steam_appid:Optional[int]
+    short_description:Optional[str]
+    price_overview:Optional[PriceOverviewModel] = None
+
+    class Config:
+        from_attributes = True
+
 class Game(BaseModel):
     steam_appid: Optional[int]
     name: Optional[str]

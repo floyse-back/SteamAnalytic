@@ -1,5 +1,5 @@
 import asyncio
-from typing import Union, List
+from typing import Union, List, Optional
 
 from steam_web_api import Steam
 
@@ -28,18 +28,28 @@ class SteamClient(Steam):
         except Exception as e:
             raise SteamExceptionBase(exc=e)
 
+    def __game_check_correct_data(self,response:Optional[dict],game_id:int)->Optional[dict]:
+        if response is None:
+            raise SteamGameNotFound("Steam game not found")
+        data = response[f"{game_id}"]
+        if not data["success"]:
+            raise SteamGameNotFound("Steam game not found")
+        else:
+            return data["data"]
+
     @cache_data(expire=3600*3)
     async def get_global_achievements(self,game_id):
-        async with AsyncClient() as client:
-            response = await client.get(
-                f"{self.__steam_http}ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid={game_id}",
-                params = {"gameid": game_id}
-            )
+        filters = "achievements,basic,price_overview"
+        response = self.apps.get_app_details(app_id=game_id,country="UA",filters=filters)
 
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise SteamGameNotFound("Steam game not found")
+        return self.__game_check_correct_data(response,game_id)
+
+    @cache_data(expire=3600)
+    async def get_price_game_now(self,app_id:int):
+        filters = "basic,price_overview"
+        response = self.apps.get_app_details(app_id=app_id,filters=filters)
+
+        return self.__game_check_correct_data(response,app_id)
 
     async def get_user_details(self,steam_ids:Union[int,str,List[int]])->dict:
         if type(steam_ids) == list:

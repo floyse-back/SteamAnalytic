@@ -11,6 +11,7 @@ from app.infrastructure.db.database import Base, get_async_db
 from app.infrastructure.db.models import steam_models
 from app.infrastructure.db.models.steam_models import Game, Category, Publisher, Ganres
 from app.infrastructure.db.models.users_models import UserModel, EmailConfirmed
+from app.infrastructure.logger.logger import logger
 from app.main import app
 from app.utils.config import TEST_DATABASE_URL, ServicesConfig
 from app.utils.utils import hashed_password
@@ -85,7 +86,7 @@ async def steamgames(session: async_sessionmaker[AsyncSession]):
         steam_games = [
             steam_models.SteamBase(
                 name = f"Item {i}",
-                appid = f"{i}",
+                appid = f"{570+i}",
                 developer = f"Random Nick{i}",
                 publisher= f"Random Publisher{i}",
                 positive = random.randint(1,15000),

@@ -54,3 +54,8 @@ async def free_games(analitic_service=Depends(get_analitic_service),session=Depe
 @router.get("/random_games")
 async def random_games(analitic_service=Depends(get_analitic_service),session=Depends(get_async_db)):
     return await analitic_service.random_games(session=session,limit=1)
+
+
+@router.get("/game_price_now/{app}")
+async def game_price_now(app:str,analitic_service=Depends(get_analitic_service),session=Depends(get_async_db)):
+    return await analitic_service.game_price_now(app=app,session=session)

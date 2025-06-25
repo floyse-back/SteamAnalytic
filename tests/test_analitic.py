@@ -2,8 +2,10 @@ from httpx import AsyncClient
 
 import pytest
 
+from app.application.dto.steam_dto import GamePriceModel
 from app.infrastructure.logger.logger import logger
 from app.utils.config import ServicesConfig
+from tests.utils import transform_to_dto
 
 host = "http://127.0.0.1:8000"
 
@@ -169,6 +171,28 @@ class TestAnalitic:
         assert response.status_code == 404
         assert response.json()["detail"] == "Steam game not found"
         logger.critical(response.json())
+
+
+    @pytest.mark.parametrize(
+        "game,status_code,expected",
+        [
+            ("Item 0",200,None),
+            ("730",200,None),
+            ("570",200,None),
+            ("760",404,"Steam game not found"),
+            ("AFDSFRGRGTRGVFDVFVFD",404,"Steam game not found")
+         ]
+    )
+    async def test_price_game(self,steamgames,login,game,status_code,expected):
+        new_client =  login["client"]
+        response = await new_client.get(f"{self.PATH}/game_price_now/{game}")
+
+        assert response.status_code == status_code
+        if expected:
+            assert response.json()['detail'] == expected
+        else:
+            data = transform_to_dto(GamePriceModel,response.json())
+            assert isinstance(data,dict)
 
     @pytest.mark.parametrize(
         "url,status_code,expected",

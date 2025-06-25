@@ -8,6 +8,7 @@ from app.application.usecases.get_free_transform import GetFreeTransformUseCase
 from app.application.usecases.get_friends_game_list import GetFriendsGameListUseCase
 from app.application.usecases.get_game_stats import GetGameStatsUseCase
 from app.application.usecases.get_games_for_you import GetGamesForYouUseCase
+from app.application.usecases.get_price_game_now import GetGamePriceNowUseCase
 from app.application.usecases.get_random_game import GetRandomGamesUseCase
 from app.application.usecases.get_salling_for_you import GetSallingForYouUseCase
 from app.application.usecases.get_player_achievemts import GetPlayerAchivementsUseCase
@@ -57,6 +58,9 @@ class AnalyticService:
         )
         self.get_steam_appid = GetAppidFromNameUseCase(
             steam_repository = steam_repository
+        )
+        self.get_price_now = GetGamePriceNowUseCase(
+            steam = self.steam
         )
 
     @cache_data(expire=1200)
@@ -113,6 +117,12 @@ class AnalyticService:
 
     async def random_games(self,session,limit:int=15):
         return await self.get_random_games.execute(session=session,limit=limit)
+
+    async def game_price_now(self,app,session):
+        app_id = await self.get_steam_appid.execute(app, session)
+        data = await self.get_price_now.execute(app_id=app_id)
+        return data
+
 
 
 
