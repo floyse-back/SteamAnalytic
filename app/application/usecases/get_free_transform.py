@@ -25,7 +25,7 @@ class GetFreeTransformUseCase:
             final_formatted_price = data.get("price_overview",{"final_formatted":"Free"}).get("final_formatted","0"),
             discount = int(data.get("price_overview",{"discount_percent":0}).get("discount_percent",0)),
             short_description=data.get("short_description","text"),
-            url = data.get(f"capsule_image"),
+            img_url= data.get(f"capsule_image"),
 
             game_ganre=[GanresOut(ganres_id=int(i.get('id')),ganres_name=i.get("description")) for i in data.get("genres",[])],
         )

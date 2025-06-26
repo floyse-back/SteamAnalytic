@@ -45,5 +45,17 @@ async def user_games_play(user:str,steam_service = Depends(get_steam_service)):
 
 
 @router.get("/search_game/")
-async def search_game(steam_service = Depends(get_steam_service),name:Optional[str] = Query(default=None),to_price: Optional[int] = Query(default=None),out_price:Optional[int] = Query(default=None),category: Optional[List] = Query(default=None),ganre:Optional[List] = Query(default=None),discount:Optional[int] = Query(default=None),publisher:Optional[List] = Query(default=None),session = Depends(get_async_db)):
-    return await steam_service.search_game(session=session,name=name,category=category,discount=discount,publisher=publisher,ganre=ganre,to_price=to_price,out_price=out_price)
+async def search_game(steam_service = Depends(get_steam_service),
+                      name:Optional[str] = Query(default=None),
+                      to_price: Optional[int] = Query(default=None),
+                      out_price:Optional[int] = Query(default=None),
+                      category: Optional[List] = Query(default=None),
+                      ganre:Optional[List] = Query(default=None),
+                      discount:Optional[int] = Query(default=None),
+                      publisher:Optional[List] = Query(default=None),
+                      page:Optional[int] = Query(default=1,lt=500),
+                      limit:Optional[int] = Query(default=10,lt=500),
+                      share:Optional[bool] = Query(default=True),
+                      session = Depends(get_async_db)
+                      ):
+    return await steam_service.search_game(session=session,share=share,page=page,limit=limit,name=name,category=category,discount=discount,publisher=publisher,ganre=ganre,to_price=to_price,out_price=out_price)

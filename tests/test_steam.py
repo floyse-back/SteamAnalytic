@@ -1,8 +1,10 @@
 import pytest
 from httpx import AsyncClient
 
+from app.application.dto.steam_dto import AchievementsModel, GameAchievementsModel
 from app.infrastructure.logger.logger import logger
 from app.utils.config import ServicesConfig
+from tests.utils import transform_to_dto
 
 service_config = ServicesConfig()
 
@@ -120,7 +122,7 @@ class TestGameAchivements:
 
         assert response.status_code == status_code or response.status_code == 502
         if not expected:
-            assert response.json().get("achievementpercentages")
+            transform_to_dto(GameAchievementsModel,response.json())
         else:
             assert response.json() == {"detail": expected}
 

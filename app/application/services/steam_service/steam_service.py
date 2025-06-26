@@ -77,9 +77,7 @@ class SteamService:
         return await self.get_user_games_play.execute(user = user)
 
     @cache_data(expire=600)
-    async def search_game(self,session,name = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None):
-        result =  await self.steam_games_use_case.execute(session=session,name=name,category=category,discount=discount,publisher=publisher,ganre=ganre,to_price=to_price,out_price=out_price)
+    async def search_game(self,session,page:int = 1,limit:int = 10,share:bool = True,name = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None):
+        result =  await self.steam_games_use_case.execute(session=session,page = page,share=share,limit=limit,name=name,category=category,discount=discount,publisher=publisher,ganre=ganre,to_price=to_price,out_price=out_price)
 
-        serilaze_result = [transform_to_dto(Game, i) for i in result]
-
-        return serilaze_result
+        return result

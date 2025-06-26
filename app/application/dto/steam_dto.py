@@ -56,9 +56,18 @@ class GameShortModel(BaseModel):
     final_formatted_price:Optional[str]
     discount:Union[int,str]
     short_description:Optional[str]
-    url:Optional[str] = None
+    img_url:Optional[str] = None
 
     game_ganre:List[GanresOut]
+
+    class Config:
+        from_attributes = True
+
+class GameListModel(BaseModel):
+    name:str
+    steam_appid:Optional[int] = None
+    final_formatted_price:Optional[str]
+    discount:Union[int] = None
 
     class Config:
         from_attributes = True

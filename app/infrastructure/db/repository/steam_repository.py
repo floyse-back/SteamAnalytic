@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from sqlalchemy import select, desc, func
+from sqlalchemy import select, desc, func, case
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy.sql.operators import is_
@@ -36,7 +36,7 @@ class SteamRepository(ISteamRepository):
         result = await session.execute(statement)
         return result.scalars().first()
 
-    async def search_game(self,session,name:str = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None) -> Optional[List[Game]]:
+    async def search_game(self,session,page:int= 1,limit:int = 10,name:str = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None) -> Optional[List[Game]]:
         statement = (
             select(Game)
         )
@@ -58,7 +58,7 @@ class SteamRepository(ISteamRepository):
         if out_price:
             statement = statement.filter(Game.final_price <= out_price)
 
-        statement = statement.limit(5)
+        statement = statement.offset((page - 1)*limit).limit(limit)
 
         result = await session.execute(statement)
         return result.unique().scalars().all()

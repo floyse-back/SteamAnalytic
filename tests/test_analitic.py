@@ -195,7 +195,7 @@ class TestAnalitic:
             assert isinstance(data,dict)
 
     @pytest.mark.parametrize(
-        "url,status_code,expected",
+        "img_url,status_code,expected",
         [
             ("/user_battle?user1_id=76561199667157069&user2_id=76561199054741771",401,"Token not found"),
             ("/user_score?user=76561199054741771", 401, "Token not found"),

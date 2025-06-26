@@ -35,7 +35,7 @@ class AnaliticRepository(IAnaliticsRepository):
 
         subquery = query.subquery()
 
-        final_query = select(subquery.c.steam_appid,subquery.c.name,subquery.c.img_url,subquery.c.total,subquery.c.final_formatted_price,subquery.c.discount,subquery.c.game_categories).order_by(subquery.c.total.desc())
+        final_query = select(subquery.c.steam_appid,subquery.c.name,subquery.c.img_url,subquery.c.total).order_by(subquery.c.total.desc())
 
         result = await session.execute(final_query)
         results = result.fetchall()

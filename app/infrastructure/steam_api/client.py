@@ -95,7 +95,7 @@ class SteamClient(Steam):
     @cache_data(expire=60*60*5)
     async def get_vanity_user_url(self,vanity_url):
         """
-        Vanity URL format: This ID from url
+        Vanity URL format: This ID from img_url
         """
         if re.fullmatch(r"7656119\d{10}", vanity_url):
             return vanity_url
