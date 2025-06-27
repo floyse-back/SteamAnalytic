@@ -31,7 +31,7 @@ class AnaliticRepository(IAnaliticsRepository):
         .join(Ganres,Ganres.ganres_id==GanreToMany.ganre_id) \
         .join(CategoryToMany, CategoryToMany.game_id == Game.steam_appid, isouter=True) \
         .join(Category, Category.category_id == CategoryToMany.category_id, isouter=True).where(Game.steam_appid.notin_(steam_appids)) \
-        .group_by(Game.name,Game.steam_appid,Game.img_url,Game.final_formatted_price,Game.discount,Game.game_categories)).offset((page-1)*limit).limit(limit)
+        .group_by(Game.name,Game.steam_appid,Game.img_url,Game.final_formatted_price,Game.discount)).offset((page-1)*limit).limit(limit)
 
         subquery = query.subquery()
 
