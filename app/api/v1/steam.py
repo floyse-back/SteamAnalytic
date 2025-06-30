@@ -2,6 +2,7 @@ from fastapi import APIRouter, Query, Depends
 from typing import List, Optional
 from steam_web_api import Steam
 
+from app.application.dto.steam_dto import SteamAppid
 from app.utils.config import STEAM_API_KEY
 from app.infrastructure.celery_app.steam_tasks import update_or_add_game
 from app.utils.dependencies import get_steam_service,get_async_db
@@ -59,3 +60,7 @@ async def search_game(steam_service = Depends(get_steam_service),
                       session = Depends(get_async_db)
                       ):
     return await steam_service.search_game(session=session,share=share,page=page,limit=limit,name=name,category=category,discount=discount,publisher=publisher,ganre=ganre,to_price=to_price,out_price=out_price)
+
+@router.get("/vanity_user/{user}",response_model=SteamAppid)
+async def vanity_users(user:str,steam_service=Depends(get_steam_service)):
+    return await steam_service.vanity_user(user)

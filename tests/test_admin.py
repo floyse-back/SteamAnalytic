@@ -58,7 +58,7 @@ class TestAdmin:
                 assert user_model.scalars().first() is None
 
     @pytest.mark.parametrize(
-        "img_url,method,status_code,expected",
+        "url,method,status_code,expected",
         [(f"/user_info?username=admin_ivan","GET",401,"Token not found"),
          ("/user_delete?username=user_dmytro","DELETE",401,"Token not found"),
          ]

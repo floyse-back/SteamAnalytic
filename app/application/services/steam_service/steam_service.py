@@ -11,6 +11,7 @@ from app.application.usecases.get_steam_search_games import GetSteamSearchGamesU
 from app.application.usecases.get_top_games import GetTopGamesUseCase
 from app.application.usecases.get_player_full_stats import GetUserFullStatsUseCase
 from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUseCase
+from app.application.usecases.vanity_user_use_case import VanityUserUseCase
 from app.domain.cache_repository import ICacheRepository
 from app.domain.steam.repository import ISteamRepository
 from app.application.decorators.cache import cache_data
@@ -43,6 +44,9 @@ class SteamService:
         )
         self.get_appid_games = GetAppidFromNameUseCase(
             steam_repository = steam_repository
+        )
+        self.vanity_user_use_case = VanityUserUseCase(
+            steam = steam
         )
 
     @cache_data(expire=2400)
@@ -81,3 +85,7 @@ class SteamService:
         result =  await self.steam_games_use_case.execute(session=session,page = page,share=share,limit=limit,name=name,category=category,discount=discount,publisher=publisher,ganre=ganre,to_price=to_price,out_price=out_price)
 
         return result
+
+    @cache_data(expire=600)
+    async def vanity_user(self,user:str):
+        return await self.vanity_user_use_case.execute(user = user)

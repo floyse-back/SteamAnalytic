@@ -72,6 +72,23 @@ class GameListModel(BaseModel):
     class Config:
         from_attributes = True
 
+class SteamAppid(BaseModel):
+    steam_appid: int
+
+class GamesForYouModel(BaseModel):
+    steam_appid:Optional[int]
+    name:Optional[str]
+    img_url:Optional[str]
+    final_formatted_price:Optional[str]
+    total:Optional[int]
+    discount:Union[int]
+    short_description:Optional[str]
+    recomendations:Optional[int]
+    metacritic:Optional[str]
+
+    class Config:
+        from_attributes = True
+
 class AchivementModel(BaseModel):
     name:str
 

@@ -1,9 +1,7 @@
 from typing import Optional, List
 
-from sqlalchemy import select, desc, func, case
+from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import lazyload, joinedload
-from sqlalchemy.sql.operators import is_
 
 from app.domain.steam.repository import ISteamRepository
 from app.infrastructure.db.models.steam_models import SteamBase, Game, Category, Publisher, Ganres

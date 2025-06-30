@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, case, and_
 from sqlalchemy import func
 
+from app.application.dto.steam_dto import transform_to_dto, GamesForYouModel
 from app.domain.steam.repository import IAnaliticsRepository
 from app.infrastructure.db.models.steam_models import Game,Ganres,Category,GanreToMany,CategoryToMany
 from typing import List
@@ -24,6 +25,11 @@ class AnaliticRepository(IAnaliticsRepository):
             Game.steam_appid,
             Game.name,
             Game.img_url,
+            Game.final_formatted_price,
+            Game.discount,
+            Game.short_description,
+            Game.recomendations,
+            Game.metacritic,
             func.sum(
                 case(*ganre_cases,else_=0) + case(*category_case,else_=0)
             ).label("total")
@@ -31,17 +37,17 @@ class AnaliticRepository(IAnaliticsRepository):
         .join(Ganres,Ganres.ganres_id==GanreToMany.ganre_id) \
         .join(CategoryToMany, CategoryToMany.game_id == Game.steam_appid, isouter=True) \
         .join(Category, Category.category_id == CategoryToMany.category_id, isouter=True).where(Game.steam_appid.notin_(steam_appids)) \
-        .group_by(Game.name,Game.steam_appid,Game.img_url,Game.final_formatted_price,Game.discount)).offset((page-1)*limit).limit(limit)
+        .group_by(Game.name,Game.steam_appid,Game.img_url,Game.final_formatted_price,Game.discount,Game.short_description,Game.recomendations,Game.metacritic))
 
         subquery = query.subquery()
 
-        final_query = select(subquery.c.steam_appid,subquery.c.name,subquery.c.img_url,subquery.c.total).order_by(subquery.c.total.desc())
+        final_query = select(subquery.c.name,subquery.c.steam_appid,subquery.c.img_url,subquery.c.final_formatted_price,subquery.c.discount,subquery.c.short_description,subquery.c.recomendations,subquery.c.metacritic,subquery.c.total).order_by(subquery.c.total.desc()).offset((page-1)*limit).limit(limit)
 
         result = await session.execute(final_query)
         results = result.fetchall()
         logger.info("%s",results)
 
-        return [{"appid":r[0],"name": r[1],"img":r[2], "rating": r[3]} for r in results]
+        return [transform_to_dto(GamesForYouModel,r) for r in results]
 
     async def salling_for_you(self,session:AsyncSession,ganres_data:List,category_data:List,steam_appids:List,page:int=1,limit:int=15):
         ganre_cases = [ (Ganres.ganres_name == f'{ganre[0]}',ganre[1]) for ganre in ganres_data ]
@@ -52,7 +58,11 @@ class AnaliticRepository(IAnaliticsRepository):
             Game.steam_appid,
             Game.name,
             Game.img_url,
+            Game.final_formatted_price,
             Game.discount,
+            Game.short_description,
+            Game.recomendations,
+            Game.metacritic,
             func.sum(
                 case(*ganre_cases,else_=0) + case(*category_cases,else_=0)
             ).label("total")
@@ -60,16 +70,16 @@ class AnaliticRepository(IAnaliticsRepository):
         .join(Ganres,Ganres.ganres_id==GanreToMany.ganre_id) \
         .join(CategoryToMany, CategoryToMany.game_id == Game.steam_appid, isouter=True) \
         .join(Category, Category.category_id == CategoryToMany.category_id, isouter=True).where(and_(Game.steam_appid.notin_(steam_appids), Game.discount >= 70)) \
-        .group_by(Game.name,Game.steam_appid,Game.img_url,Game.discount)).offset((page-1)*limit).limit(limit)
+        .group_by(Game.name,Game.steam_appid,Game.img_url,Game.discount))
 
         subquery = query.subquery()
 
-        final_query = select(subquery.c.steam_appid,subquery.c.name,subquery.c.img_url,subquery.c.total,subquery.c.discount).order_by(subquery.c.total.desc())
+        final_query = select(subquery.c.name,subquery.c.steam_appid,subquery.c.img_url,subquery.c.final_formatted_price,subquery.c.discount,subquery.c.short_description,subquery.c.recomendations,subquery.c.metacritic,subquery.c.total).order_by(subquery.c.total.desc()).offset((page-1)*limit).limit(limit)
 
         result = await session.execute(final_query)
         results = result.fetchall()
 
-        return [{"appid":r[0],"name": r[1],"steam_img":r[2], "total": r[3],"discount":r[4]} for r in results]
+        return [transform_to_dto(GamesForYouModel,r) for r in results]
 
     async def get_random_games(self,session:AsyncSession,limit:int=15):
         query = select(Game).order_by(func.random()).limit(limit)
