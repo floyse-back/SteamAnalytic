@@ -21,7 +21,8 @@ class SteamClient(Steam):
         self.__steam_http = "https://api.steampowered.com/"
         self.cache_repository = cache_repository
 
-    def save_start_pool(self,func,*args,**kwargs):
+    @cache_data(expire=60*60*3)
+    async def save_start_pool(self,func,func_name="",*args,**kwargs):
         try:
             data = func(*args,**kwargs)
             return data
@@ -130,10 +131,5 @@ class SteamClient(Steam):
         except Exception:
             raise SteamUserAchievementsNotFoundDetails("User or app not found")
 
-    @cache_data(expire=60*60*2)
-    async def user_get_friends(self,user):
-        try:
-            data = self.users.get_user_friends_list(steam_id=user,enriched=False)
-            return data
-        except Exception:
-            return None
+
+

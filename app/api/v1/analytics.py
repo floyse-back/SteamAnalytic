@@ -1,25 +1,24 @@
 from fastapi import APIRouter,Depends,Query
 from starlette.responses import JSONResponse
 
+from app.application.dto.steam_dto import SteamRatingModel, UserComparison, FriendsListModel
 from app.infrastructure.db.database import get_async_db
 from app.utils.dependencies import user_auth_check, get_analitic_service
 
 router = APIRouter(dependencies=[Depends(user_auth_check)])
 
 
-@router.get("/user_battle",response_model=None)
+@router.get("/user_battle",response_model=UserComparison)
 async def analytics(user1_id:str, user2_id:str,analitic_service = Depends(get_analitic_service)):
     return await analitic_service.analitic_user_battle(user1_id,user2_id)
 
 
-@router.get("/user_score")
+@router.get("/user_score",response_model=SteamRatingModel)
 async def user_score_generate(user:str,analitic_service = Depends(get_analitic_service)):
-    return {
-        "user_rating": await analitic_service.analitic_user_rating(user)
-    }
+    return await analitic_service.analitic_user_rating(user)
 
 
-@router.get("/friends_list")
+@router.get("/friends_list",response_model=FriendsListModel)
 async def friend_game_list(user:str,analitic_service = Depends(get_analitic_service)):
     return await analitic_service.friends_game_list(user=user)
 

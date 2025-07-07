@@ -1,13 +1,15 @@
-from app.application.dto.steam_dto import SteamUser
+from app.application.dto.steam_dto import SteamUser, transform_to_dto, UserComparison
 
 
 class GetPlayerBattleUseCase:
     """Порівняння 2 профілів"""
     async def execute(self, user1_data: SteamUser, user2_data: SteamUser,user1_rating:int,user2_rating:int):
         data = dict()
+        data['user_1'] = user1_data["user_data"]["player"].get("personaname")
+        data['user_2'] = user2_data["user_data"]["player"].get("personaname")
 
-        self.user1_id = user1_data["user_data"]["player"].get("steamid")
-        self.user2_id = user2_data["user_data"]["player"].get("steamid")
+        self.user1_id = "user_1"
+        self.user2_id = "user_2"
 
         # Перевірка на наявність steamid (базова інформація)
         if not self.user1_id or not self.user2_id:
@@ -146,12 +148,13 @@ class GetPlayerBattleUseCase:
             elif user2_element > user1_element:
                 winner = self.user2_id
             else:
-                winner = "draw"  # Або None, або інше позначення нічиєї
+                winner = None
 
         data[f"{title}"] = {
             f"{self.user1_id}": user1_element,
             f"{self.user2_id}": user2_element,
-            f"": difference,
+            f"difference": difference,
             "winner": winner,
         }
-        return data
+
+        return transform_to_dto(UserComparison,data)

@@ -10,7 +10,7 @@ app.conf.broker_connection_retry_on_startup=True
 app.conf.beat_schedule = {
     "update_every_night":{
         'task':'app.infrastructure.celery_app.steam_tasks.update_steam_games',
-        'schedule':crontab(hour="0",minute="0")
+        'schedule':crontab(hour="13",minute="45")
     },
     "get_thousand_gamedetails":{
         'task':'app.infrastructure.celery_app.steam_tasks.get_game_details',

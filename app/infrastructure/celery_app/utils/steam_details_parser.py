@@ -1,15 +1,20 @@
 import datetime
+import random
 import time
+
+from sqlalchemy.orm import Session
 from steam_web_api import Steam
 from app.infrastructure.db.models.steam_models import Game, Category, Ganres, Publisher
+from app.infrastructure.logger.logger import logger
 from app.utils.config import STEAM_API_KEY
 
 
 class SteamDetailsParser:
-    def __init__(self, session):
+    def __init__(self, session:Session,session_commit:bool=True):
         self.steam = Steam(STEAM_API_KEY)
         self.filters = 'basic,controller_support,dlc,fullgame,developers,demos,price_overview,metacritic,categories,genres,recommendations,achievements'
         self.session = session
+        self.session_commit = session_commit
 
     @staticmethod
     def steam_id_unique(session, model, **kwargs):
@@ -18,6 +23,12 @@ class SteamDetailsParser:
             return False
         else:
             return True
+
+    def session_commit_func(self):
+        if self.session_commit:
+            self.session.commit()
+        else:
+            self.session.flush()
 
     @staticmethod
     def get_or_create(session, model, **kwargs):
@@ -46,25 +57,28 @@ class SteamDetailsParser:
         existing_game.last_updated = datetime.datetime.today().date()
 
         # Оновлення категорій, жанрів та видавців
-        existing_game.game_categories = []
         if game.get("categories"):
             for category in game.get("categories"):
                 category_name = category.get("description")
-                existing_game.game_categories.append(self.get_or_create(session=self.session, model=Category, category_name=category_name))
+                category_obj = self.get_or_create(self.session, Category, category_name=category_name)
+                if category_obj not in existing_game.game_categories:
+                    existing_game.game_categories.append(category_obj)
 
-        existing_game.game_publisher = []
         if game.get("publishers"):
             for publisher in game.get("publishers"):
                 publisher_name = publisher.get("name")
-                existing_game.game_publisher.append(self.get_or_create(session=self.session, model=Publisher, publisher_name=publisher_name))
+                publisher_obj = self.get_or_create(self.session, Publisher, publisher_name=publisher_name)
+                if publisher_obj not in existing_game.game_publisher:
+                    existing_game.game_publisher.append(publisher_obj)
 
-        existing_game.game_ganre = []
         if game.get("genres"):
             for genre in game.get("genres"):
                 ganres_name = genre.get("description")
-                existing_game.game_ganre.append(self.get_or_create(session=self.session, model=Ganres, ganres_name=ganres_name))
+                ganres_obj = self.get_or_create(self.session, Ganres, ganres_name=ganres_name)
+                if ganres_obj not in existing_game.game_ganre:
+                    existing_game.game_ganre.append(ganres_obj)
 
-        self.session.commit()  # Підтверджуємо зміни в базі
+        self.session_commit_func()
 
     def add_new_game(self,game,steam_appid):
         new_game = Game(
@@ -103,7 +117,7 @@ class SteamDetailsParser:
                     self.get_or_create(session=self.session, model=Ganres, ganres_name=ganres_name))
 
         self.session.add(new_game)
-        self.session.commit()
+        self.session_commit_func()
 
     def create_gamesdetails_model(self, game_list):
         if not isinstance(game_list, list):
@@ -118,7 +132,9 @@ class SteamDetailsParser:
             else:
                 self.add_new_game(game,steam_appid)
 
-
+    @staticmethod
+    def __safe_sleep(min_delay=0.8, max_delay=1.3):
+        time.sleep(random.uniform(min_delay, max_delay))
 
     def parse(self,game_list_appid):
         new_list = []
@@ -130,8 +146,9 @@ class SteamDetailsParser:
                     continue
 
                 new_list.append(result[f'{i}']['data'])
-                time.sleep(2)
+                self.__safe_sleep()
             except:
+                logger.debug("Don`t parse game appid %s",i)
                 time.sleep(5)
 
 

@@ -67,7 +67,7 @@ class AnalyticService:
     async def analitic_user_rating(self,user:str):
         data = await self.get_user_full_stats.execute(user=user,friends_details=False)
 
-        return await self.get_user_rating.execute(data=data)
+        return await self.get_user_rating.execute(data=data,enriched=True)
 
     @cache_data(expire=1200)
     async def analitic_games_for_you(self,user,session,page:int = 1,limit:int = 15):
@@ -95,7 +95,7 @@ class AnalyticService:
         return await self.get_salling_for_you.execute(data=user_data, session=session,page=page,limit=limit)
 
     async def friends_game_list(self,user):
-        return await self.get_friends_game_list.execute(user)
+        return await self.get_friends_game_list.execute(user,enriched=False)
 
     @cache_data(expire=1200)
     async def user_achivements(self,user:str,app:str,session):

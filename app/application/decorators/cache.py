@@ -16,7 +16,6 @@ def cache_data(expire: int = 3600):
             redis_result = self.cache_repository.get_data(key)
             if redis_result:
                 return redis_result
-
             result = await func(self,*args,**kwargs)
 
             self.cache_repository.cache_data(key=key,data=result,expire=expire)

@@ -51,7 +51,7 @@ class SteamParser:
         data = steamspypi.download(self.create_query())
         return data
 
-    def page_parse(self):
+    def page_parse(self,time_sleep_default:int=0,time_sleep_exception:int=0):
         while self.current_page <80 and self.__empty_data_score < 5:
             try:
                 data = self.request_steampipy()
@@ -62,16 +62,16 @@ class SteamParser:
                 elif data == {}:
                     self.__empty_data_score += 1
 
-                self.current_page += 1
                 self.__count_error = 0
-                time.sleep(70)
+                time.sleep(time_sleep_default)
             except Exception as ex:
                 logger.debug(f"Error info: {ex}")
-                if self.__count_error >= 3:
+                if self.__count_error >= 5:
                     return "Server don`t response"
                 self.__count_error += 1
-                time.sleep(200)
-
+                time.sleep(time_sleep_exception)
+            finally:
+                self.current_page += 1
             logger.info(f"Current page: {self.current_page}")
 
 

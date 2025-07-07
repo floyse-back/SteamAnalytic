@@ -11,6 +11,7 @@ from app.application.usecases.get_steam_search_games import GetSteamSearchGamesU
 from app.application.usecases.get_top_games import GetTopGamesUseCase
 from app.application.usecases.get_player_full_stats import GetUserFullStatsUseCase
 from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUseCase
+from app.application.usecases.get_user_badges_use_case import UserBadgesUseCase
 from app.application.usecases.vanity_user_use_case import VanityUserUseCase
 from app.domain.cache_repository import ICacheRepository
 from app.domain.steam.repository import ISteamRepository
@@ -48,6 +49,9 @@ class SteamService:
         self.vanity_user_use_case = VanityUserUseCase(
             steam = steam
         )
+        self.user_badges_use_case = UserBadgesUseCase(
+            steam = steam
+        )
 
     @cache_data(expire=2400)
     async def best_sallers(self,session:AsyncSession,page,limit):
@@ -76,16 +80,16 @@ class SteamService:
         game_id:Optional[int] = await self.get_appid_games.execute(name = game,session=session)
         return await self.get_game_achievements.execute(game_id = game_id,page=page,offset=offset)
 
-    @cache_data(expire=2400)
     async def user_games_play(self,user:str):
         return await self.get_user_games_play.execute(user = user)
 
     @cache_data(expire=600)
-    async def search_game(self,session,page:int = 1,limit:int = 10,share:bool = True,name = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None):
+    async def search_game(self,session,page:int = 1,limit:int = 10,share:bool = True,name:Optional[str] = None,category = None,ganre = None,discount = None,publisher = None,to_price = None,out_price = None):
         result =  await self.steam_games_use_case.execute(session=session,page = page,share=share,limit=limit,name=name,category=category,discount=discount,publisher=publisher,ganre=ganre,to_price=to_price,out_price=out_price)
-
         return result
 
-    @cache_data(expire=600)
     async def vanity_user(self,user:str):
         return await self.vanity_user_use_case.execute(user = user)
+
+    async def user_badges(self,user):
+        return await self.user_badges_use_case.execute(user=user)

@@ -1,13 +1,17 @@
+import time
+
+from sqlalchemy.dialects.postgresql import insert
+
 from app.infrastructure.celery_app.celery_app import app
 
 from datetime import date
 
 from app.infrastructure.celery_app.database import get_db
-from app.infrastructure.db.models.steam_models import SteamBase, Game
+from app.infrastructure.db.models.steam_models import SteamBase, Game, SteamReserveBase
 from app.infrastructure.db.models.users_models import RefreshToken
 from app.infrastructure.celery_app.utils.steam_parser import SteamParser
 from app.infrastructure.celery_app.utils.steam_details_parser import SteamDetailsParser
-from sqlalchemy import cast,Integer,select,delete,update
+from sqlalchemy import cast, Integer, select, delete, update, text, and_, or_
 
 from app.infrastructure.email_sender.new_email_sender import EmailSender
 from app.infrastructure.logger.logger import logger
@@ -17,12 +21,22 @@ from app.infrastructure.logger.logger import logger
     max_retries=2,
     default_retry_delay=100
 )
-def update_steam_games():
+def update_steam_games(max_count:int=250):
     logger.info("Starting task update_steam_games!")
     session = next(get_db())
-
+    session_parser = next(get_db())
+    logger.debug("Copy Data from table Steam to Steam_Last")
+    session.execute(delete(SteamReserveBase))
+    session.execute(text("INSERT INTO steambase_copy SELECT * FROM steambase"))
+    session.commit()
     parser = SteamParser()
+    steam_detail_parser = SteamDetailsParser(
+        session=session_parser,
+        session_commit=True
+    )
     generator_data = parser.page_parse()
+    #Логіка заповнення GamesDetails
+
 
     session.query(SteamBase).delete()
 
@@ -30,7 +44,27 @@ def update_steam_games():
         if data != "Server don`t respond":
             session.bulk_save_objects(data)
             session.flush()
-
+            appids_data = [int(model.appid) for model in data]
+            statement = (select(SteamBase.appid).outerjoin(Game, Game.steam_appid == cast(SteamBase.appid,Integer))
+                .filter(
+                    and_(
+                        cast(SteamBase.appid,Integer).in_(appids_data),or_(
+                            SteamBase.discount.is_distinct_from(Game.discount),
+                            SteamBase.price.is_distinct_from(Game.final_price),
+                            Game.steam_appid.is_(None)
+                        )
+                    )
+                )
+                .order_by(Game.steam_appid.desc())
+                .limit(max_count)
+            )
+            result = session.execute(statement)
+            appids = result.scalars().all()
+            logger.debug(f"Appids don`t find or changed between SteamBase and GamesDetails: {appids}")
+            logger.debug(f"Go to find Games Appids {appids}")
+            steam_detail_parser.parse(game_list_appid=appids)
+            if len(appids) < 60:
+                time.sleep(70-len(appids))
     session.commit()
     session.close()
     logger.info("Finished task update_steam_games!")

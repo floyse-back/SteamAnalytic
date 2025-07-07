@@ -23,6 +23,24 @@ class SteamBase(Base):
     discount = Column(Integer)
     img_url = Column(String,nullable=True,default=None)
 
+class SteamReserveBase(Base):
+    __tablename__ = "steambase_copy"
+
+    id = Column(Integer, primary_key=True,autoincrement=True)
+    name = Column(String)
+    appid = Column(String,index=True)
+    developer = Column(String)
+    publisher = Column(String)
+    positive = Column(Integer)
+    negative = Column(Integer)
+    average_forever = Column(Integer)
+    average_2weeks =Column(Integer)
+    median_forever = Column(Integer)
+    median_2weeks = Column(Integer)
+    price = Column(Integer)
+    discount = Column(Integer)
+    img_url = Column(String,nullable=True,default=None)
+
 class Game(Base):
     __tablename__ = 'gamesdetails'
 
