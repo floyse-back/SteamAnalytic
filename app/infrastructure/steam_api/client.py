@@ -56,7 +56,7 @@ class SteamClient(Steam):
         if type(steam_ids) == list:
             steam_ids = ",".join(map(str,steam_ids))
 
-        async with AsyncClient(base_url=self.__steam_http) as client:
+        async with AsyncClient(base_url=self.__steam_http,timeout=10.0) as client:
             response = await client.get(
                 "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",
                 params={

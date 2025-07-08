@@ -1,6 +1,6 @@
 import random
 
-from app.infrastructure.celery_app.steam_tasks import update_game_icon_url,send_email
+from app.infrastructure.celery_app.tasks.steam_tasks import update_game_icon_url,send_email
 
 class TestCeleryTasks:
     def test_create_very_big_tasks(self):

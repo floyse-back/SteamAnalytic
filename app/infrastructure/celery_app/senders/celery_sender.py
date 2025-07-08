@@ -1,5 +1,5 @@
 from app.domain.celery_sender import ICelerySender
-from app.infrastructure.celery_app.steam_tasks import send_email
+from app.infrastructure.celery_app.tasks.steam_tasks import send_email
 
 
 

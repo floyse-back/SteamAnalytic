@@ -4,7 +4,7 @@ from steam_web_api import Steam
 
 from app.application.dto.steam_dto import SteamAppid, SteamBadgesListModel, SteamUser
 from app.utils.config import STEAM_API_KEY
-from app.infrastructure.celery_app.steam_tasks import update_or_add_game
+from app.infrastructure.celery_app.tasks.steam_tasks import update_or_add_game
 from app.utils.dependencies import get_steam_service,get_async_db
 
 
