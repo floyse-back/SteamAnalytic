@@ -2,6 +2,7 @@ from fastapi import Depends,Request
 from fastapi.params import Form
 
 from app.application.services.admin_service.admin_service import AdminService
+from app.application.services.news_service.news_service import NewsService
 from app.application.services.notification_service.notification_service import NotificationService
 from app.application.services.steam_service.steam_service import SteamService
 from app.application.services.users_service.users_service import UserService
@@ -12,6 +13,7 @@ from app.infrastructure.db.repository.email_confirmation_repository import Email
 from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
 from app.infrastructure.db.repository.steam_repository import SteamRepository
 from app.infrastructure.db.repository.user_repository import UserRepository
+from app.infrastructure.db.sync_repository.news_repository import NewsRepository
 from app.infrastructure.redis.redis_repository import RedisRepository
 from app.utils.config import STEAM_API_KEY
 from app.application.services.analitic_service.analitic_service import AnalyticService
@@ -75,6 +77,10 @@ async def get_email_service() -> NotificationService:
         user_repository=UserRepository()
     )
 
+def get_news_service() -> NewsService:
+    return NewsService(
+        news_repository=NewsRepository()
+    )
 
 """Other Depends"""
 async def verify_user(session = Depends(get_async_db),auth_service = Depends(get_auth_service),username:str = Form,password:str = Form):

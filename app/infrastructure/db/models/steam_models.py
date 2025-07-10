@@ -1,3 +1,5 @@
+from typing import Union
+
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, JSON, Date, Boolean, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import relationship
@@ -10,7 +12,25 @@ class SteamBase(Base):
 
     id = Column(Integer, primary_key=True,autoincrement=True)
     name = Column(String)
-    appid = Column(String,index=True)
+    appid = Column(String,index=True,unique=True)
+    developer = Column(String)
+    publisher = Column(String)
+    positive = Column(Integer)
+    negative = Column(Integer)
+    average_forever = Column(Integer)
+    average_2weeks =Column(Integer)
+    median_forever = Column(Integer)
+    median_2weeks = Column(Integer)
+    price = Column(Integer)
+    discount = Column(Integer)
+    img_url = Column(String,nullable=True,default=None)
+
+class SteamBaseTemp(Base):
+    __tablename__ = "steambase_temp"
+
+    id = Column(Integer, primary_key=True,autoincrement=True)
+    name = Column(String)
+    appid = Column(String,index=True,unique=True)
     developer = Column(String)
     publisher = Column(String)
     positive = Column(Integer)
@@ -28,7 +48,7 @@ class SteamReserveBase(Base):
 
     id = Column(Integer, primary_key=True,autoincrement=True)
     name = Column(String)
-    appid = Column(String,index=True)
+    appid = Column(String,index=True,unique=True)
     developer = Column(String)
     publisher = Column(String)
     positive = Column(Integer)
@@ -57,6 +77,7 @@ class Game(Base):
     achievements = Column(JSON)
     recomendations = Column(Integer)
     img_url = Column(String)
+    release_data = Column(Date,default= sqlalchemy.func.current_date())
     last_updated = Column(Date,default = sqlalchemy.func.current_date())
 
     __table_args__ = (

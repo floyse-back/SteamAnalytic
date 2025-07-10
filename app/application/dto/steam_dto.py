@@ -1,5 +1,5 @@
 from __future__ import annotations
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, field_validator, model_validator
 from typing import Optional, List, Union, Dict
 from datetime import date, datetime
 
@@ -21,6 +21,7 @@ class SteamBase(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class CategoryOut(BaseModel):
     category_id: int
@@ -199,10 +200,18 @@ class PlayerModel(BaseModel):
     class Config:
         from_attributes = True
 
+class FriendsShortModel(BaseModel):
+    steamid:str
+    relationship:str
+    friend_since:int
+
+    class Config:
+        from_attributes = True
+
 class FriendsListModel(BaseModel):
-    friends_count:Optional[int] = None
-    first_friend:Optional[FriendsShortModel] = None
-    last_friend:Optional[FriendsShortModel] = None
+    friends_count:Optional[int] = 0
+    first_friend:Optional[FriendsShortModel] = FriendsShortModel(steamid="-",relationship="-",friend_since=-1)
+    last_friend:Optional[FriendsShortModel] = FriendsShortModel(steamid="-",relationship="-",friend_since=-1)
     friends:List[FriendsShortModel]
 
     @model_validator(mode="after")
@@ -222,14 +231,6 @@ class FriendsListModel(BaseModel):
             self.last_friend = max_value
 
             return self
-
-    class Config:
-        from_attributes = True
-
-class FriendsShortModel(BaseModel):
-    steamid:str
-    relationship:str
-    friend_since:int
 
     class Config:
         from_attributes = True

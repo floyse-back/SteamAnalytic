@@ -1,27 +1,28 @@
 import time
 
-from sqlalchemy.dialects.postgresql import insert
-
 from app.infrastructure.celery_app.celery_app import app
 
 from datetime import date
 
 from app.infrastructure.celery_app.database import get_db
-from app.infrastructure.db.models.steam_models import SteamBase, Game, SteamReserveBase
+from app.infrastructure.db.models.steam_models import SteamBase, Game, SteamReserveBase, SteamBaseTemp
 from app.infrastructure.db.models.users_models import RefreshToken
 from app.infrastructure.celery_app.utils.steam_parser import SteamParser
 from app.infrastructure.celery_app.utils.steam_details_parser import SteamDetailsParser
-from sqlalchemy import cast, Integer, select, delete, update, text, and_, or_
+from sqlalchemy import cast, Integer, delete, update, text, and_, or_,select
+from sqlalchemy.dialects.postgresql import insert
 
 from app.infrastructure.email_sender.new_email_sender import EmailSender
 from app.infrastructure.logger.logger import logger
+
+
 
 
 @app.task(
     max_retries=2,
     default_retry_delay=100
 )
-def update_steam_games(max_count:int=250):
+def update_steam_games(max_count:int=100):
     logger.info("Starting task update_steam_games!")
     session = next(get_db())
     session_parser = next(get_db())
@@ -35,36 +36,84 @@ def update_steam_games(max_count:int=250):
         session_commit=True
     )
     generator_data = parser.page_parse()
-    #Логіка заповнення GamesDetails
 
-
-    session.query(SteamBase).delete()
+    session.query(SteamBaseTemp).delete()
 
     for data in generator_data:
-        if data != "Server don`t respond":
-            session.bulk_save_objects(data)
-            session.flush()
-            appids_data = [int(model.appid) for model in data]
-            statement = (select(SteamBase.appid).outerjoin(Game, Game.steam_appid == cast(SteamBase.appid,Integer))
-                .filter(
-                    and_(
-                        cast(SteamBase.appid,Integer).in_(appids_data),or_(
-                            SteamBase.discount.is_distinct_from(Game.discount),
-                            SteamBase.price.is_distinct_from(Game.final_price),
-                            Game.steam_appid.is_(None)
+        try:
+            if data != "Server don`t respond":
+                logger.debug("Bulk save objects")
+                session.bulk_save_objects(data)
+                logger.debug("Correct Bulk save objects")
+                session.flush()
+                session.commit()
+                appids_data = [int(model.appid) for model in data]
+                statement = (select(SteamBaseTemp.appid).outerjoin(Game, Game.steam_appid == cast(SteamBaseTemp.appid,Integer))
+                    .filter(
+                        and_(
+                            cast(SteamBaseTemp.appid,Integer).in_(appids_data),or_(
+                                SteamBaseTemp.discount.is_distinct_from(Game.discount),
+                                SteamBaseTemp.price.is_distinct_from(Game.final_price),
+                                Game.steam_appid.is_(None)
+                            )
                         )
                     )
+                    .order_by(Game.steam_appid.desc())
+                    .limit(max_count)
                 )
-                .order_by(Game.steam_appid.desc())
-                .limit(max_count)
-            )
-            result = session.execute(statement)
-            appids = result.scalars().all()
-            logger.debug(f"Appids don`t find or changed between SteamBase and GamesDetails: {appids}")
-            logger.debug(f"Go to find Games Appids {appids}")
-            steam_detail_parser.parse(game_list_appid=appids)
-            if len(appids) < 60:
-                time.sleep(70-len(appids))
+                result = session.execute(statement)
+                appids = result.scalars().all()
+                logger.info(f"Appids don`t find or changed between SteamBase and GamesDetails: {appids}")
+                steam_detail_parser.parse(game_list_appid=appids)
+                if len(appids) < 60:
+                    time.sleep(70-len(appids))
+                else:
+                    time.sleep(25)
+        except Exception as e:
+            logger.critical(f"{e} Exception occurred")
+
+    columns = [
+        'appid', 'name', 'developer', 'publisher', 'positive', 'negative',
+        'average_forever', 'average_2weeks', 'median_forever', 'median_2weeks',
+        'price', 'discount', 'img_url'
+    ]
+
+    stmt = insert(SteamBase).from_select(
+        columns,
+        select(
+            SteamBase.appid,
+            SteamBase.name,
+            SteamBase.developer,
+            SteamBase.publisher,
+            SteamBase.positive,
+            SteamBase.negative,
+            SteamBase.average_forever,
+            SteamBase.average_2weeks,
+            SteamBase.median_forever,
+            SteamBase.median_2weeks,
+            SteamBase.price,
+            SteamBase.discount,
+            SteamBase.img_url
+        )
+    )
+    stmt = stmt.on_conflict_do_update(
+        index_elements=['appid'],
+        set_={
+            'name': stmt.excluded.name,
+            'developer': stmt.excluded.developer,
+            'publisher': stmt.excluded.publisher,
+            'positive': stmt.excluded.positive,
+            'negative': stmt.excluded.negative,
+            'average_forever': stmt.excluded.average_forever,
+            'average_2weeks': stmt.excluded.average_2weeks,
+            'median_forever': stmt.excluded.median_forever,
+            'median_2weeks': stmt.excluded.median_2weeks,
+            'price': stmt.excluded.price,
+            'discount': stmt.excluded.discount,
+            'img_url': stmt.excluded.img_url
+        }
+    )
+    session.execute(stmt)
     session.commit()
     session.close()
     logger.info("Finished task update_steam_games!")

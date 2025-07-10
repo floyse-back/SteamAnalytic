@@ -1,6 +1,7 @@
 import datetime
 import random
 import time
+from typing import Union
 
 from sqlalchemy.orm import Session
 from steam_web_api import Steam
@@ -10,9 +11,23 @@ from app.utils.config import STEAM_API_KEY
 
 
 class SteamDetailsParser:
+    MONTHS_CODE = {
+        "Jan": 1,
+        "Feb": 2,
+        "Mar": 3,
+        "Apr": 4,
+        "May": 5,
+        "Jun": 6,
+        "Jul": 7,
+        "Aug": 8,
+        "Sep": 9,
+        "Oct": 10,
+        "Nov": 11,
+        "Dec": 12,
+    }
     def __init__(self, session:Session,session_commit:bool=True):
         self.steam = Steam(STEAM_API_KEY)
-        self.filters = 'basic,controller_support,dlc,fullgame,developers,demos,price_overview,metacritic,categories,genres,recommendations,achievements'
+        self.filters = 'basic,controller_support,dlc,fullgame,developers,demos,price_overview,metacritic,categories,genres,recommendations,achievements,release_date'
         self.session = session
         self.session_commit = session_commit
 
@@ -55,6 +70,7 @@ class SteamDetailsParser:
         existing_game.recomendations = int(game.get("recommendations", {}).get("total", 0))
         existing_game.img_url = game.get("capsule_image")
         existing_game.last_updated = datetime.datetime.today().date()
+        existing_game.release_data = self.__transform_date(game.get("release_data",{"date":datetime.date.today()}).get("date"))
 
         # Оновлення категорій, жанрів та видавців
         if game.get("categories"):
@@ -80,6 +96,20 @@ class SteamDetailsParser:
 
         self.session_commit_func()
 
+    @classmethod
+    def __transform_date(cls,my_date:Union[datetime.date,str]):
+        if isinstance(my_date, datetime.date):
+            return my_date
+        date_split = my_date.split(" ")
+        if len(date_split) < 3:
+            return None
+        month_number = cls.MONTHS_CODE[date_split[0]]
+        day = int(date_split[1].replace(",",""))
+        year = int(date_split[2])
+        new_date = datetime.date(year=year,month=month_number,day=day)
+        logger.debug(f"transform_date: %s",new_date)
+        return new_date
+
     def add_new_game(self,game,steam_appid):
         new_game = Game(
             steam_appid=steam_appid,
@@ -95,6 +125,7 @@ class SteamDetailsParser:
             achievements=game.get("achievements", {}).get("highlighted", {}),
             recomendations=int(game.get("recommendations", {}).get("total", 0)),
             img_url=game.get("capsule_image"),
+            release_data=self.__transform_date(game.get("release_date",{"date":datetime.date.today()}).get("date"))
         )
 
         # Додаємо категорії, жанри та видавців

@@ -22,13 +22,15 @@ class SteamClient(Steam):
         self.cache_repository = cache_repository
 
     @cache_data(expire=60*60*3)
-    async def save_start_pool(self,func,func_name="",*args,**kwargs):
+    async def save_start_pool(self,func,func_name="",raise_error:bool=True,*args,**kwargs):
         try:
             data = func(*args,**kwargs)
             return data
         except Exception as e:
-            raise SteamExceptionBase(exc=e)
-
+            if raise_error:
+                raise SteamExceptionBase(exc=e)
+            else:
+                return None
     def __game_check_correct_data(self,response:Optional[dict],game_id:int)->Optional[dict]:
         if response is None:
             raise SteamGameNotFound("Steam game not found")

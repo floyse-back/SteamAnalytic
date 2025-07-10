@@ -13,9 +13,11 @@ class GetUserFullStatsUseCase:
         user_data,user = await self.steam.get_user_info(user)
 
         if user_data["player"].get("communityvisibilitystate") == 3:
-            user_friends_list =await self.steam.save_start_pool(self.steam.users.get_user_friends_list,steam_id=user,enriched=friends_details)
-            user_badges_list =await self.steam.save_start_pool(self.steam.users.get_user_badges,func_name="user_badges",steam_id=f"{user}") if user_badges else None
-            user_games_list =await self.steam.save_start_pool(self.steam.users.get_owned_games,func_name="owned_games",steam_id=f"{user}")  if user_games else None
+            user_friends_list =await self.steam.save_start_pool(self.steam.users.get_user_friends_list,raise_error=False,steam_id=user,enriched=friends_details)
+            if user_friends_list is None:
+                user_friends_list = {"friends":[]}
+            user_badges_list =await self.steam.save_start_pool(self.steam.users.get_user_badges,func_name="user_badges",raise_error=False,steam_id=f"{user}") if user_badges else None
+            user_games_list =await self.steam.save_start_pool(self.steam.users.get_owned_games,func_name="owned_games",raise_error=False,steam_id=f"{user}")  if user_games else None
 
             #Серіалізація даних
             logger.critical("User Data Information%s",user_data)
