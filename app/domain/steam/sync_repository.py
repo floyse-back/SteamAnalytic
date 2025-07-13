@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 from app.domain.steam.schemas import Game
 
@@ -39,8 +39,24 @@ class INewsRepository(ABC):
         pass
 
 
-class ISubscribesRepository(ABC):
+class IGameWishlistRepository(ABC):
     @abstractmethod
-    def wishlist_game_discount(self,appids:List[int])->Optional[dict]:
+    def wishlist_game_discount(self,appids:List[int],session)->Optional[dict]:
         pass
 
+    @abstractmethod
+    def get_changed_games(self,appids:List[dict],session)->Optional[List[Game]]:
+        pass
+
+class ICalendarSteamEventRepository(ABC):
+    @abstractmethod
+    def update_calendar_data(self,session,data:List[Tuple[str,date,date,str]]):
+        pass
+
+    @abstractmethod
+    def get_calendar_events(self,session):
+        pass
+
+    @abstractmethod
+    def get_now_events(self,session,datenow:date):
+        pass

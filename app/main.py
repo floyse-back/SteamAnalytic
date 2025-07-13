@@ -4,8 +4,10 @@ from fastapi import FastAPI
 from app.api.register_exceptions import register_exceptions
 from app.api.v1 import steam, auth, analytics,users,admin,email
 from app.api.middleware.register_middleware import register_middleware
+from app.infrastructure.logger.logger import logger
+from app.infrastructure.messages.consumer import Consumer
 from app.utils.config import ServicesConfig, PORT,HOST_PATH
-
+from multiprocessing import Process
 app = FastAPI()
 
 service_config = ServicesConfig()
@@ -26,4 +28,9 @@ register_exceptions(app)
 
 
 if __name__ == "__main__":
+    logger.info("Starting APP")
+    consumer = Consumer()
+    p = Process(target=consumer.consume)
+    p.start()
+    logger.info("Started consumer")
     uvicorn.run(app, host=HOST_PATH, port=int(PORT))

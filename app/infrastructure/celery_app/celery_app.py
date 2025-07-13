@@ -10,7 +10,7 @@ app.conf.broker_connection_retry_on_startup=True
 app.conf.beat_schedule = {
     "update_every_night":{
         'task':'app.infrastructure.celery_app.tasks.steam_tasks.update_steam_games',
-        'schedule':crontab(hour="9",minute="26")
+        'schedule':crontab(hour="17",minute="55")
     },
     "get_thousand_gamedetails":{
         'task':'app.infrastructure.celery_app.tasks.steam_tasks.get_game_details',
@@ -29,10 +29,35 @@ app.conf.beat_schedule = {
         "schedule": crontab(hour="2",minute="20")
     },
     "news_new_release":{
-        "task":"app.infrastructure.celery_app.tasks.news_tasks.news_new_release",
-        "schedule": crontab(hour="12",minute="48"),
+        "task":"app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
+        "schedule": crontab(hour="13",minute="15"),
         "kwargs":{"type_news":"news_new_release"}
-    }
+    },
+    "news_free_games_now": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
+        "schedule": crontab(hour="13", minute="34"),
+        "kwargs": {"type_news": "news_free_games_now"}
+    },
+    "news_event_history": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
+        "schedule": crontab(hour="13", minute="32"),
+        "kwargs": {"type_news": "news_event_history"}
+    },
+    "news_discounts_steam_now": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
+        "schedule": crontab(hour="13", minute="33"),
+        "kwargs": {"type_news": "news_discounts_steam_now"}
+    },
+    "news_top_for_a_coins": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
+        "schedule": crontab(hour="13", minute="35"),
+        "kwargs": {"type_news": "news_top_for_a_coins"}
+    },
+    "news_random_game": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
+        "schedule": crontab(hour="13", minute="36"),
+        "kwargs": {"type_news": "news_random_game"}
+    },
 }
 
 app.autodiscover_tasks([

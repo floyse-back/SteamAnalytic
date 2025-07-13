@@ -1,6 +1,7 @@
 from datetime import date
-from typing import List
+from typing import List, Optional
 
+from app.application.dto.steam_dto import transform_to_dto, GameFullModel
 from app.domain.steam.sync_repository import INewsRepository
 
 
@@ -8,9 +9,14 @@ class EventHistorySteamFactsUseCase:
     def __init__(self,news_repository:INewsRepository):
         self.news_repository = news_repository
 
-    def execute(self,session):
+    def execute(self,session)->Optional[List[dict]]:
         now_date_list = self.__now_date_list()
-        return self.news_repository.event_history_steam_facts(session=session,now_date_list=now_date_list)
+        data = self.news_repository.event_history_steam_facts(session=session,now_date_list=now_date_list)
+        #Серіалізація даних
+        if data is None:
+            return None
+        serialize_data = [transform_to_dto(GameFullModel, i) for i in data]
+        return serialize_data
 
     def __now_date_list(self)->List[date]:
         date_now = date.today()

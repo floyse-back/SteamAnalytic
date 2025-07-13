@@ -125,6 +125,25 @@ class GamePriceModel(BaseModel):
     class Config:
         from_attributes = True
 
+class GameFullModel(BaseModel):
+    steam_appid: int
+    name: str
+    is_free: Optional[bool] = None
+    short_description: Optional[str] = None
+    final_price: Optional[int] = None
+    final_formatted_price: Optional[str] = None
+    metacritic: Optional[str] = None
+    discount: Optional[int] = None
+    recomendations: Optional[int] = None
+    release_data: Optional[date] = None
+
+    game_ganre: List[GanresOut]
+    game_publisher: List[PublisherOut]
+    game_categories: List[CategoryOut]
+
+    class Config:
+        from_attributes = True
+
 class Game(BaseModel):
     steam_appid: Optional[int]
     name: Optional[str]
@@ -140,6 +159,7 @@ class Game(BaseModel):
     recomendations: Optional[int] = None
     img_url: Optional[str] = None
     last_update: Optional[date] = None
+    release_data:Optional[date] = None
 
     game_ganre: List[GanresOut]
     game_publisher: List[PublisherOut]
@@ -302,6 +322,15 @@ class ComparisonModel(BaseModel):
     user_2:Optional[Union[int,float,str]]
     difference:Optional[Union[int,float,str]]
     winner : Optional[str]
+
+class CalendarEventModel(BaseModel):
+    name:Optional[str]
+    date_start:date
+    date_end:date
+    type_name:Optional[str] = 'festival'
+
+    class Config:
+        from_attributes = True
 
 class UserComparison(BaseModel):
     user_1:str

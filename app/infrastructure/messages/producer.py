@@ -14,7 +14,7 @@ class EventProducer:
         self.channel.basic_publish(
             exchange='',
             routing_key=queue,
-            body=json.dumps(body),
+            body=json.dumps(body,default=str),
             properties=pika.BasicProperties(
                 delivery_mode=2,
             )

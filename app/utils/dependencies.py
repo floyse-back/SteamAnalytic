@@ -5,6 +5,7 @@ from app.application.services.admin_service.admin_service import AdminService
 from app.application.services.news_service.news_service import NewsService
 from app.application.services.notification_service.notification_service import NotificationService
 from app.application.services.steam_service.steam_service import SteamService
+from app.application.services.subsctibes_service.subscribes_service import SubscribesService
 from app.application.services.users_service.users_service import UserService
 from app.infrastructure.celery_app.senders.celery_sender import CelerySender
 from app.infrastructure.db.repository.analitic_repository import AnaliticRepository
@@ -13,7 +14,9 @@ from app.infrastructure.db.repository.email_confirmation_repository import Email
 from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
 from app.infrastructure.db.repository.steam_repository import SteamRepository
 from app.infrastructure.db.repository.user_repository import UserRepository
+from app.infrastructure.db.sync_repository.calendar_repository import CalendarSteamEventRepository
 from app.infrastructure.db.sync_repository.news_repository import NewsRepository
+from app.infrastructure.db.sync_repository.wishlist_repository import GameWishlistRepository
 from app.infrastructure.redis.redis_repository import RedisRepository
 from app.utils.config import STEAM_API_KEY
 from app.application.services.analitic_service.analitic_service import AnalyticService
@@ -79,7 +82,15 @@ async def get_email_service() -> NotificationService:
 
 def get_news_service() -> NewsService:
     return NewsService(
-        news_repository=NewsRepository()
+        news_repository=NewsRepository(),
+        calendar_repository = CalendarSteamEventRepository()
+    )
+
+def get_subscribes_service() -> SubscribesService:
+    return SubscribesService(
+        news_repository=NewsRepository(),
+        calendar_repository = CalendarSteamEventRepository(),
+        wishlist_repository=GameWishlistRepository()
     )
 
 """Other Depends"""

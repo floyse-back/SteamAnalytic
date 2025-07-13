@@ -19,7 +19,7 @@ from app.infrastructure.logger.logger import logger
 
 
 @app.task(
-    max_retries=2,
+    max_retries=1,
     default_retry_delay=100
 )
 def update_steam_games(max_count:int=100):
@@ -68,7 +68,7 @@ def update_steam_games(max_count:int=100):
                 if len(appids) < 60:
                     time.sleep(70-len(appids))
                 else:
-                    time.sleep(25)
+                    time.sleep(15)
         except Exception as e:
             logger.critical(f"{e} Exception occurred")
 
@@ -81,19 +81,19 @@ def update_steam_games(max_count:int=100):
     stmt = insert(SteamBase).from_select(
         columns,
         select(
-            SteamBase.appid,
-            SteamBase.name,
-            SteamBase.developer,
-            SteamBase.publisher,
-            SteamBase.positive,
-            SteamBase.negative,
-            SteamBase.average_forever,
-            SteamBase.average_2weeks,
-            SteamBase.median_forever,
-            SteamBase.median_2weeks,
-            SteamBase.price,
-            SteamBase.discount,
-            SteamBase.img_url
+            SteamBaseTemp.appid,
+            SteamBaseTemp.name,
+            SteamBaseTemp.developer,
+            SteamBaseTemp.publisher,
+            SteamBaseTemp.positive,
+            SteamBaseTemp.negative,
+            SteamBaseTemp.average_forever,
+            SteamBaseTemp.average_2weeks,
+            SteamBaseTemp.median_forever,
+            SteamBaseTemp.median_2weeks,
+            SteamBaseTemp.price,
+            SteamBaseTemp.discount,
+            SteamBaseTemp.img_url
         )
     )
     stmt = stmt.on_conflict_do_update(

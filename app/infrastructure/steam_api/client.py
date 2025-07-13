@@ -134,4 +134,3 @@ class SteamClient(Steam):
             raise SteamUserAchievementsNotFoundDetails("User or app not found")
 
 
-

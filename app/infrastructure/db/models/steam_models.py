@@ -1,11 +1,21 @@
+from datetime import date
 from typing import Union
 
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, JSON, Date, Boolean, UniqueConstraint, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from app.infrastructure.db.database import Base
 
+
+class SteamEventBase(Base):
+    __tablename__ = "steam_events"
+
+    id:Mapped[int] = mapped_column(Integer, primary_key=True,autoincrement=True)
+    name:Mapped[str] = mapped_column(String,unique=True)
+    type_name:Mapped[str] = mapped_column(String,default="festival")
+    date_start:Mapped[date] = mapped_column(Date)
+    date_end:Mapped[date] = mapped_column(Date)
 
 class SteamBase(Base):
     __tablename__ = "steambase"
