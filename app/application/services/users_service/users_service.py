@@ -4,6 +4,7 @@ from app.application.exceptions.exception_handler import UserNotFound, UserNotAu
 from app.application.usecases.get_user import GetUserUseCase
 from app.application.usecases.put_user import PutUserUseCase
 from app.domain.cache_repository import ICacheRepository
+from app.domain.logger import ILogger
 from app.domain.users.repository import IUserRepository, IBlackListRepository, IRefreshTokenRepository
 from app.application.dto.user_dto import UserMe, UserPublic
 from app.application.decorators.cache import cache_data
@@ -11,19 +12,22 @@ from app.utils.utils import decode_jwt
 
 
 class UserService:
-    def __init__(self,user_repository: IUserRepository,blacklist_repository: IBlackListRepository,refresh_token_repository:IRefreshTokenRepository,cache_repository: ICacheRepository):
+    def __init__(self,user_repository: IUserRepository,blacklist_repository: IBlackListRepository,refresh_token_repository:IRefreshTokenRepository,cache_repository: ICacheRepository,logger:ILogger):
         self.user_repository = user_repository
         self.refresh_token_repository = refresh_token_repository
         self.blacklist_repository = blacklist_repository
         self.cache_repository = cache_repository
+        self.logger = logger
 
         self.get_user_use_case = GetUserUseCase(
-            user_repository = user_repository
+            user_repository = user_repository,
+            logger = logger
         )
         self.put_user_use_case = PutUserUseCase(
             user_repository = user_repository,
             blacklist_repository = blacklist_repository,
             refresh_token_repository = refresh_token_repository,
+            logger = logger
         )
 
     async def put_user(self,token,password:str,user:UserMe,session:AsyncSession):

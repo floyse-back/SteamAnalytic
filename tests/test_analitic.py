@@ -3,9 +3,10 @@ from httpx import AsyncClient
 import pytest
 
 from app.application.dto.steam_dto import GamePriceModel
-from app.infrastructure.logger.logger import logger
 from app.utils.config import ServicesConfig
+from tests.conftest import tests_logger as logger
 from tests.utils import transform_to_dto
+
 
 host = "http://127.0.0.1:8000"
 

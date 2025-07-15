@@ -10,42 +10,51 @@ from app.application.usecases.user_login import UserLoginUseCase
 from app.application.usecases.user_register import UserRegisterUseCase
 from app.application.usecases.verify_email import VerifyEmailUseCase
 from app.application.usecases.verify_user import VerifyUserUseCase
+from app.domain.logger import ILogger
 from app.domain.users.repository import IUserRepository, IRefreshTokenRepository, IBlackListRepository, \
     IEmailConfirmationRepository
-from app.application.dto.user_dto import User, TokenType, transform_to_dto,UserModelDTO
+from app.application.dto.user_dto import User, TokenType,UserModelDTO
 from app.utils.utils import decode_jwt
 
 
 class AuthService:
-    def __init__(self,user_repository:IUserRepository,email_repository:IEmailConfirmationRepository,refresh_token_repository:IRefreshTokenRepository,black_list_repository:IBlackListRepository):
+    def __init__(self,user_repository:IUserRepository,email_repository:IEmailConfirmationRepository,refresh_token_repository:IRefreshTokenRepository,black_list_repository:IBlackListRepository,logger:ILogger):
         self.black_list_repository = black_list_repository
 
         self.verify_user_use_case = VerifyUserUseCase(
-            user_repository=user_repository
+            user_repository=user_repository,
+            logger = logger
         )
         self.delete_user_use_case = DeleteUserUseCase(
             user_repository=user_repository,
+            logger = logger
         )
         self.user_login_use_case = UserLoginUseCase(
-            refresh_token_repository=refresh_token_repository
+            refresh_token_repository=refresh_token_repository,
+            logger = logger
         )
         self.user_register_use_case = UserRegisterUseCase(
-            user_repository=user_repository
+            user_repository=user_repository,
+            logger = logger
         )
         self.get_refresh_token_use_case = GetRefreshTokenUseCase(
-            user_repository = user_repository
+            user_repository = user_repository,
+            logger = logger
         )
-
         self.email_verify_confirm_use_case = EmailVerifyConfirmUseCase(
             email_repository=email_repository,
-            user_repository=user_repository
+            user_repository=user_repository,
+            logger = logger
         )
         self.verify_email_use_case = VerifyEmailUseCase(
-            user_repository=user_repository
+            user_repository=user_repository,
+            logger = logger
         )
         self.put_forgot_password_use_case = PutForgotPasswordUseCase(
             user_repository=user_repository,
+            logger = logger
         )
+        self.logger = logger
 
     async def verify_user(self,session:AsyncSession, username: str, password: str) -> UserModelDTO:
         return await self.verify_user_use_case.execute(session,username,password)
@@ -82,3 +91,4 @@ class AuthService:
     async def forgot_password(self,session,token,new_password):
         user_model = await self.email_verify_confirm_use_case.execute(session=session,type="forgot_password",token=token)
         await self.put_forgot_password_use_case.execute(session=session,user_model=user_model,new_password=new_password)
+        self.logger.info("AuthService::forgot_password Successfully forgotten password user_token = %s",token)

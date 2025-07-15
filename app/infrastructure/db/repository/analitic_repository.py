@@ -7,7 +7,6 @@ from app.domain.steam.repository import IAnaliticsRepository
 from app.infrastructure.db.models.steam_models import Game,Ganres,Category,GanreToMany,CategoryToMany
 from typing import List
 
-from app.infrastructure.logger.logger import logger
 
 
 class AnaliticRepository(IAnaliticsRepository):
@@ -45,7 +44,6 @@ class AnaliticRepository(IAnaliticsRepository):
 
         result = await session.execute(final_query)
         results = result.fetchall()
-        logger.info("%s",results)
 
         return [transform_to_dto(GamesForYouModel,r) for r in results]
 

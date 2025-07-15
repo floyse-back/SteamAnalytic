@@ -1,17 +1,20 @@
 from app.application.dto.user_dto import UserMe, UserElementToken, TokenType
 from app.application.exceptions.exception_handler import UserNotAuthorized, UserNotFound, PasswordIncorrect
+from app.domain.logger import ILogger
 from app.domain.users.repository import IUserRepository, IBlackListRepository, IRefreshTokenRepository
 from app.utils.auth_utils import create_access_token, create_refresh_token
 from app.utils.utils import decode_jwt, verify_password
 
 
 class PutUserUseCase:
-    def __init__(self,user_repository:IUserRepository,blacklist_repository:IBlackListRepository,refresh_token_repository:IRefreshTokenRepository):
+    def __init__(self,user_repository:IUserRepository,blacklist_repository:IBlackListRepository,refresh_token_repository:IRefreshTokenRepository,logger:ILogger):
         self.user_repository = user_repository
         self.blacklist_repository = blacklist_repository
         self.refresh_token_repository = refresh_token_repository
+        self.logger = logger
 
     async def execute(self,session,token,password:str,user:UserMe):
+        self.logger.info("PutUserUseCase user=%s",user.username)
         if not token:
             raise UserNotAuthorized("User not authorized")
 

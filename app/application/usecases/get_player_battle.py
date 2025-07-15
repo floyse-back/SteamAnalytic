@@ -1,9 +1,13 @@
 from app.application.dto.steam_dto import SteamUser, transform_to_dto, UserComparison
+from app.domain.logger import ILogger
 
 
 class GetPlayerBattleUseCase:
+    def __init__(self,logger:ILogger):
+        self.logger = logger
     """Порівняння 2 профілів"""
     async def execute(self, user1_data: SteamUser, user2_data: SteamUser,user1_rating:int,user2_rating:int):
+        self.logger.info("GetPlayerBattleUseCase called user1_data_appid=%s, user2_data_appid=%s",user1_data['user_data']['player']['steamid'],user2_data['user_data']['player']['steamid'])
         data = dict()
         data['user_1'] = user1_data["user_data"]["player"].get("personaname")
         data['user_2'] = user2_data["user_data"]["player"].get("personaname")

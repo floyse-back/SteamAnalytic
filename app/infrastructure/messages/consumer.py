@@ -1,18 +1,16 @@
-import json
-
 import pika
 
-from app.infrastructure.logger.logger import logger
+from app.domain.logger import ILogger
 from app.utils.config import RABBITMQ_HOST
 
-
 class Consumer:
-    def __init__(self):
+    def __init__(self,logger:ILogger):
         self.connection = None
         self.channel = None
+        self.logger = logger
 
     def connect(self):
-        logger.info("Connecting to rabbitmq")
+        self.logger.info("Connecting to rabbitmq")
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(f"{RABBITMQ_HOST}"))
         self.channel = self.connection.channel()
 
@@ -23,10 +21,10 @@ class Consumer:
         self.channel.queue_declare(queue="sub_appids", durable=True)
 
         def callback(ch,method,properties,body):
-            logger.info("Get:%s", body.decode())
+            self.logger.info("Get:%s", body.decode())
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
         self.channel.basic_consume(queue="sub_appids",on_message_callback=callback)
-        logger.info("Consume message")
+        self.logger.info("Consume message")
         self.channel.start_consuming()
 

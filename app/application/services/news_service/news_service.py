@@ -9,38 +9,47 @@ from app.application.usecases.news_use_cases.update_calendar_events_use_case imp
 from app.application.usecases.subscribes_use_cases.free_games_now_use_case import FreeGamesNowSyncUseCase
 from app.application.usecases.subscribes_use_cases.hot_discount_games_use_case import HotDiscountUseCase
 from app.application.usecases.subscribes_use_cases.new_release_use_case import NewReleaseUseCase
+from app.domain.logger import ILogger
 from app.domain.steam.sync_repository import INewsRepository, ICalendarSteamEventRepository
-from app.infrastructure.logger.logger import logger
 
 
 class NewsService:
-    def __init__(self,news_repository:INewsRepository,calendar_repository:ICalendarSteamEventRepository):
+    def __init__(self,news_repository:INewsRepository,calendar_repository:ICalendarSteamEventRepository,logger:ILogger):
+        self.logger = logger
         self.event_history_steam_facts_use_case = EventHistorySteamFactsUseCase(
             news_repository=news_repository,
+            logger = logger
         )
         self.free_games_now_use_case = FreeGamesNowSyncUseCase(
             news_repository=news_repository,
+            logger = logger
         )
         self.new_discounts_steam_use_case = HotDiscountUseCase(
             news_repository=news_repository,
+            logger=logger
         )
         self.new_release_use_case = NewReleaseUseCase(
             news_repository=news_repository,
+            logger=logger
         )
         self.summary_statistics_steam_use_case = SummaryStatisticsSteamUseCase(
             news_repository=news_repository,
+            logger=logger
         )
         self.top_for_a_coins_use_case = CheepGamesUseCase(
             news_repository=news_repository,
+            logger=logger
         )
         self.random_game_sync_use_case = GetSyncRandomGameUseCase(
             news_repository=news_repository,
+            logger=logger
         )
         self.update_calendar_events_use_case = UpdateCalendarEventsUseCase(
-            calendar_repository=calendar_repository
+            calendar_repository=calendar_repository,
         )
         self.calendar_event_now_use_case = GetCalendarEventNowUseCase(
-            calendar_repository=calendar_repository
+            calendar_repository=calendar_repository,
+            logger=logger
         )
         self.dispatcher_command:Dict[str,Callable] = {
             "news_new_release":self.new_release,
@@ -93,5 +102,5 @@ class NewsService:
         except KeyError as e:
             raise KeyError(e)
         except Exception as e:
-            logger.error(e)
+            self.logger.error("",e,exc_info=True)
             raise e

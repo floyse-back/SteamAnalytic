@@ -1,8 +1,7 @@
 import smtplib
 from app.domain.email_sender import IEmailSender
-from app.infrastructure.logger.logger import logger
+from app.infrastructure.celery_app.celery_app import logger
 from app.utils.config import EMAIL_PASSWORD, EMAIL_SERVER, EMAIL_PORT, EMAIL_SENDER, ServicesConfig
-
 
 class EmailSender(IEmailSender):
     """Відправка простих текстових email"""

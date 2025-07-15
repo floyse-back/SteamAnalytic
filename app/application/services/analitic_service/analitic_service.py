@@ -17,50 +17,64 @@ from app.application.usecases.get_player_full_stats import GetUserFullStatsUseCa
 from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUseCase
 from app.application.usecases.get_players_rating import GetUserRatingUseCase
 from app.domain.cache_repository import ICacheRepository
+from app.domain.logger import ILogger
 from app.domain.steam.repository import ISteamRepository, IAnaliticsRepository
 
 
 
 class AnalyticService:
-    def __init__(self,steam,cache_repository: ICacheRepository,steam_repository:ISteamRepository,analitic_repository: IAnaliticsRepository):
+    def __init__(self,steam,cache_repository: ICacheRepository,steam_repository:ISteamRepository,analitic_repository: IAnaliticsRepository,logger:ILogger):
         self.steam = steam
         self.cache_repository = cache_repository
 
         self.get_user_full_stats = GetUserFullStatsUseCase(
-            steam = steam
+            steam = steam,
+            logger=logger
         )
         self.get_user_games_play = GetPlayerGamesPlayUseCase(
-            steam = steam
+            steam = steam,
+            logger = logger
         )
-        self.get_user_rating = GetUserRatingUseCase()
+        self.get_user_rating = GetUserRatingUseCase(
+            logger = logger
+        )
         self.get_free_games = GetFreeGamesUseCase(
-            steam_repository=steam_repository
+            steam_repository=steam_repository,
+            logger = logger
         )
         self.get_free_transform = GetFreeTransformUseCase()
         self.get_user_achivements = GetPlayerAchivementsUseCase(
-            steam=steam
+            steam=steam,
         )
         self.get_friends_game_list = GetFriendsGameListUseCase(
-            steam = steam
+            steam = steam,
         )
         self.get_games_for_you = GetGamesForYouUseCase(
-            analitic_repository=analitic_repository
+            analitic_repository=analitic_repository,
+            logger = logger
         )
         self.get_salling_for_you = GetSallingForYouUseCase(
-            analitic_repository=analitic_repository
+            analitic_repository=analitic_repository,
+            logger = logger
         )
         self.get_game_details = GetGameStatsUseCase(
-            steam = steam
+            steam = steam,
+            logger = logger
         )
-        self.get_user_battle = GetPlayerBattleUseCase()
+        self.get_user_battle = GetPlayerBattleUseCase(
+            logger = logger
+        )
         self.get_random_games = GetRandomGamesUseCase(
-            analitic_repository=analitic_repository
+            analitic_repository=analitic_repository,
+            logger = logger
         )
         self.get_steam_appid = GetAppidFromNameUseCase(
-            steam_repository = steam_repository
+            steam_repository = steam_repository,
+            logger = logger
         )
         self.get_price_now = GetGamePriceNowUseCase(
-            steam = self.steam
+            steam = self.steam,
+            logger = logger
         )
 
     @cache_data(expire=1200)

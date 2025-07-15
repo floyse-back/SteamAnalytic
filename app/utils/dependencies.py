@@ -17,7 +17,9 @@ from app.infrastructure.db.repository.user_repository import UserRepository
 from app.infrastructure.db.sync_repository.calendar_repository import CalendarSteamEventRepository
 from app.infrastructure.db.sync_repository.news_repository import NewsRepository
 from app.infrastructure.db.sync_repository.wishlist_repository import GameWishlistRepository
-from app.infrastructure.redis.redis_repository import RedisRepository
+from app.infrastructure.logger.logger import Logger
+from app.infrastructure.messages.consumer import Consumer
+from app.infrastructure.redis.redis_repository import CacheRepository
 from app.utils.config import STEAM_API_KEY
 from app.application.services.analitic_service.analitic_service import AnalyticService
 from app.infrastructure.db.database import get_async_db
@@ -27,10 +29,16 @@ from app.infrastructure.steam_api.client import SteamClient
 
 
 """Infrastucture Depends"""
+def get_cache_repository() -> CacheRepository:
+    return CacheRepository(
+        logger=Logger(name="infrastructure.CacheRepository",file_path="infrastructure"),
+    )
+
 async def get_steam_client() -> SteamClient:
     return SteamClient(
-        cache_repository = RedisRepository(),
-        steam_key=STEAM_API_KEY
+        cache_repository = get_cache_repository(),
+        steam_key=STEAM_API_KEY,
+        logger = Logger(name="SteamClient",file_path="infrastructure")
         )
 
 
@@ -39,7 +47,8 @@ async def get_steam_service(steam_client:SteamClient = Depends(get_steam_client)
     return SteamService(
         steam=steam_client,
         steam_repository = SteamRepository(),
-        cache_repository = RedisRepository()
+        cache_repository = get_cache_repository(),
+        logger=Logger(name="application.SteamService",file_path="application")
     )
 
 async def get_analitic_service(
@@ -47,9 +56,10 @@ async def get_analitic_service(
 ) -> AnalyticService:
     return AnalyticService(
         steam = steam_client,
-        cache_repository = RedisRepository(),
+        cache_repository = get_cache_repository(),
         steam_repository = SteamRepository(),
         analitic_repository=AnaliticRepository(),
+        logger=Logger(name="application.AnalyticService",file_path="application")
     )
 
 async def get_users_service() -> UserService:
@@ -57,7 +67,8 @@ async def get_users_service() -> UserService:
         user_repository = UserRepository(),
         refresh_token_repository = RefreshTokenRepository(),
         blacklist_repository = BlackListRepository(),
-        cache_repository = RedisRepository()
+        cache_repository = get_cache_repository(),
+        logger = Logger(name="application.UserService",file_path="application")
     )
 
 async def get_auth_service() -> AuthService:
@@ -66,31 +77,41 @@ async def get_auth_service() -> AuthService:
         refresh_token_repository = RefreshTokenRepository(),
         black_list_repository = BlackListRepository(),
         email_repository=EmailConfirmationRepository(),
+        logger=Logger(name="application.AuthService", file_path="application")
     )
 
 async def get_admin_service() -> AdminService:
     return AdminService(
-        user_repository = UserRepository()
+        user_repository = UserRepository(),
+        logger=Logger(name="application.AdminService", file_path="application")
     )
 
 async def get_email_service() -> NotificationService:
     return NotificationService(
         email_confirmation_repository=EmailConfirmationRepository(),
         celery_sender=CelerySender(),
-        user_repository=UserRepository()
+        user_repository=UserRepository(),
+        logger=Logger(name="application.GetEmailService", file_path="application")
     )
 
 def get_news_service() -> NewsService:
     return NewsService(
         news_repository=NewsRepository(),
-        calendar_repository = CalendarSteamEventRepository()
+        calendar_repository = CalendarSteamEventRepository(),
+        logger=Logger(name="application.NewsService",file_path="application")
     )
 
 def get_subscribes_service() -> SubscribesService:
     return SubscribesService(
         news_repository=NewsRepository(),
         calendar_repository = CalendarSteamEventRepository(),
-        wishlist_repository=GameWishlistRepository()
+        wishlist_repository=GameWishlistRepository(),
+        logger=Logger(name="application.SubscribesService", file_path="application")
+    )
+
+def get_consumer_rabbitmq():
+    return Consumer(
+        logger = Logger(name="infrastructure.rabbitmq",file_path="infrastructure")
     )
 
 """Other Depends"""

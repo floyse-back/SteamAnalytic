@@ -4,10 +4,13 @@ from fastapi import FastAPI
 from app.api.register_exceptions import register_exceptions
 from app.api.v1 import steam, auth, analytics,users,admin,email
 from app.api.middleware.register_middleware import register_middleware
-from app.infrastructure.logger.logger import logger
-from app.infrastructure.messages.consumer import Consumer
+from app.infrastructure.logger.logger import Logger
+from app.infrastructure.logger.logger_conf import setup_global_config_logger
 from app.utils.config import ServicesConfig, PORT,HOST_PATH
 from multiprocessing import Process
+
+from app.utils.dependencies import get_consumer_rabbitmq
+
 app = FastAPI()
 
 service_config = ServicesConfig()
@@ -28,8 +31,10 @@ register_exceptions(app)
 
 
 if __name__ == "__main__":
+    setup_global_config_logger()
+    logger = Logger(name=__name__,file_path="api")
     logger.info("Starting APP")
-    consumer = Consumer()
+    consumer  = get_consumer_rabbitmq()
     p = Process(target=consumer.consume)
     p.start()
     logger.info("Started consumer")

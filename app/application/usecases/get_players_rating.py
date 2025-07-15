@@ -3,11 +3,15 @@ from math import log
 from typing import Union, Optional
 
 from app.application.dto.steam_dto import SteamUser, SteamRatingModel
-from app.infrastructure.logger.logger import logger
+from app.domain.logger import ILogger
 
 
 class GetUserRatingUseCase:
+    def __init__(self,logger:ILogger):
+        self.logger = logger
+
     async def execute(self,data:SteamUser,enriched:bool=False) -> Union[SteamRatingModel,int]:
+        self.logger.info("GetUserRatingUseCase: called %s",data)
         allow_games,allow_friends,allow_badges = True,True,True
         if data.get('user_games') is None:
             allow_games = False
@@ -32,7 +36,7 @@ class GetUserRatingUseCase:
                 "player_xp_needed_to_level_up": -1,
                 "player_xp_needed_current_level": -1
               }
-        logger.info("Steam User Rating first data %s",data)
+        self.logger.debug("GetUserRatingUseCase: Steam User Rating first data %s",data)
         year_create_user_score = await self.__check_user_years(data["user_data"]["player"].get("timecreated",None)) * 10
         count_user_friends_score = len(data["user_friends_list"]["friends"]) * 2
         lastlogoff = await self.__count_score_last_logoff(self.__last_logoff(data["user_data"]["player"].get("lastlogoff")).days) if data["user_data"]["player"].get("lastlogoff") else 0
@@ -74,11 +78,11 @@ class GetUserRatingUseCase:
             )
         else:
             serialize_data = result
-
+        self.logger.info("Successfully fetched user rating: %s",serialize_data)
         return serialize_data
 
     def __formula_user(self,data:list)->int:
-        logger.debug("Data: %s",data)
+        self.logger.debug("GetUserRatingUseCase: Data: %s",data)
         return round(sum(data))
 
     @staticmethod

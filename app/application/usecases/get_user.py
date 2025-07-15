@@ -1,11 +1,12 @@
 from app.application.dto.user_dto import UserModelDTO
 from app.application.exceptions.exception_handler import UserNotFound
+from app.domain.logger import ILogger
 from app.domain.users.repository import IUserRepository
-from app.infrastructure.logger.logger import logger
 
 class GetUserUseCase:
-    def __init__(self,user_repository:IUserRepository):
+    def __init__(self,user_repository:IUserRepository,logger:ILogger):
         self.user_repository = user_repository
+        self.logger = logger
 
     async def execute(self,session,user_id:int|None = None,email: str|None = None,username:str|None = None)->UserModelDTO:
         if user_id != None:
@@ -20,6 +21,6 @@ class GetUserUseCase:
         if user_model == None:
             raise UserNotFound
 
-        logger.info(f"User {user_model.id} is getting a user")
+        self.logger.info(f"User {user_model.id} is getting a user")
 
         return user_model

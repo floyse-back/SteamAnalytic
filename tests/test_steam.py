@@ -1,10 +1,10 @@
 import pytest
 from httpx import AsyncClient
 
-from app.application.dto.steam_dto import AchievementsModel, GameAchievementsModel
-from app.infrastructure.logger.logger import logger
+from app.application.dto.steam_dto import GameAchievementsModel
 from app.utils.config import ServicesConfig
 from tests.utils import transform_to_dto
+from tests.conftest import tests_logger as logger
 
 service_config = ServicesConfig()
 

@@ -2,7 +2,7 @@ import random
 import pytest
 from app.infrastructure.celery_app.tasks.steam_tasks import update_game_icon_url,send_email
 from app.infrastructure.celery_app.tasks.news_tasks import update_steam_events, news_task_creator
-from app.infrastructure.logger.logger import logger
+from tests.conftest import tests_logger as logger
 
 
 class TestCeleryTasks:

@@ -5,21 +5,22 @@ from steam_web_api import Steam
 
 from app.application.decorators.cache import cache_data
 from app.application.exceptions.exception_handler import SteamExceptionBase
+from app.domain.logger import ILogger
 from app.infrastructure.exceptions.exception_handler import SteamGameNotFound, SteamUserNotFound, \
     SteamUserAchievementsNotFoundDetails, SteamNginxException
-from app.infrastructure.logger.logger import logger
-from app.infrastructure.redis.redis_repository import RedisRepository
+from app.infrastructure.redis.redis_repository import CacheRepository
 from app.utils.config import STEAM_API_KEY
 import re
 from httpx import AsyncClient
 
 
 class SteamClient(Steam):
-    def __init__(self,cache_repository:RedisRepository,steam_key = STEAM_API_KEY):
+    def __init__(self, cache_repository:CacheRepository, logger:ILogger, steam_key = STEAM_API_KEY):
         super().__init__(key=steam_key)
         self.__steam_key = steam_key
         self.__steam_http = "https://api.steampowered.com/"
         self.cache_repository = cache_repository
+        self.logger = logger
 
     @cache_data(expire=60*60*3)
     async def save_start_pool(self,func,func_name="",raise_error:bool=True,*args,**kwargs):
@@ -112,7 +113,6 @@ class SteamClient(Steam):
                 }
             )
             data = response.json()["response"]
-            logger.info(f"{data}")
             if response.status_code == 200 and data["success"] == 1:
                 return data["steamid"]
             raise SteamUserNotFound(f"User {vanity_url} not found")

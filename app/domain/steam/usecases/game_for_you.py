@@ -1,23 +1,24 @@
 from abc import ABC, abstractmethod
 
 from app.application.exceptions.exception_handler import ProfilePrivate
+from app.domain.logger import ILogger
 from app.domain.steam.repository import IAnaliticsRepository
 from app.domain.steam.schemas import Game
-from app.infrastructure.logger.logger import logger
 
 
 class IGameForYou(ABC):
-    def __init__(self,analitic_repository:IAnaliticsRepository):
+    def __init__(self,analitic_repository:IAnaliticsRepository,logger:ILogger):
         self.analitic_repository = analitic_repository
+        self.logger = logger
 
     async def execute(self,data:dict,session,page:int=1,limit:int=15):
         if data is None or len(data)==0:
             raise ProfilePrivate("No data provided")
         appid_list = self.__get_games_appid_list(data)
-        logger.critical(f"appid_list: %s",appid_list)
+        self.logger.debug(f"GamesForYouUseCase:appid_list: %s",appid_list)
         games_details_list = await self.analitic_repository.get_games_for_appids(session,appid_list)
         count_dict = self.__count_games_elements(games_details_list)
-        logger.debug(f"count_dict: %s, games_details_list: %s,appid_list: %s",count_dict,games_details_list,appid_list)
+        self.logger.debug(f"GamesForYouUseCase: count_dict: %s, games_details_list: %s,appid_list: %s",count_dict,games_details_list,appid_list)
 
         data = await self.get_games(session=session,count_dict=count_dict,appid_list=appid_list,page=page,limit=limit)
 

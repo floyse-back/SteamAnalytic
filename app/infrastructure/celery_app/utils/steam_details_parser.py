@@ -5,10 +5,10 @@ from typing import Union
 
 from sqlalchemy.orm import Session
 from steam_web_api import Steam
-from app.infrastructure.db.models.steam_models import Game, Category, Ganres, Publisher
-from app.infrastructure.logger.logger import logger
-from app.utils.config import STEAM_API_KEY
 
+from app.infrastructure.celery_app.celery_app import logger
+from app.infrastructure.db.models.steam_models import Game, Category, Ganres, Publisher
+from app.utils.config import STEAM_API_KEY
 
 class SteamDetailsParser:
     MONTHS_CODE = {

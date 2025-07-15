@@ -1,6 +1,6 @@
 import time
 
-from app.infrastructure.celery_app.celery_app import app
+from app.infrastructure.celery_app.celery_app import app, logger
 
 from datetime import date
 
@@ -13,10 +13,6 @@ from sqlalchemy import cast, Integer, delete, update, text, and_, or_,select
 from sqlalchemy.dialects.postgresql import insert
 
 from app.infrastructure.email_sender.new_email_sender import EmailSender
-from app.infrastructure.logger.logger import logger
-
-
-
 
 @app.task(
     max_retries=1,

@@ -1,12 +1,13 @@
 from typing import Optional
 
+from app.domain.logger import ILogger
 from app.domain.steam.repository import ISteamRepository
-from app.infrastructure.logger.logger import logger
 
 
 class GetAppidFromNameUseCase:
-    def __init__(self,steam_repository:ISteamRepository):
+    def __init__(self,steam_repository:ISteamRepository,logger:ILogger):
         self.steam_repository = steam_repository
+        self.logger = logger
 
     async def execute(self,name,session)->Optional[int]:
         try:
@@ -16,5 +17,5 @@ class GetAppidFromNameUseCase:
             pass
 
         result = await self.steam_repository.get_steam_appid(session=session,name=name)
-        logger.info("Steam Get Steam Appid name=%s result:%s",name,result)
+        self.logger.info("GetAppidFromNameUseCase: Steam Get Steam Appid name=%s result:%s",name,result)
         return result

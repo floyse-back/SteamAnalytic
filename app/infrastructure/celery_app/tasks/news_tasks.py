@@ -1,12 +1,11 @@
 from pydantic import BaseModel
 
 from app.application.services.news_service.news_service import NewsService
-from app.infrastructure.celery_app.celery_app import app
+from app.infrastructure.celery_app.celery_app import app, logger
 from app.infrastructure.celery_app.database import get_db
-from app.infrastructure.logger.logger import logger
+
 from app.infrastructure.messages.producer import EventProducer
 from app.utils.dependencies import get_news_service
-
 
 @app.task
 def update_steam_events():
@@ -26,7 +25,9 @@ def news_task_creator(type_news:str):
         logger.info("Don`t Finded games from {}".format(type_news))
         return None
 
-    event_producer = EventProducer()
+    event_producer = EventProducer(
+        logger=logger,
+    )
     if data and isinstance(data[-1],BaseModel):
         data = [i.model_dump() for i in data]
     logger.info(f"Data:%s\nType%s",data,type(data))

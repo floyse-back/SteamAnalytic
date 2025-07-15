@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import requests
 from datetime import date
 
-from app.infrastructure.logger.logger import logger
+from app.infrastructure.celery_app.celery_app import logger
 
 
 class UpdateCalendarEventsUseCase:

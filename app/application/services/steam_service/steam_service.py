@@ -14,43 +14,52 @@ from app.application.usecases.get_player_games_play import GetPlayerGamesPlayUse
 from app.application.usecases.get_user_badges_use_case import UserBadgesUseCase
 from app.application.usecases.vanity_user_use_case import VanityUserUseCase
 from app.domain.cache_repository import ICacheRepository
+from app.domain.logger import ILogger
 from app.domain.steam.repository import ISteamRepository
 from app.application.decorators.cache import cache_data
 
 
 class SteamService:
-    def __init__(self,steam_repository: ISteamRepository,steam,cache_repository: ICacheRepository):
+    def __init__(self,steam_repository: ISteamRepository,steam,cache_repository: ICacheRepository,logger:ILogger):
         self.cache_repository = cache_repository
 
         self.get_best_sallers_use_case = GetBestSallersUseCase(
-            steam_repository = steam_repository
+            steam_repository = steam_repository,
+            logger = logger
         )
         self.get_user_full_stats = GetUserFullStatsUseCase(
-            steam = steam
+            steam = steam,
+            logger = logger,
         )
         self.get_game_stats = GetGameStatsUseCase(
-            steam = steam
+            steam = steam,
+            logger = logger
         )
         self.get_top_games_use_case = GetTopGamesUseCase(
-            steam_repository = steam_repository
+            steam_repository = steam_repository,
         )
         self.get_game_achievements = GetGameAchievementsUseCase(
-            steam = steam
+            steam = steam,
         )
         self.get_user_games_play = GetPlayerGamesPlayUseCase(
-            steam = steam
+            steam = steam,
+            logger=logger
         )
         self.steam_games_use_case = GetSteamSearchGamesUseCase(
-            steam_repository = steam_repository
+            steam_repository = steam_repository,
+            logger = logger
         )
         self.get_appid_games = GetAppidFromNameUseCase(
-            steam_repository = steam_repository
+            steam_repository = steam_repository,
+            logger = logger
+
         )
         self.vanity_user_use_case = VanityUserUseCase(
-            steam = steam
+            steam = steam,
         )
         self.user_badges_use_case = UserBadgesUseCase(
-            steam = steam
+            steam = steam,
+            logger = logger
         )
 
     @cache_data(expire=2400)

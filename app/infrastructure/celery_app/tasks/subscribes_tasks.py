@@ -1,6 +1,6 @@
 from app.application.services.subsctibes_service.subscribes_service import SubscribesService
 from app.utils.dependencies import get_subscribes_service
-from ..celery_app import app
+from app.infrastructure.celery_app.celery_app import app, logger
 from ..database import get_db
 
 

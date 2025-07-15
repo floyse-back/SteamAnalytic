@@ -1,9 +1,8 @@
 import steamspypi
-from app.infrastructure.db.models.steam_models import SteamBase, SteamBaseTemp
+
+from app.infrastructure.celery_app.celery_app import logger
+from app.infrastructure.db.models.steam_models import SteamBaseTemp
 import time
-
-from app.infrastructure.logger.logger import logger
-
 
 class SteamParser:
     def __init__(self):
