@@ -3,6 +3,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.steam_dto import SteamBase, transform_to_dto, Game
+from app.application.usecases.add_blocked_games_use_case import AddBlockedGamesUseCase
 from app.application.usecases.get_appid_from_name import GetAppidFromNameUseCase
 from app.application.usecases.get_best_sallers import GetBestSallersUseCase
 from app.application.usecases.get_game_achivements import GetGameAchievementsUseCase
@@ -17,10 +18,11 @@ from app.domain.cache_repository import ICacheRepository
 from app.domain.logger import ILogger
 from app.domain.steam.repository import ISteamRepository
 from app.application.decorators.cache import cache_data
+from app.domain.steam.sync_repository import IBlockedGamesRepository
 
 
 class SteamService:
-    def __init__(self,steam_repository: ISteamRepository,steam,cache_repository: ICacheRepository,logger:ILogger):
+    def __init__(self,steam_repository: ISteamRepository,blocked_repository:IBlockedGamesRepository,steam,cache_repository: ICacheRepository,logger:ILogger):
         self.cache_repository = cache_repository
 
         self.get_best_sallers_use_case = GetBestSallersUseCase(
@@ -60,6 +62,9 @@ class SteamService:
         self.user_badges_use_case = UserBadgesUseCase(
             steam = steam,
             logger = logger
+        )
+        self.add_blocked_games_use_case = AddBlockedGamesUseCase(
+            blocked_repository=blocked_repository
         )
 
     @cache_data(expire=2400)
@@ -102,3 +107,6 @@ class SteamService:
 
     async def user_badges(self,user):
         return await self.user_badges_use_case.execute(user=user)
+
+    def add_blocked_games_use_case(self,appid:int,session):
+        return self.add_blocked_games_use_case.execute(appid = appid,session=session)

@@ -21,7 +21,8 @@ class EventProducer:
                 delivery_mode=2,
             )
         )
-        self.logger.info("[x] Sent Message")
+        self.logger.info("[x] Sent Message %s",queue)
+        self.logger.info("[x] Sent Message Body = %s",body)
 
     def close(self):
         self.connection.close()

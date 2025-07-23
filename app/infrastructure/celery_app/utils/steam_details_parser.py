@@ -1,35 +1,51 @@
 import datetime
 import random
 import time
-from typing import Union
+from typing import Union, Optional, List
 
 from sqlalchemy.orm import Session
-from steam_web_api import Steam
 
+from app.application.usecases.add_blocked_games_use_case import AddBlockedGamesUseCase
+from app.application.usecases.add_safe_games_use_case import AddSafeGamesUseCase
+from app.application.usecases.check_game_base_use_case import CheckGameBaseUseCase
 from app.infrastructure.celery_app.celery_app import logger
 from app.infrastructure.db.models.steam_models import Game, Category, Ganres, Publisher
-from app.utils.config import STEAM_API_KEY
+from app.infrastructure.db.sync_repository.BlockedGamesRepository import BlockedGamesRepository
+from app.infrastructure.db.sync_repository.safe_game_repository import SafeGameRepository
+from app.utils.dependencies import get_steam_client
+from app.utils.filter_nfsm_content import filter_nfsm_content
+
 
 class SteamDetailsParser:
     MONTHS_CODE = {
-        "Jan": 1,
-        "Feb": 2,
-        "Mar": 3,
-        "Apr": 4,
-        "May": 5,
-        "Jun": 6,
-        "Jul": 7,
-        "Aug": 8,
-        "Sep": 9,
-        "Oct": 10,
-        "Nov": 11,
-        "Dec": 12,
+        "січ.": 1,
+        "лют.": 2,
+        "берез.": 3,
+        "квіт.": 4,
+        "трав.": 5,
+        "черв.": 6,
+        "лип.": 7,
+        "серп.": 8,
+        "верес.": 9,
+        "жовт.": 10,
+        "листоп.": 11,
+        "груд.": 12,
     }
     def __init__(self, session:Session,session_commit:bool=True):
-        self.steam = Steam(STEAM_API_KEY)
-        self.filters = 'basic,controller_support,dlc,fullgame,developers,demos,price_overview,metacritic,categories,genres,recommendations,achievements,release_date'
+        self.steam = get_steam_client()
+        self.filters = 'basic,controller_support,dlc,fullgame,developers,demos,price_overview,metacritic,categories,genres,recommendations,achievements,release_date,movies,content_descriptors'
         self.session = session
         self.session_commit = session_commit
+        self.add_blocked_game_use_case = AddBlockedGamesUseCase(
+            blocked_repository=BlockedGamesRepository(),
+        )
+        self.add_safegame_use_case = AddSafeGamesUseCase(
+            safe_game_repository=SafeGameRepository(),
+        )
+        self.check_game_use_case = CheckGameBaseUseCase(
+            safe_games_repository=SafeGameRepository(),
+            blocked_repository=BlockedGamesRepository(),
+        )
 
     @staticmethod
     def steam_id_unique(session, model, **kwargs):
@@ -55,7 +71,19 @@ class SteamDetailsParser:
             session.add(instance)
             return instance
 
+    @staticmethod
+    def get_trailer_url(data:Optional[List])->str:
+        logger.debug("Get Trailer URL")
+        if data is None:
+            logger.debug("Get Trailer URL None")
+            return ""
+        for movie in data:
+            if movie.get("name",{"name":None}) and movie['name'].lower().find("trailer")!=-1:
+                logger.debug(f"Get Trailer URL Movie Trailer {movie.get("mp4",{"mp4":{"max":""}})['max']}")
+                return movie.get("mp4",{"mp4":{"max":""}})['max']
+
     def update_game_details(self, game, existing_game):
+        logger.debug(f"Game {game}")
         """Функція для оновлення деталей гри."""
         existing_game.is_free = game.get("is_free")
         existing_game.name = game.get("name")
@@ -70,7 +98,8 @@ class SteamDetailsParser:
         existing_game.recomendations = int(game.get("recommendations", {}).get("total", 0))
         existing_game.img_url = game.get("capsule_image")
         existing_game.last_updated = datetime.datetime.today().date()
-        existing_game.release_data = self.__transform_date(game.get("release_data",{"date":datetime.date.today()}).get("date"))
+        existing_game.release_data = self.__transform_date(my_date=game.get("release_date",{"date":datetime.date.today()}).get("date"))
+        existing_game.trailer_url = self.get_trailer_url(game.get("movies"))
 
         # Оновлення категорій, жанрів та видавців
         if game.get("categories"):
@@ -103,11 +132,15 @@ class SteamDetailsParser:
         date_split = my_date.split(" ")
         if len(date_split) < 3:
             return None
-        month_number = cls.MONTHS_CODE[date_split[0]]
-        day = int(date_split[1].replace(",",""))
+        try:
+            logger.info(f"{my_date}")
+            month_number = cls.MONTHS_CODE[date_split[1]]
+        except KeyError:
+            return None
+        day = int(date_split[0].replace(",",""))
         year = int(date_split[2])
         new_date = datetime.date(year=year,month=month_number,day=day)
-        logger.debug(f"transform_date: %s",new_date)
+        logger.info(f"transform_date: %s",new_date)
         return new_date
 
     def add_new_game(self,game,steam_appid):
@@ -125,7 +158,8 @@ class SteamDetailsParser:
             achievements=game.get("achievements", {}).get("highlighted", {}),
             recomendations=int(game.get("recommendations", {}).get("total", 0)),
             img_url=game.get("capsule_image"),
-            release_data=self.__transform_date(game.get("release_date",{"date":datetime.date.today()}).get("date"))
+            trailer_url=self.get_trailer_url(data=game.get("movies")),
+            release_data=self.__transform_date(game.get("release_date",{"date":datetime.date.today()}).get("date")),
         )
 
         # Додаємо категорії, жанри та видавців
@@ -164,22 +198,35 @@ class SteamDetailsParser:
                 self.add_new_game(game,steam_appid)
 
     @staticmethod
-    def __safe_sleep(min_delay=0.8, max_delay=1.3):
+    def __safe_sleep(min_delay=0.25, max_delay=0.5):
         time.sleep(random.uniform(min_delay, max_delay))
 
     def parse(self,game_list_appid):
         new_list = []
-        for i in game_list_appid:
+        filter_list_appid = self.check_game_use_case.execute(appids=game_list_appid,session=self.session)
+        logger.info(f"{filter_list_appid}")
+        for i in filter_list_appid:
             try:
-                result = self.steam.apps.get_app_details(int(i), filters=self.filters)
+                appid = i.get("appid")
+                result = self.steam.get_game_stats(appid=appid, filters=self.filters,cc="UA")
+                self.__safe_sleep()
 
-                if result.get(f"{i}").get("success") == False:
+                if result.get(f"{appid}").get("success") == False or i.get("success") == True:
                     continue
 
-                new_list.append(result[f'{i}']['data'])
-                self.__safe_sleep()
-            except:
-                logger.debug("Don`t parse game appid %s",i)
+                check = filter_nfsm_content(result[f'{appid}']['data'])
+                if check:
+                    new_list.append(result[f'{appid}']['data'])
+                    self.add_safegame_use_case.execute(
+                        session=self.session,
+                        appid=appid
+                    )
+                else:
+                    logger.debug(f"Blocked game {result[f'{appid}']['data']['steam_appid']}")
+                    self.add_blocked_game_use_case.execute(appid,session=self.session)
+            except Exception as e:
+                logger.info("Don`t parse game %s",i)
+                logger.warning("SteamDetailsParser error parse game: %s Game_appid = %s",e,appid)
                 time.sleep(5)
 
 

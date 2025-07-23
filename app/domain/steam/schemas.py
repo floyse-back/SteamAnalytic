@@ -66,3 +66,7 @@ class SteamBase:
     price: int
     discount: int
     img_url: Optional[str] = None
+
+@dataclass(frozen=True)
+class BlockedGames:
+    appid:int

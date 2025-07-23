@@ -1,4 +1,8 @@
-2025-07-15 10:05:08,147 - __main__ - INFO - Starting APP
-2025-07-15 10:05:08,156 - __main__ - INFO - Started consumer
-2025-07-15 10:06:08,507 - __main__ - INFO - Starting APP
-2025-07-15 10:06:08,516 - __main__ - INFO - Started consumer
+2025-07-23 14:21:51,313 - api.main - INFO - StartUP: Starting APP
+2025-07-23 14:21:51,327 - api.main - INFO - StartUP: Started consumer
+2025-07-23 14:44:40,677 - api.main - INFO - StartUP: Starting APP
+2025-07-23 14:44:40,685 - api.main - INFO - StartUP: Started consumer
+2025-07-23 15:24:20,676 - api.main - INFO - StartUP: Starting APP
+2025-07-23 15:24:20,688 - api.main - INFO - StartUP: Started consumer
+2025-07-23 15:47:53,374 - api.main - INFO - StartUP: Starting APP
+2025-07-23 15:47:53,382 - api.main - INFO - StartUP: Started consumer

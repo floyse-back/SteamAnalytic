@@ -6,10 +6,9 @@ from app.api.v1 import steam, auth, analytics,users,admin,email
 from app.api.middleware.register_middleware import register_middleware
 from app.infrastructure.logger.logger import Logger
 from app.infrastructure.logger.logger_conf import setup_global_config_logger
+from app.run_consumers import run_consumer
 from app.utils.config import ServicesConfig, PORT,HOST_PATH
 from multiprocessing import Process
-
-from app.utils.dependencies import get_consumer_rabbitmq
 
 app = FastAPI()
 
@@ -32,10 +31,9 @@ register_exceptions(app)
 
 if __name__ == "__main__":
     setup_global_config_logger()
-    logger = Logger(name=__name__,file_path="api")
-    logger.info("Starting APP")
-    consumer  = get_consumer_rabbitmq()
-    p = Process(target=consumer.consume)
+    logger = Logger(name="api.main",file_path="api")
+    logger.info("StartUP: Starting APP")
+    p = Process(target=run_consumer)
     p.start()
-    logger.info("Started consumer")
+    logger.info("StartUP: Started consumer")
     uvicorn.run(app, host=HOST_PATH, port=int(PORT))

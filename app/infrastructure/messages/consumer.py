@@ -1,3 +1,5 @@
+import json
+
 import pika
 
 from app.domain.logger import ILogger
@@ -20,8 +22,11 @@ class Consumer:
 
         self.channel.queue_declare(queue="sub_appids", durable=True)
 
-        def callback(ch,method,properties,body):
+        def callback(ch, method, properties, body):
             self.logger.info("Get:%s", body.decode())
+            from app.infrastructure.celery_app.tasks.subscribes_tasks import update_wishlist_batches
+            data = json.loads(body.decode())
+            update_wishlist_batches.delay(data)
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
         self.channel.basic_consume(queue="sub_appids",on_message_callback=callback)

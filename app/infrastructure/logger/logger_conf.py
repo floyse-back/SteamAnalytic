@@ -2,11 +2,8 @@ import logging
 import os
 import sys
 
-from app.utils.config import LOGGER_LEVEL
-
-
 def setup_global_config_logger():
-    logging.basicConfig(level=logging.INFO,
+    logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         handlers=[
                             logging.StreamHandler(sys.stdout),
@@ -24,7 +21,7 @@ name_level = {
 
 def get_logger(name: str, file_path: str = None) -> logging.Logger:
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)  # або LOGGER_LEVEL, якщо він є
+    logger.setLevel(logging.DEBUG)  # або LOGGER_LEVEL, якщо він є
 
     log_path = name_level.get(file_path)
     if log_path:

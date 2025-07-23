@@ -5,7 +5,6 @@ from app.application.exceptions.exception_handler import IncorrectType, UserNotF
 from app.domain.celery_sender import ICelerySender
 from app.domain.logger import ILogger
 from app.domain.users.repository import IEmailConfirmationRepository, IUserRepository
-from app.infrastructure.celery_app.senders.celery_sender import CelerySender
 from app.utils.config import HOST
 
 

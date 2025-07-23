@@ -5,14 +5,16 @@ from app.infrastructure.celery_app.celery_app import app, logger
 from datetime import date
 
 from app.infrastructure.celery_app.database import get_db
-from app.infrastructure.db.models.steam_models import SteamBase, Game, SteamReserveBase, SteamBaseTemp
-from app.infrastructure.db.models.users_models import RefreshToken
 from app.infrastructure.celery_app.utils.steam_parser import SteamParser
+from app.infrastructure.db.models.steam_models import SteamBase, Game, SteamBaseTemp, SteamReserveBase
+from app.infrastructure.db.models.users_models import RefreshToken
 from app.infrastructure.celery_app.utils.steam_details_parser import SteamDetailsParser
-from sqlalchemy import cast, Integer, delete, update, text, and_, or_,select
+from sqlalchemy import cast, Integer, delete, update, select, and_, or_, text, func
 from sqlalchemy.dialects.postgresql import insert
 
 from app.infrastructure.email_sender.new_email_sender import EmailSender
+from app.infrastructure.messages.producer import EventProducer
+
 
 @app.task(
     max_retries=1,
@@ -67,11 +69,10 @@ def update_steam_games(max_count:int=100):
                     time.sleep(15)
         except Exception as e:
             logger.critical(f"{e} Exception occurred")
-
     columns = [
         'appid', 'name', 'developer', 'publisher', 'positive', 'negative',
         'average_forever', 'average_2weeks', 'median_forever', 'median_2weeks',
-        'price', 'discount', 'img_url'
+        'price', 'discount', 'img_url',"ccu"
     ]
 
     stmt = insert(SteamBase).from_select(
@@ -89,7 +90,8 @@ def update_steam_games(max_count:int=100):
             SteamBaseTemp.median_2weeks,
             SteamBaseTemp.price,
             SteamBaseTemp.discount,
-            SteamBaseTemp.img_url
+            SteamBaseTemp.img_url,
+            SteamBaseTemp.ccu
         )
     )
     stmt = stmt.on_conflict_do_update(
@@ -106,14 +108,19 @@ def update_steam_games(max_count:int=100):
             'median_2weeks': stmt.excluded.median_2weeks,
             'price': stmt.excluded.price,
             'discount': stmt.excluded.discount,
-            'img_url': stmt.excluded.img_url
+            'img_url': stmt.excluded.img_url,
+            'ccu':stmt.excluded.ccu
         }
     )
     session.execute(stmt)
     session.commit()
     session.close()
+    event_producer = EventProducer(
+        logger = logger
+    )
+    event_producer.send_message(body={"type":"update_steam_games","status":True},queue="subscribe_queue")
     logger.info("Finished task update_steam_games!")
-
+    get_game_details.delay()
 
 @app.task(
     max_retries=2,
@@ -124,7 +131,16 @@ def get_game_details():
     session = next(get_db())
 
     try:
-        statement = select(SteamBase.appid).join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True).filter(Game.steam_appid.is_(None)).order_by(SteamBase.positive.desc()).limit(500)
+        statement = (select(SteamBase.appid)
+                     .join(SteamBaseTemp,SteamBase.appid == SteamBaseTemp.appid)
+                     .join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=False)
+                     .filter(and_(or_(SteamBaseTemp.discount != SteamBase.discount, SteamBaseTemp.price != SteamBase.price),
+                                  Game.last_updated.is_distinct_from(func.current_date)
+                            )
+                            )
+                     .order_by(Game.last_updated)
+                     .limit(10000)
+                     )
         result = session.execute(statement)
         result = result.scalars().all()
         parser = SteamDetailsParser(session=session)
@@ -138,7 +154,6 @@ def get_game_details():
     finally:
         session.close()
     logger.info("Finished task get_game_details!")
-
 
 @app.task(
     max_retries=2,

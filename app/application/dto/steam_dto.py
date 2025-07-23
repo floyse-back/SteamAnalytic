@@ -18,6 +18,7 @@ class SteamBase(BaseModel):
     price : Optional[int] = None
     discount : Optional[int] = None
     img_url: Optional[str] = None
+    ccu: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -38,7 +39,7 @@ class GanresOut(BaseModel):
         from_attributes = True
 
 class PublisherOut(BaseModel):
-    publisher_id: int
+    publisher_id: Optional[int] = None
     publisher_name: str
 
     class Config:
@@ -136,10 +137,22 @@ class GameFullModel(BaseModel):
     discount: Optional[int] = None
     recomendations: Optional[int] = None
     release_data: Optional[date] = None
+    img_url: Optional[str] = None
+    trailer_url: Optional[str] = None
 
     game_ganre: List[GanresOut]
     game_publisher: List[PublisherOut]
     game_categories: List[CategoryOut]
+
+    class Config:
+        from_attributes = True
+
+class GameWishlistModel(BaseModel):
+    game_id:Optional[int] = None
+    name:Optional[str] = None
+    short_desc:Optional[str] = None
+    price:Optional[int] = None
+    discount:Optional[int] = None
 
     class Config:
         from_attributes = True

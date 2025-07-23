@@ -40,3 +40,24 @@ def news_task_creator(type_news:str):
 
     logger.debug("news_new_release data: {}".format(data))
 
+@app.task
+def news_game_from_ganre(ganre_name:str):
+    """
+    Важливо ganre_name має бути українською мовою
+    """
+    logger.info("NewsGameFromGanre: Execute %s",ganre_name)
+    session = next(get_db())
+    news_service: NewsService = get_news_service()
+    data = news_service.game_from_ganre(ganre_name=ganre_name,session=session)
+    if data is None:
+        logger.info("Don`t Finded games from {}".format(ganre_name))
+        return None
+
+    event_producer = EventProducer(logger=logger)
+    body = {
+        "type_news":f"news_game_from_ganre{ganre_name}",
+        "data":data if isinstance(data,list) else [data]
+    }
+    event_producer.send_message(body=body,queue="news_queue")
+
+

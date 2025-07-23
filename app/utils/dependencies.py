@@ -14,11 +14,13 @@ from app.infrastructure.db.repository.email_confirmation_repository import Email
 from app.infrastructure.db.repository.refresh_token_repository import RefreshTokenRepository
 from app.infrastructure.db.repository.steam_repository import SteamRepository
 from app.infrastructure.db.repository.user_repository import UserRepository
+from app.infrastructure.db.sync_repository.BlockedGamesRepository import BlockedGamesRepository
 from app.infrastructure.db.sync_repository.calendar_repository import CalendarSteamEventRepository
 from app.infrastructure.db.sync_repository.news_repository import NewsRepository
 from app.infrastructure.db.sync_repository.wishlist_repository import GameWishlistRepository
 from app.infrastructure.logger.logger import Logger
 from app.infrastructure.messages.consumer import Consumer
+from app.infrastructure.messages.producer import EventProducer
 from app.infrastructure.redis.redis_repository import CacheRepository
 from app.utils.config import STEAM_API_KEY
 from app.application.services.analitic_service.analitic_service import AnalyticService
@@ -34,11 +36,11 @@ def get_cache_repository() -> CacheRepository:
         logger=Logger(name="infrastructure.CacheRepository",file_path="infrastructure"),
     )
 
-async def get_steam_client() -> SteamClient:
+def get_steam_client() -> SteamClient:
     return SteamClient(
         cache_repository = get_cache_repository(),
         steam_key=STEAM_API_KEY,
-        logger = Logger(name="SteamClient",file_path="infrastructure")
+        logger = Logger(name="infrastructure.SteamClient",file_path="infrastructure")
         )
 
 
@@ -48,7 +50,8 @@ async def get_steam_service(steam_client:SteamClient = Depends(get_steam_client)
         steam=steam_client,
         steam_repository = SteamRepository(),
         cache_repository = get_cache_repository(),
-        logger=Logger(name="application.SteamService",file_path="application")
+        logger=Logger(name="application.SteamService",file_path="application"),
+        blocked_repository=BlockedGamesRepository()
     )
 
 async def get_analitic_service(
@@ -94,11 +97,17 @@ async def get_email_service() -> NotificationService:
         logger=Logger(name="application.GetEmailService", file_path="application")
     )
 
-def get_news_service() -> NewsService:
+def get_news_service(
+) -> NewsService:
     return NewsService(
         news_repository=NewsRepository(),
         calendar_repository = CalendarSteamEventRepository(),
-        logger=Logger(name="application.NewsService",file_path="application")
+        logger=Logger(name="application.NewsService",file_path="application"),
+        steam=SteamClient(
+        cache_repository = get_cache_repository(),
+        steam_key=STEAM_API_KEY,
+        logger = Logger(name="infrastructure.SteamClient",file_path="infrastructure")
+        )
     )
 
 def get_subscribes_service() -> SubscribesService:
@@ -106,7 +115,11 @@ def get_subscribes_service() -> SubscribesService:
         news_repository=NewsRepository(),
         calendar_repository = CalendarSteamEventRepository(),
         wishlist_repository=GameWishlistRepository(),
-        logger=Logger(name="application.SubscribesService", file_path="application")
+        logger=Logger(name="application.SubscribesService", file_path="application"),
+        steam = get_steam_client(),
+        event_producer = EventProducer(
+            logger = Logger(name="infrastructure.EventProvider",file_path="infrastructure"),
+        )
     )
 
 def get_consumer_rabbitmq():

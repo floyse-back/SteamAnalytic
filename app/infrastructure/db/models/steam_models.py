@@ -2,7 +2,7 @@ from datetime import date
 from typing import Union
 
 import sqlalchemy
-from sqlalchemy import Column, Integer, String, JSON, Date, Boolean, UniqueConstraint, ForeignKey
+from sqlalchemy import Column, Integer, String, JSON, Date, Boolean, UniqueConstraint, ForeignKey, Index
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from app.infrastructure.db.database import Base
@@ -16,6 +16,14 @@ class SteamEventBase(Base):
     type_name:Mapped[str] = mapped_column(String,default="festival")
     date_start:Mapped[date] = mapped_column(Date)
     date_end:Mapped[date] = mapped_column(Date)
+
+class BlockedGames(Base):
+    __tablename__ = "blocked_games"
+    appid:Mapped[int] = mapped_column(Integer, primary_key=True,nullable=False)
+
+class SafeGames(Base):
+    __tablename__ = "safe_games"
+    appid:Mapped[int] = mapped_column(Integer, primary_key=True,nullable=False)
 
 class SteamBase(Base):
     __tablename__ = "steambase"
@@ -34,6 +42,7 @@ class SteamBase(Base):
     price = Column(Integer)
     discount = Column(Integer)
     img_url = Column(String,nullable=True,default=None)
+    ccu = Column(Integer,nullable=True,default=0)
 
 class SteamBaseTemp(Base):
     __tablename__ = "steambase_temp"
@@ -52,6 +61,7 @@ class SteamBaseTemp(Base):
     price = Column(Integer)
     discount = Column(Integer)
     img_url = Column(String,nullable=True,default=None)
+    ccu = Column(Integer,nullable=True,default=0)
 
 class SteamReserveBase(Base):
     __tablename__ = "steambase_copy"
@@ -70,12 +80,14 @@ class SteamReserveBase(Base):
     price = Column(Integer)
     discount = Column(Integer)
     img_url = Column(String,nullable=True,default=None)
+    ccu = Column(Integer,nullable=True,default=0)
+
 
 class Game(Base):
     __tablename__ = 'gamesdetails'
 
     steam_appid = Column(Integer, primary_key=True, index=True, unique=True)
-    name = Column(String)
+    name = Column(String,index=True)
     is_free = Column(Boolean)
     short_description = Column(String)
     requirements = Column(JSON)
@@ -87,11 +99,18 @@ class Game(Base):
     achievements = Column(JSON)
     recomendations = Column(Integer)
     img_url = Column(String)
+    trailer_url = Column(String,default=None,nullable=True)
     release_data = Column(Date,default= sqlalchemy.func.current_date())
     last_updated = Column(Date,default = sqlalchemy.func.current_date())
 
     __table_args__ = (
         UniqueConstraint('steam_appid', name='uq_gamesdetails_steam_appid'),
+        Index(
+            'idx_game_name_trgm',
+            'name',
+            postgresql_using='gin',
+            postgresql_ops={'name': 'gin_trgm_ops'}
+        )
     )
 
     game_ganre = relationship(

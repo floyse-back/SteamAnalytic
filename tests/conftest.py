@@ -33,6 +33,7 @@ def event_loop():
 @pytest_asyncio.fixture(scope="function", autouse=True)
 async def prepare_database():
     async with engine.begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
@@ -56,6 +57,10 @@ async def session(connection: AsyncConnection, transaction: AsyncTransaction):
     yield async_session
     await transaction.rollback()
 
+@pytest_asyncio.fixture(scope="function")
+async def sync_connection():
+    with engine.connect() as conn:
+        yield conn
 
 @pytest_asyncio.fixture()
 async def client(connection:AsyncConnection,transaction:AsyncTransaction):

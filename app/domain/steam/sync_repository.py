@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Sequence
 
-from app.domain.steam.schemas import Game
+from app.domain.steam.schemas import Game, BlockedGames
 
 
 class INewsRepository(ABC):
@@ -38,6 +38,10 @@ class INewsRepository(ABC):
     def event_history_steam_facts(self,session,now_date_list:List[date]=date.today())->Optional[List[Game]]:
         pass
 
+    @abstractmethod
+    def get_game_from_ganre_name(self, ganre_name, session):
+        pass
+
 
 class IGameWishlistRepository(ABC):
     @abstractmethod
@@ -59,4 +63,24 @@ class ICalendarSteamEventRepository(ABC):
 
     @abstractmethod
     def get_now_events(self,session,datenow:date):
+        pass
+
+
+class IBlockedGamesRepository(ABC):
+    @abstractmethod
+    def add_blocked_games(self,appid:int,session):
+        pass
+
+    @abstractmethod
+    def get_blocked_games_from_appids(self, appids, session)->Sequence[BlockedGames]:
+        pass
+
+
+class ISafegameRepository(ABC):
+    @abstractmethod
+    def add_safe_games(self,appid:int,session):
+        pass
+
+    @abstractmethod
+    def get_safe_games_from_appids(self, appids, session):
         pass

@@ -1,8 +1,11 @@
 from typing import Dict, Callable, Optional, List
 
+from app.application.usecases.get_free_transform import GetFreeTransformUseCase
+from app.application.usecases.get_game_stats import GetGameStatsUseCase
 from app.application.usecases.news_use_cases.cheep_games_use_case import CheepGamesUseCase
 from app.application.usecases.news_use_cases.event_history_steam_use_case import EventHistorySteamFactsUseCase
 from app.application.usecases.news_use_cases.get_calendar_event_now_use_case import GetCalendarEventNowUseCase
+from app.application.usecases.news_use_cases.get_game_from_ganre_name_use_case import GetGameFromGanreNameUseCase
 from app.application.usecases.news_use_cases.get_sync_random_game import GetSyncRandomGameUseCase
 from app.application.usecases.news_use_cases.summary_statistics_steam_use_case import SummaryStatisticsSteamUseCase
 from app.application.usecases.news_use_cases.update_calendar_events_use_case import UpdateCalendarEventsUseCase
@@ -14,7 +17,7 @@ from app.domain.steam.sync_repository import INewsRepository, ICalendarSteamEven
 
 
 class NewsService:
-    def __init__(self,news_repository:INewsRepository,calendar_repository:ICalendarSteamEventRepository,logger:ILogger):
+    def __init__(self,news_repository:INewsRepository,calendar_repository:ICalendarSteamEventRepository,logger:ILogger,steam):
         self.logger = logger
         self.event_history_steam_facts_use_case = EventHistorySteamFactsUseCase(
             news_repository=news_repository,
@@ -51,6 +54,11 @@ class NewsService:
             calendar_repository=calendar_repository,
             logger=logger
         )
+        self.get_game_stats_use_case = GetGameStatsUseCase(
+            logger=logger,
+            steam=steam
+        )
+        self.get_game_correct_data = GetFreeTransformUseCase(logger=logger)
         self.dispatcher_command:Dict[str,Callable] = {
             "news_new_release":self.new_release,
             "news_free_games_now":self.free_games_now,
@@ -59,14 +67,26 @@ class NewsService:
             "news_top_for_a_coins":self.top_for_a_coins,
             "news_random_game":self.random_game,
             "news_trailer_from_day":self.trailer_from_day,
-            "news_calendar_event_now":self.get_calendar_event_now
+            "news_calendar_event_now":self.get_calendar_event_now,
+            "news_game_from_ganre":self.game_from_ganre
         }
+        self.get_game_from_ganre_name_use_case = GetGameFromGanreNameUseCase(
+            news_repository=news_repository
+        )
 
     def event_history_steam_facts(self,session)->Optional[List[dict]]:
         return self.event_history_steam_facts_use_case.execute(session=session)
 
     def free_games_now(self,session)->Optional[List[dict]]:
-        return self.free_games_now_use_case.execute(session=session)
+        data:List[int] = self.free_games_now_use_case.execute(session=session)
+        if data is None or len(data) == 0:
+            return None
+        else:
+            full_data = [
+                self.get_game_correct_data.execute(data = self.get_game_stats_use_case.execute_sync(steam_id=i),game_id=i,full=True)
+                for i in data
+            ]
+        return full_data
 
     def summary_statistics_steam(self,session)->Optional[List[dict]]:
         return self.summary_statistics_steam_use_case.execute(session=session)
@@ -75,7 +95,7 @@ class NewsService:
         return self.new_discounts_steam_use_case.execute(session=session,limit=5)
 
     def top_for_a_coins(self,session)->Optional[List[dict]]:
-        return self.top_for_a_coins_use_case.execute(min_price=500,session=session)
+        return self.top_for_a_coins_use_case.execute(min_price=12500,session=session)
 
     def random_game(self,session)->Optional[List[dict]]:
         return self.random_game_sync_use_case.execute(session=session)
@@ -95,6 +115,9 @@ class NewsService:
 
     def update_calendar_events(self,session):
         return self.update_calendar_events_use_case.execute(session=session)
+
+    def game_from_ganre(self,ganre_name:str,session)->Optional[dict]:
+        return self.get_game_from_ganre_name_use_case.execute(ganre_name=ganre_name,session=session)
 
     def dispathcher(self,func_name:str,*args,**kwargs):
         try:

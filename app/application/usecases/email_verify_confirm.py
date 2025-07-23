@@ -22,7 +22,6 @@ class EmailVerifyConfirmUseCase:
         if not user_model:
             raise UserNotFound()
 
-        self.logger.debug(f"EmailVerifyConfirmUseCase: User Model transform to dto,token=",token)
         await self.email_repository.delete_confirm_token(session=session,type=type,user_id=email_model.user_id)
 
         if type == "delete_user":

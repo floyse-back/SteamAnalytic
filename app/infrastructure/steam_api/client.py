@@ -1,6 +1,7 @@
 import asyncio
 from typing import Union, List, Optional
 
+from bs4 import BeautifulSoup
 from steam_web_api import Steam
 
 from app.application.decorators.cache import cache_data
@@ -12,7 +13,7 @@ from app.infrastructure.redis.redis_repository import CacheRepository
 from app.utils.config import STEAM_API_KEY
 import re
 from httpx import AsyncClient
-
+import httpx
 
 class SteamClient(Steam):
     def __init__(self, cache_repository:CacheRepository, logger:ILogger, steam_key = STEAM_API_KEY):
@@ -21,6 +22,7 @@ class SteamClient(Steam):
         self.__steam_http = "https://api.steampowered.com/"
         self.cache_repository = cache_repository
         self.logger = logger
+
 
     @cache_data(expire=60*60*3)
     async def save_start_pool(self,func,func_name="",raise_error:bool=True,*args,**kwargs):
@@ -32,6 +34,7 @@ class SteamClient(Steam):
                 raise SteamExceptionBase(exc=e)
             else:
                 return None
+
     def __game_check_correct_data(self,response:Optional[dict],game_id:int)->Optional[dict]:
         if response is None:
             raise SteamGameNotFound("Steam game not found")
@@ -133,4 +136,29 @@ class SteamClient(Steam):
         except Exception:
             raise SteamUserAchievementsNotFoundDetails("User or app not found")
 
+    def get_game_stats(self,appid,filters,cc):
+        response = httpx.get(
+            "https://store.steampowered.com/api/appdetails",
+            params={
+                "appids":appid,
+                "filters":filters,
+                "cc":cc,
+                "l":"ukrainian"
+            }
+        )
+        if response.status_code == 200:
+            return response.json()
 
+    @staticmethod
+    def get_popular_tags(appid: int) -> list[str]:
+        url = f"https://store.steampowered.com/app/{appid}"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = httpx.get(url, headers=headers)
+        soup = BeautifulSoup(response.text, "html.parser")
+        tags = []
+        tag_container = soup.find_all("a", class_="app_tag")
+        for tag in tag_container:
+            tag_text = tag.text.strip()
+            if tag_text:
+                tags.append(tag_text.lower())
+        return tags

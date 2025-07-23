@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.steam.repository import ISteamRepository
@@ -17,7 +17,7 @@ class SteamRepository(ISteamRepository):
         return result.scalars().all()
 
     async def get_most_discount_games(self,session:AsyncSession,page:int,limit:int):
-        statement = select(SteamBase).order_by(desc(SteamBase.discount)).offset((page - 1) * limit).order_by(desc(SteamBase.discount),desc(SteamBase.positive),desc(SteamBase.price)).limit(limit)
+        statement = select(SteamBase).filter(and_(SteamBase.positive >= 1000,SteamBase.positive - SteamBase.negative >=250)).order_by(desc(SteamBase.discount)).offset((page - 1) * limit).limit(limit)
 
         result = await session.execute(statement)
         return result.scalars().all()
@@ -48,7 +48,7 @@ class SteamRepository(ISteamRepository):
 
         if name:
             name=name.lower()
-            statement = statement.filter(Game.name.ilike(f"%{name}%"))
+            statement = statement.filter(Game.name.op("~*")(fr'\m{name}')).order_by(desc(Game.recomendations))
         if discount:
             statement = statement.filter(Game.discount >= discount)
         if to_price:

@@ -13,7 +13,6 @@ class GetCalendarEventNowUseCase:
     def execute(self,session):
         data = self.calendar_repository.get_now_events(session=session,datenow = date.today())
         self.logger.info(f"GetCalendarEventNowUseCase execute len: %s",len(data))
-        self.logger.debug(f"GetCalendarEventNowUseCase execute",data)
         if data is None:
             return None
 
