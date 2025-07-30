@@ -42,6 +42,9 @@ class INewsRepository(ABC):
     def get_game_from_ganre_name(self, ganre_name, session):
         pass
 
+    @abstractmethod
+    def get_game_from_categorie_name(self, category_name:str, session)->Optional[Game]:
+        pass
 
 class IGameWishlistRepository(ABC):
     @abstractmethod

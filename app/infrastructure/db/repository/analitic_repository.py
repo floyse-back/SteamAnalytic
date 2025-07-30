@@ -80,7 +80,7 @@ class AnaliticRepository(IAnaliticsRepository):
         return [transform_to_dto(GamesForYouModel,r) for r in results]
 
     async def get_random_games(self,session:AsyncSession,limit:int=15):
-        query = select(Game).order_by(func.random()).limit(limit)
+        query = select(Game).where(Game.recomendations >= 5000).order_by(func.random()).limit(limit)
 
         data = await session.execute(query)
 

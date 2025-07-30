@@ -161,4 +161,4 @@ class SteamClient(Steam):
             tag_text = tag.text.strip()
             if tag_text:
                 tags.append(tag_text.lower())
-        return tags
+        return tags[0:11]

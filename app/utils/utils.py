@@ -1,7 +1,7 @@
 import bcrypt
 import jwt
 from fastapi import HTTPException
-from jwt import ExpiredSignatureError
+from jwt import ExpiredSignatureError, InvalidTokenError, DecodeError
 
 from app.utils.config import TokenConfig
 from app.utils.exceptions.exceptions import ExpiredToken
@@ -18,7 +18,8 @@ def decode_jwt(
         return jwt.decode(encoded_jwt, public_key,algorithms=[algorithm])
     except ExpiredSignatureError:
         raise ExpiredToken()
-
+    except (InvalidTokenError, DecodeError) as e:
+        raise ExpiredToken()
 
 def encode_jwt(
         payload:dict,

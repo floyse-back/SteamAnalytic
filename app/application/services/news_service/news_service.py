@@ -5,6 +5,8 @@ from app.application.usecases.get_game_stats import GetGameStatsUseCase
 from app.application.usecases.news_use_cases.cheep_games_use_case import CheepGamesUseCase
 from app.application.usecases.news_use_cases.event_history_steam_use_case import EventHistorySteamFactsUseCase
 from app.application.usecases.news_use_cases.get_calendar_event_now_use_case import GetCalendarEventNowUseCase
+from app.application.usecases.news_use_cases.get_game_from_categories_name_use_case import \
+    GetGameFromCategoriesNameUseCase
 from app.application.usecases.news_use_cases.get_game_from_ganre_name_use_case import GetGameFromGanreNameUseCase
 from app.application.usecases.news_use_cases.get_sync_random_game import GetSyncRandomGameUseCase
 from app.application.usecases.news_use_cases.summary_statistics_steam_use_case import SummaryStatisticsSteamUseCase
@@ -58,6 +60,9 @@ class NewsService:
             logger=logger,
             steam=steam
         )
+        self.get_game_from_category_name_use_case = GetGameFromCategoriesNameUseCase(
+            news_repository=news_repository
+                                                                                     )
         self.get_game_correct_data = GetFreeTransformUseCase(logger=logger)
         self.dispatcher_command:Dict[str,Callable] = {
             "news_new_release":self.new_release,
@@ -66,9 +71,9 @@ class NewsService:
             "news_discounts_steam_now":self.news_discounts_steam,
             "news_top_for_a_coins":self.top_for_a_coins,
             "news_random_game":self.random_game,
-            "news_trailer_from_day":self.trailer_from_day,
             "news_calendar_event_now":self.get_calendar_event_now,
-            "news_game_from_ganre":self.game_from_ganre
+            "news_game_from_ganre":self.game_from_ganre,
+            "news_game_from_categorie":self.game_from_categories
         }
         self.get_game_from_ganre_name_use_case = GetGameFromGanreNameUseCase(
             news_repository=news_repository
@@ -95,13 +100,10 @@ class NewsService:
         return self.new_discounts_steam_use_case.execute(session=session,limit=5)
 
     def top_for_a_coins(self,session)->Optional[List[dict]]:
-        return self.top_for_a_coins_use_case.execute(min_price=12500,session=session)
+        return self.top_for_a_coins_use_case.execute(min_price=20000,session=session)
 
     def random_game(self,session)->Optional[List[dict]]:
         return self.random_game_sync_use_case.execute(session=session)
-
-    def trailer_from_day(self,session):
-        return {"Time":"Soon"}
 
     def new_release(self,session)->Optional[List[dict]]:
         return self.new_release_use_case.execute(session=session)
@@ -119,11 +121,14 @@ class NewsService:
     def game_from_ganre(self,ganre_name:str,session)->Optional[dict]:
         return self.get_game_from_ganre_name_use_case.execute(ganre_name=ganre_name,session=session)
 
+    def game_from_categories(self,categories:str,session)->Optional[dict]:
+        return self.get_game_from_category_name_use_case.execute(category = categories,session=session)
+
     def dispathcher(self,func_name:str,*args,**kwargs):
         try:
             return self.dispatcher_command[func_name](*args,**kwargs)
         except KeyError as e:
             raise KeyError(e)
         except Exception as e:
-            self.logger.error("",e,exc_info=True)
+            self.logger.error(f"Error {e}",exc_info=True)
             raise e

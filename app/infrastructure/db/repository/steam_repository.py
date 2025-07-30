@@ -48,7 +48,7 @@ class SteamRepository(ISteamRepository):
 
         if name:
             name=name.lower()
-            statement = statement.filter(Game.name.op("~*")(fr'\m{name}')).order_by(desc(Game.recomendations))
+            statement = statement.filter(Game.name.ilike(f"%{name}%")).order_by(desc(Game.recomendations))
         if discount:
             statement = statement.filter(Game.discount >= discount)
         if to_price:

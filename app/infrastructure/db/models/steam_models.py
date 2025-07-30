@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Union
 
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, JSON, Date, Boolean, UniqueConstraint, ForeignKey, Index
@@ -100,7 +99,7 @@ class Game(Base):
     recomendations = Column(Integer)
     img_url = Column(String)
     trailer_url = Column(String,default=None,nullable=True)
-    release_data = Column(Date,default= sqlalchemy.func.current_date())
+    release_data = Column(Date,default= None,nullable=True)
     last_updated = Column(Date,default = sqlalchemy.func.current_date())
 
     __table_args__ = (

@@ -48,7 +48,6 @@ class SubscribesService:
             "subscribe_hot_discount_notificate":self.hot_discount_games,
             "subscribe_wishlist_notificate":self.wishlist_game_discount,
             "subscribe_steam_news":self.event_new,
-
         }
         self.get_game_stats_use_case = GetGameStatsUseCase(
             logger=logger,
@@ -78,10 +77,11 @@ class SubscribesService:
         self.wishlist_game_discount_use_case.execute(appids=appids,session=session)
 
     def hot_discount_games(self,session)->Optional[List[dict]]:
-        return self.hot_discount_games_use_case.execute(session=session)
+        return self.hot_discount_games_use_case.execute(session=session,limit=5)
 
     def update_game_wishlist(self,session,data:List[dict]):
         data =  self.update_game_wishlist_use_case.execute(session=session,data=data)
+        self.logger.info(f"Data Update Game Wishlist {data}")
         self.event_provider.send_message(body = {"type":"send_and_update_wishlist_games","status":True,"data":data},queue="subscribe_queue")
 
     def dispathcher(self,func_name:str,*args,**kwargs):

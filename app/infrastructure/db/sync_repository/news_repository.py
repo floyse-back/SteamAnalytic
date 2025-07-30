@@ -2,7 +2,7 @@ from datetime import date
 from typing import Optional, List, Sequence
 
 from sqlalchemy.orm import Session, aliased
-from sqlalchemy import select, and_, func, cast, Integer, or_
+from sqlalchemy import select, and_, func, cast, Integer, or_, desc
 
 from app.domain.steam.sync_repository import INewsRepository
 from app.infrastructure.db.models.steam_models import Game, SteamBase, SteamReserveBase, Ganres, Category
@@ -21,21 +21,21 @@ class NewsRepository(INewsRepository):
     def summary_statistics_steam(self,session)->Optional[dict]:
         return {"Sonn":"Don`t Created"}
 
-    def news_discounts_steam(self,session,limit:int=5,final_price:int=500)->Optional[List[Game]]:
-        Ganre = aliased(Ganres)
-        CategoryAlias = aliased(Category)
+    def news_discounts_steam(self,session:Session,limit:int=5)->Optional[List[Game]]:
+        final_price: int = 10000
 
-        statement = (select(Game).outerjoin(SteamReserveBase,cast(SteamReserveBase.appid,Integer)==Game.steam_appid)
-        .join(Game.game_ganre.of_type(Ganre))
-        .join(Game.game_categories.of_type(CategoryAlias))
+        statement = (select(Game)
+        .join(SteamReserveBase,cast(SteamReserveBase.appid,Integer)==Game.steam_appid)
+        .join(SteamBase,cast(SteamBase.appid,Integer)==Game.steam_appid)
         .filter(and_(
-            ~CategoryAlias.category_name.in_(self.BLOCK_CATEGORIES),
-            ~Ganre.ganres_name.in_(self.BLOCK_GANRES),
-            Game.discount>func.coalesce(SteamReserveBase.discount,0),
-            Game.discount>=75,Game.discount!=100)
+            SteamBase.discount > SteamReserveBase.discount,
+            Game.recomendations >= 250,
+            Game.discount>=60,Game.discount!=100,
+            Game.initial_price >= final_price
         )
-        .order_by(Game.discount)
-        .limit(limit))
+        )
+        .order_by(desc(Game.discount))
+        .limit(5))
         result=session.execute(statement)
         return result.scalars().unique().all()
 
@@ -51,6 +51,7 @@ class NewsRepository(INewsRepository):
                      ~CategoryAlias.category_name.in_(self.BLOCK_CATEGORIES),
                      ~Ganre.ganres_name.in_(self.BLOCK_GANRES),
                      Game.final_price>0,
+                     Game.initial_price >= 15000,
                      Game.final_price<=price,
                      Game.release_data>=date(year=2020,month=1,day=1),
                      or_(cast(Game.metacritic,Integer)>=85, 100*SteamBase.positive/(SteamBase.positive+SteamBase.negative)>85),
@@ -69,18 +70,26 @@ class NewsRepository(INewsRepository):
         .join(Game.game_categories.of_type(CategoryAlias))
         .filter(and_(~CategoryAlias.category_name.in_(self.BLOCK_CATEGORIES),
                 ~Ganre.ganres_name.in_(self.BLOCK_GANRES),
-                Game.final_price>price,cast(Game.metacritic,Integer))>=70).order_by(func.random()).limit(limit))
+                Game.recomendations >= 7000,
+                Game.final_price>price,cast(Game.metacritic,Integer)>=70)).order_by(func.random()).limit(limit))
         result = session.execute(statement)
         return result.scalars().unique().all()
 
     def new_release(self,session:Session,now_date:date=date.today())-> Sequence[Game]:
         Ganre = aliased(Ganres)
+        CategoryAlias = aliased(Category)
 
-        statement = (select(Game).where(
-            Game.release_data==now_date
+        statement = (select(Game).filter(and_(
+            Game.release_data == now_date,
+            Game.final_price >= 10000,
+            Game.initial_price >= 12000,
+            Game.recomendations >= 200
+        )
         )
         .join(Game.game_ganre.of_type(Ganre))
-        .filter(~Ganre.ganres_name.in_(self.BLOCK_CATEGORIES))
+        .filter(~Ganre.ganres_name.in_(self.BLOCK_GANRES),
+                ~CategoryAlias.category_name.in_(self.BLOCK_CATEGORIES),
+                )
         .order_by(Game.recomendations).limit(5))
         result = session.execute(statement).unique()
         return result.scalars().unique().all()
@@ -96,13 +105,14 @@ class NewsRepository(INewsRepository):
                      .join(Game.game_categories.of_type(CategoryAlias))
                      .filter(and_(
                      Game.release_data.in_(now_date_list),
-
-                     ))
+                     ),
+                     Game.recomendations >= 100
+        )
                      .order_by(Game.recomendations).limit(5))
         result = session.execute(statement).unique()
         return result.scalars().unique().all()
 
-    def get_game_from_ganre_name(self, ganre_name, session)->Optional[Game]:
+    def get_game_from_ganre_name(self, ganre_name:str, session)->Optional[Game]:
         Ganre = aliased(Ganres)
         CategoryAlias = aliased(Category)
 
@@ -114,8 +124,32 @@ class NewsRepository(INewsRepository):
             .filter(
                 ~CategoryAlias.category_name.in_(self.BLOCK_CATEGORIES),
                 ~Ganre.ganres_name.in_(self.BLOCK_GANRES),
-                (SteamBase.positive - SteamBase.negative) >= 2000,
+                Ganre.ganres_name.in_([ganre_name]),
+                (SteamBase.positive - SteamBase.negative) >= 6000,
                 Game.release_data >= date(year=2020, month=1, day=1),
+            )
+            .order_by(func.random())
+            .limit(1)
+        )
+
+        result = session.execute(statement)
+        return result.scalars().first()
+
+    def get_game_from_categorie_name(self, category_name:str, session)->Optional[Game]:
+        Ganre = aliased(Ganres)
+        CategoryAlias = aliased(Category)
+
+        statement = (
+            select(Game)
+            .join(SteamBase, cast(SteamBase.appid, Integer) == Game.steam_appid)
+            .join(Game.game_ganre.of_type(Ganre))
+            .join(Game.game_categories.of_type(CategoryAlias))
+            .filter(
+                ~CategoryAlias.category_name.in_(self.BLOCK_CATEGORIES),
+                ~Ganre.ganres_name.in_(self.BLOCK_GANRES),
+                CategoryAlias.category_name.in_([category_name]),
+                (SteamBase.positive - SteamBase.negative) >= 6000,
+                Game.release_data >= date(year=2019, month=1, day=1),
             )
             .order_by(func.random())
             .limit(1)

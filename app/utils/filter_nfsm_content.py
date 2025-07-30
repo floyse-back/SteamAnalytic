@@ -1,18 +1,33 @@
 from app.infrastructure.steam_api.client import SteamClient
 
-red_flug_descriptors_ids = [1,3,4]
-yellow_flug_descriptors_ids = [2,5]
+red_flug_descriptors_ids = [3,4]
+yellow_flug_descriptors_ids = [1,2,5]
 tags_blocked_list = [
-    "hentai","nudity","sexual content","nsfw"
+    {
+        "count":1,
+        "tag":"hentai"
+    },
+    {
+        "count":0.5,
+        "tag":"sexual content"
+    },
+    {
+        "count":1,
+        "tag":"nsfw"
+    },
+    {
+        "count":0.5,
+        "tag":"mature"
+    },
+    {
+        "count":0.5,
+        "tag":"nudity"
+    }
 ]
 tags_checked = [
     "казуальні ігри","рольові ігри","симулятори","пригоди","інді"
 ]
 
-
-def check_words(triggers: list, text: str) -> int:
-    words = text.lower().split()
-    return int(any(word in triggers for word in words))
 
 def ganre_check(ganres:list[dict]):
     """
@@ -29,9 +44,12 @@ def ganre_check(ganres:list[dict]):
 
 def tags_check(data:dict)->bool:
     tags = SteamClient.get_popular_tags(appid=data.get("steam_appid", 0))
-    for tag in tags:
-        if tag in tags_blocked_list:
-            return False
+    count_blocked = 0
+    for tag in tags_blocked_list:
+        if tag['tag'] in tags:
+            count_blocked += tag['count']
+            if count_blocked >= 1:
+                return False
     return True
 
 def filter_nfsm_content(data: dict) -> bool:

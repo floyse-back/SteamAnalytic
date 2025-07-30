@@ -4,21 +4,25 @@ from typing import AsyncGenerator
 
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy import text, select
+from sqlalchemy import text, select, create_engine, Connection, Transaction
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncConnection, AsyncTransaction, \
     async_sessionmaker
+from sqlalchemy.orm import sessionmaker
+
 from app.infrastructure.db.database import Base, get_async_db
 from app.infrastructure.db.models import steam_models
 from app.infrastructure.db.models.steam_models import Game, Category, Publisher, Ganres
 from app.infrastructure.db.models.users_models import UserModel, EmailConfirmed
 from app.infrastructure.logger.logger import Logger
 from app.main import app
-from app.utils.config import TEST_DATABASE_URL, ServicesConfig
+from app.utils.config import TEST_DATABASE_URL,TEST_DATABASE_SYNC_URL, ServicesConfig
 from app.utils.utils import hashed_password
 import asyncio
 import os
+import pytest
 
 engine = create_async_engine(TEST_DATABASE_URL)
+engine_sync = create_engine(TEST_DATABASE_SYNC_URL)
 
 service_config = ServicesConfig()
 
@@ -57,10 +61,23 @@ async def session(connection: AsyncConnection, transaction: AsyncTransaction):
     yield async_session
     await transaction.rollback()
 
-@pytest_asyncio.fixture(scope="function")
-async def sync_connection():
-    with engine.connect() as conn:
+@pytest.fixture(scope="function")
+def connection_sync():
+    with engine_sync.connect() as conn:
         yield conn
+
+@pytest.fixture()
+def transaction_sync(connection_sync: Connection):
+    with connection_sync.begin() as trans:
+        yield trans
+
+@pytest.fixture()
+def session_sync(connection_sync: Connection, transaction_sync: Transaction):
+    SessionLocal = sessionmaker(bind=connection_sync, expire_on_commit=False, autoflush=False)
+
+    yield SessionLocal
+    transaction_sync.rollback()
+
 
 @pytest_asyncio.fixture()
 async def client(connection:AsyncConnection,transaction:AsyncTransaction):

@@ -13,7 +13,6 @@ class GetRefreshTokenUseCase:
         user_model = await self.user_repository.get_user_for_id(user_id=int(user), session=session)
 
         access_token = create_access_token(user=user_model)
-        self.logger.debug(f"GetRefreshTokenUseCase: Get Refresh Token Successful ",access_token)
         self.logger.info("GetRefreshTokenUseCase: Get Refresh Token Successful %s",user)
         return TokenType(
             access_token=access_token,

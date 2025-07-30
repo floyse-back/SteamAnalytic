@@ -19,6 +19,7 @@ class UpdateGameWishlistUseCase:
         for game in data:
             for game_correct_data in correct_data:
                 if game_correct_data.steam_appid == game['steam_appid'] and (game['price_overview']['final'] != game_correct_data.final_price or game['price_overview']['discount_percent'] != game_correct_data.discount):
+                    self.logger.info(f"{game_correct_data} and {game} and {game_correct_data[0]}")
                     model = GameWishlistModel(
                             game_id=game_correct_data.steam_appid,
                             name=game_correct_data.name,

@@ -1,3 +1,4 @@
+import datetime
 import time
 
 from app.infrastructure.celery_app.celery_app import app, logger
@@ -7,6 +8,7 @@ from datetime import date
 from app.infrastructure.celery_app.database import get_db
 from app.infrastructure.celery_app.utils.steam_parser import SteamParser
 from app.infrastructure.db.models.steam_models import SteamBase, Game, SteamBaseTemp, SteamReserveBase
+from app.infrastructure.db.models.update_model import UpdateDateModel
 from app.infrastructure.db.models.users_models import RefreshToken
 from app.infrastructure.celery_app.utils.steam_details_parser import SteamDetailsParser
 from sqlalchemy import cast, Integer, delete, update, select, and_, or_, text, func
@@ -25,9 +27,15 @@ def update_steam_games(max_count:int=100):
     session = next(get_db())
     session_parser = next(get_db())
     logger.debug("Copy Data from table Steam to Steam_Last")
+    result = session.execute(select(UpdateDateModel).where(UpdateDateModel.update_steam_date == func.current_date()))
+    if result.scalar_one_or_none():
+        logger.info("This Task pushed to Steam this day")
+        return None
+    date_start = datetime.date.today()
     session.execute(delete(SteamReserveBase))
     session.execute(text("INSERT INTO steambase_copy SELECT * FROM steambase"))
     session.commit()
+
     parser = SteamParser()
     steam_detail_parser = SteamDetailsParser(
         session=session_parser,
@@ -38,7 +46,7 @@ def update_steam_games(max_count:int=100):
     session.query(SteamBaseTemp).delete()
 
     for data in generator_data:
-        try:
+        if True:
             if data != "Server don`t respond":
                 logger.debug("Bulk save objects")
                 session.bulk_save_objects(data)
@@ -56,7 +64,7 @@ def update_steam_games(max_count:int=100):
                             )
                         )
                     )
-                    .order_by(Game.steam_appid.desc())
+                    .order_by(Game.steam_appid.desc(),Game.discount.desc())
                     .limit(max_count)
                 )
                 result = session.execute(statement)
@@ -67,7 +75,7 @@ def update_steam_games(max_count:int=100):
                     time.sleep(70-len(appids))
                 else:
                     time.sleep(15)
-        except Exception as e:
+        else:
             logger.critical(f"{e} Exception occurred")
     columns = [
         'appid', 'name', 'developer', 'publisher', 'positive', 'negative',
@@ -114,16 +122,21 @@ def update_steam_games(max_count:int=100):
     )
     session.execute(stmt)
     session.commit()
+
+    update_model = UpdateDateModel(update_steam_date=date_start)
+    session.add(update_model)
+    session.commit()
     session.close()
+    session_parser.close()
+
     event_producer = EventProducer(
         logger = logger
     )
     event_producer.send_message(body={"type":"update_steam_games","status":True},queue="subscribe_queue")
     logger.info("Finished task update_steam_games!")
-    get_game_details.delay()
 
 @app.task(
-    max_retries=2,
+    max_retries=1,
     default_retry_delay=5
 )
 def get_game_details():
@@ -132,20 +145,19 @@ def get_game_details():
 
     try:
         statement = (select(SteamBase.appid)
-                     .join(SteamBaseTemp,SteamBase.appid == SteamBaseTemp.appid)
-                     .join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=False)
-                     .filter(and_(or_(SteamBaseTemp.discount != SteamBase.discount, SteamBaseTemp.price != SteamBase.price),
-                                  Game.last_updated.is_distinct_from(func.current_date)
+                     .join(SteamReserveBase,SteamBase.appid == SteamReserveBase.appid)
+                     .join(Game, cast(SteamBase.appid, Integer) == cast(Game.steam_appid, Integer), isouter=True)
+                     .filter(and_(or_(SteamReserveBase.discount != SteamBase.discount, SteamReserveBase.price != SteamBase.price),
+                                  Game.last_updated.is_distinct_from(date.today())
                             )
                             )
-                     .order_by(Game.last_updated)
-                     .limit(10000)
+                     .order_by(Game.last_updated,Game.discount)
                      )
         result = session.execute(statement)
         result = result.scalars().all()
         parser = SteamDetailsParser(session=session)
 
-        logger.info(f"Get games")
+        logger.info(f"Get games {len(result)}")
         parser.parse(game_list_appid=result)
 
     except Exception as e:

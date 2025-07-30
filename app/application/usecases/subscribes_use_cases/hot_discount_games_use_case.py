@@ -13,7 +13,7 @@ class HotDiscountUseCase:
 
     def execute(self,session,limit:int=5)->Optional[List[Game]]:
         self.logger.debug("HotDiscountUseCase execute")
-        data = self.news_repository.news_discounts_steam(session=session,limit=limit)
+        data = self.news_repository.news_discounts_steam(session=session,limit=5)
         if data is None:
             self.logger.info("HotDiscountUseCase execute not found Games")
             return None

@@ -45,6 +45,7 @@ class SteamDetailsParser:
         self.check_game_use_case = CheckGameBaseUseCase(
             safe_games_repository=SafeGameRepository(),
             blocked_repository=BlockedGamesRepository(),
+            logger=logger
         )
 
     @staticmethod
@@ -159,7 +160,7 @@ class SteamDetailsParser:
             recomendations=int(game.get("recommendations", {}).get("total", 0)),
             img_url=game.get("capsule_image"),
             trailer_url=self.get_trailer_url(data=game.get("movies")),
-            release_data=self.__transform_date(game.get("release_date",{"date":datetime.date.today()}).get("date")),
+            release_data=self.__transform_date(game.get("release_date",{"date":None}).get("date")),
         )
 
         # Додаємо категорії, жанри та видавців

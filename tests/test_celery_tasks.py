@@ -1,11 +1,18 @@
 import random
 import pytest
-from app.infrastructure.celery_app.tasks.steam_tasks import update_game_icon_url, send_email, update_steam_games
-from app.infrastructure.celery_app.tasks.news_tasks import update_steam_events, news_task_creator, news_game_from_ganre
+from app.infrastructure.celery_app.tasks.steam_tasks import update_game_icon_url, send_email, update_steam_games, \
+    get_game_details
+from app.infrastructure.celery_app.tasks.news_tasks import update_steam_events, news_task_creator, news_game_from_type
 from app.infrastructure.celery_app.tasks.subscribes_tasks import subscribes_task
 from app.infrastructure.messages.producer import EventProducer
 from tests.conftest import tests_logger as logger
 
+
+def test_steam_update_night_task():
+    update_steam_games.delay()
+
+def test_steam_upgrade_steam_games_task():
+    get_game_details.delay()
 
 class TestCeleryTasks:
     def test_create_very_big_tasks(self):
@@ -13,6 +20,7 @@ class TestCeleryTasks:
         for _ in range(10):
             r_n = random.randint(100000,999999)
             send_email.delay("floyse.fake@gmail.com",r_n,"delete_user")
+
 
 class TestCeleryNewsSenderTasks:
     @pytest.mark.parametrize(
@@ -41,7 +49,19 @@ class TestCeleryNewsSenderTasks:
     )
     def test_news_ganres_to_queue(self,ganre_name):
         try:
-            news_game_from_ganre.delay(ganre_name=ganre_name)
+            news_game_from_type.delay(name=ganre_name)
+        except Exception as e:
+            logger.error(e,exc_info=True)
+
+    @pytest.mark.parametrize(
+        "category_name",[
+            ("Кооперативна гра"),
+            ("Колекційні картки Steam"),
+        ]
+    )
+    def test_news_categories_to_queue(self,category_name):
+        try:
+            news_game_from_type.delay(name=category_name,type="category")
         except Exception as e:
             logger.error(e,exc_info=True)
 
@@ -73,4 +93,3 @@ class TestCelerySubscribeSenderTasks:
     def test_wishlist(self):
         event_producer = EventProducer(logger=logger)
         event_producer.send_message(body={"type": "update_steam_games", "status": True}, queue="subscribe_queue")
-
