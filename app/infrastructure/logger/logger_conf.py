@@ -3,7 +3,7 @@ import os
 import sys
 
 def setup_global_config_logger():
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         handlers=[
                             logging.StreamHandler(sys.stdout),
@@ -11,12 +11,12 @@ def setup_global_config_logger():
 )
 
 name_level = {
-    "domain":"app/infrastructure/logger/logs/domain.log",
-    "application":"app/infrastructure/logger/logs/application.log",
-    "api":"app/infrastructure/logger/logs/api.log",
-    "infrastructure":"app/infrastructure/logger/logs/infrastructure.log",
-    "celery_app":"app/infrastructure/logger/logs/celery_app.log",
-    "tests":"app/infrastructure/logger/logs/tests.log",
+    "domain":"infrastructure/logger/logs/domain.log",
+    "application":"infrastructure/logger/logs/application.log",
+    "api":"infrastructure/logger/logs/api.log",
+    "infrastructure":"infrastructure/logger/logs/infrastructure.log",
+    "celery_app":"infrastructure/logger/logs/celery_app.log",
+    "tests":"infrastructure/logger/logs/tests.log",
 }
 
 def get_logger(name: str, file_path: str = None) -> logging.Logger:

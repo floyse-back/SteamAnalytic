@@ -14,6 +14,7 @@ SYNC_DATABASE_URL = getenv("SYNC_DATABASE_URL")
 
 TEST_DATABASE_URL = getenv("TEST_DATABASE_URL")
 TEST_DATABASE_SYNC_URL = getenv("TEST_DATABASE_SYNC_URL")
+ALLOW_ORIGINS = getenv("ALLOW_ORIGINS")
 
 CELERY_BROKER_URL = getenv("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = getenv("CELERY_RESULT_BACKEND")
@@ -41,7 +42,7 @@ class TokenConfig(BaseModel):
     algorithm: str = "RS256"
 
     access_token_expires: int = 15
-    refresh_token_expires: int = 60
+    refresh_token_expires: int = 43200
 
 
 class ServiceConfig(BaseModel):

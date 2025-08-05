@@ -111,7 +111,7 @@ class UpdateCalendarEventsUseCase:
             try:
                 answer_data.append(self.__correct_steamworks_event_sale(line.text.strip(),full_month=True))
             except Exception as e:
-                logger.error(f"Error:%s\n line %s",e,line,exc_info=True)
+                logger.info(f"UpdateCalendarEventsException: {e}")
         festival_data = soup.find(class_="documentation_bbcode").find("table").find_all("tr")[1:-1]
         if festival_data is None:
             logger.critical(f"Steam Website does not contain a bb_subsection")

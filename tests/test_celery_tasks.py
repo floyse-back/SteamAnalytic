@@ -1,18 +1,25 @@
 import random
 import pytest
 from app.infrastructure.celery_app.tasks.steam_tasks import update_game_icon_url, send_email, update_steam_games, \
-    get_game_details
+    get_game_details, get_games_new_released
 from app.infrastructure.celery_app.tasks.news_tasks import update_steam_events, news_task_creator, news_game_from_type
 from app.infrastructure.celery_app.tasks.subscribes_tasks import subscribes_task
 from app.infrastructure.messages.producer import EventProducer
 from tests.conftest import tests_logger as logger
 
+def test_steam_update_released_games_task():
+    get_games_new_released.delay()
 
-def test_steam_update_night_task():
-    update_steam_games.delay()
+def test_steam_update_free_games_task():
+    get_games_new_released.delay(
+        type_task = "free"
+    )
 
 def test_steam_upgrade_steam_games_task():
     get_game_details.delay()
+
+def test_steam_update_events_task():
+    update_steam_events.delay()
 
 class TestCeleryTasks:
     def test_create_very_big_tasks(self):
@@ -25,13 +32,13 @@ class TestCeleryTasks:
 class TestCeleryNewsSenderTasks:
     @pytest.mark.parametrize(
         "type_news",[
-            ("news_free_games_now"),
-            ("news_top_for_a_coins"),
-            ("news_discounts_steam_now"),
-            ("news_new_release"),
-            ("news_event_history"),
-            ("news_random_game"),
-            ("news_calendar_event_now"),
+            #("news_free_games_now"),
+            #("news_top_for_a_coins"),
+            #("news_discounts_steam_now"),
+            #("news_new_release"),
+            #("news_event_history"),
+            #("news_random_game"),
+            #("news_calendar_event_now"),
         ]
     )
     def test_news_sender_to_queue(self,type_news):
@@ -77,7 +84,7 @@ class TestCelerySubscribeSenderTasks:
     @pytest.mark.parametrize(
         "sub_type",[
             ("subscribe_new_release"),
-            ("subscribe_free_games"),
+            ("subscribe_free_games_now"),
             ("subscribe_hot_discount_notificate"),
             ("subscribe_steam_news")
         ]

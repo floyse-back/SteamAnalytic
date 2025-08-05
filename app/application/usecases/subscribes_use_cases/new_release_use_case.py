@@ -16,6 +16,6 @@ class NewReleaseUseCase:
         if data is None:
             return None
         self.logger.debug(f"New release data: {data}")
-        serialize_data = [transform_to_dto(GameFullModel,i) for i in data]
+        serialize_data = [transform_to_dto(GameFullModel,i) for i in data[0:5]]
 
         return serialize_data

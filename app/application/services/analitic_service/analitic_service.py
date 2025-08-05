@@ -125,11 +125,15 @@ class AnalyticService:
             return False
 
         for value in data:
-            game = await self.get_game_details.execute(steam_id=int(value['appid']))
-            self.logger.info(f"FreeGames: game {game}")
-            if int(game.get("price_overview",{"discount_percent":0}).get("discount_percent",0))==100:
-                self.logger.info(f"FreeGames: {int(game.get("price_overview",{"discount_percent":0}).get("discount_percent",0))}")
-                answer.append(self.get_free_transform.execute(game,game_id=int(value['appid'])))
+            try:
+                game = await self.get_game_details.execute(steam_id=int(value['appid']))
+                check_game = game.get(f"{value['appid']}",{"data":{}}).get("data")
+                self.logger.info(f"FreeGames: game {check_game}")
+                if int(check_game.get("price_overview",{"discount_percent":0}).get("discount_percent",0))==100:
+                    self.logger.info(f"\nFreeGames: {int(check_game.get("price_overview",{"discount_percent":0}).get("discount_percent",0))}\n")
+                    answer.append(self.get_free_transform.execute(game,game_id=int(value['appid'])))
+            except Exception as e:
+                self.logger.error("Errror Analitic_service")
         self.logger.info(f"FreeGames: {len(answer)}")
         if len(answer) == 0:
             return False

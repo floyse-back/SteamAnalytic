@@ -37,7 +37,6 @@ def ganre_check(ganres:list[dict]):
     answer = 0
     for ganre in ganres:
         if ganre['description'].lower() in tags_checked:
-            print(ganre['description'])
             answer += 1
     return 1 if answer >= 2 else 0
 

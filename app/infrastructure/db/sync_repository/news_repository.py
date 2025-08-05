@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from typing import Optional, List, Sequence
 
 from sqlalchemy.orm import Session, aliased
@@ -13,8 +13,24 @@ class NewsRepository(INewsRepository):
     BLOCK_GANRES = ["Сексуальний вміст","Оголення"]
 
     def free_games_now(self,session)->Optional[Sequence[SteamBase.appid]]:
-        statement = select(SteamBase.appid).outerjoin(SteamReserveBase,SteamBase.appid==SteamReserveBase.appid)\
-        .filter(and_(SteamBase.discount==100,SteamReserveBase.discount!=100))
+        statement = (
+            select(SteamBase.appid)
+            .outerjoin(SteamReserveBase, SteamBase.appid == SteamReserveBase.appid)
+            .outerjoin(Game, cast(SteamBase.appid, Integer) == Game.steam_appid)
+            .filter(
+                or_(
+                    and_(
+                        SteamBase.discount == 100,
+                        SteamReserveBase.discount != 100
+                    ),
+                    and_(
+                        Game.discount == 100,
+                        SteamBase.discount != 100,
+                        Game.last_updated == date.today()
+                    )
+                )
+            )
+        )
         result=session.execute(statement)
         return result.scalars().all()
 
@@ -29,7 +45,8 @@ class NewsRepository(INewsRepository):
         .join(SteamBase,cast(SteamBase.appid,Integer)==Game.steam_appid)
         .filter(and_(
             SteamBase.discount > SteamReserveBase.discount,
-            Game.recomendations >= 250,
+            Game.recomendations >= 6000,
+            Game.release_data >= date(year=2018,month=1,day=1),
             Game.discount>=60,Game.discount!=100,
             Game.initial_price >= final_price
         )
@@ -70,28 +87,20 @@ class NewsRepository(INewsRepository):
         .join(Game.game_categories.of_type(CategoryAlias))
         .filter(and_(~CategoryAlias.category_name.in_(self.BLOCK_CATEGORIES),
                 ~Ganre.ganres_name.in_(self.BLOCK_GANRES),
-                Game.recomendations >= 7000,
-                Game.final_price>price,cast(Game.metacritic,Integer)>=70)).order_by(func.random()).limit(limit))
+                or_(Game.recomendations >= 7000,
+                Game.final_price>price,cast(Game.metacritic,Integer)>=70))).order_by(func.random()).limit(limit))
         result = session.execute(statement)
         return result.scalars().unique().all()
 
     def new_release(self,session:Session,now_date:date=date.today())-> Sequence[Game]:
-        Ganre = aliased(Ganres)
         CategoryAlias = aliased(Category)
-
-        statement = (select(Game).filter(and_(
-            Game.release_data == now_date,
-            Game.final_price >= 10000,
-            Game.initial_price >= 12000,
-            Game.recomendations >= 200
-        )
-        )
-        .join(Game.game_ganre.of_type(Ganre))
-        .filter(~Ganre.ganres_name.in_(self.BLOCK_GANRES),
-                ~CategoryAlias.category_name.in_(self.BLOCK_CATEGORIES),
-                )
-        .order_by(Game.recomendations).limit(5))
-        result = session.execute(statement).unique()
+        yestarday = now_date-timedelta(days=1)
+        statement = (select(Game).join(Game.game_categories.of_type(CategoryAlias))
+        .filter(and_(
+            ~CategoryAlias.category_name.in_(self.BLOCK_CATEGORIES),
+            Game.release_data == yestarday,
+        )).order_by(desc(Game.recomendations)))
+        result = session.execute(statement)
         return result.scalars().unique().all()
 
     def new_release_from_this_month(self,session,now_date:date=date.today())->Optional[List[Game]]:

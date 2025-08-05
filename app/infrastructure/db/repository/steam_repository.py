@@ -1,6 +1,7 @@
+from datetime import date
 from typing import Optional, List
 
-from sqlalchemy import select, desc, and_
+from sqlalchemy import select, desc, and_, cast, Integer, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.steam.repository import ISteamRepository
@@ -23,7 +24,18 @@ class SteamRepository(ISteamRepository):
         return result.scalars().all()
 
     async def get_free_discount_games(self,session:AsyncSession):
-        statement = select(SteamBase).where(SteamBase.discount>=100)
+        statement = (select(SteamBase)
+                     .outerjoin(Game,cast(SteamBase.appid,Integer)==Game.steam_appid)
+                     .filter(
+            or_(
+                SteamBase.discount >= 100,
+                and_(
+                    Game.discount == 100,
+                    Game.last_updated == date.today()
+                )
+            )
+        )
+        )
 
         result = await session.execute(statement)
         return result.scalars().all()
@@ -60,5 +72,4 @@ class SteamRepository(ISteamRepository):
 
         result = await session.execute(statement)
         return result.unique().scalars().all()
-
 

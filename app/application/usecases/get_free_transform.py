@@ -9,18 +9,18 @@ from app.infrastructure.db.models.steam_models import Category
 
 class GetFreeTransformUseCase:
     MONTHS_CODE = {
-        "Jan": 1,
-        "Feb": 2,
-        "Mar": 3,
-        "Apr": 4,
-        "May": 5,
-        "Jun": 6,
-        "Jul": 7,
-        "Aug": 8,
-        "Sep": 9,
-        "Oct": 10,
-        "Nov": 11,
-        "Dec": 12,
+        "січ.": 1,
+        "лют.": 2,
+        "берез.": 3,
+        "квіт.": 4,
+        "трав.": 5,
+        "черв.": 6,
+        "лип.": 7,
+        "серп.": 8,
+        "верес.": 9,
+        "жовт.": 10,
+        "листоп.": 11,
+        "груд.": 12,
     }
     """
     Трансформує дані типу GetGameStatsUseCase
@@ -65,8 +65,11 @@ class GetFreeTransformUseCase:
         date_split = my_date.split(" ")
         if len(date_split) < 3:
             return None
-        month_number = cls.MONTHS_CODE[date_split[0]]
-        day = int(date_split[1].replace(",",""))
+        try:
+            month_number = cls.MONTHS_CODE[date_split[1]]
+        except KeyError:
+            return None
+        day = int(date_split[0].replace(",",""))
         year = int(date_split[2])
         new_date = datetime.date(year=year,month=month_number,day=day)
         return new_date

@@ -44,7 +44,7 @@ class SubscribesService:
         )
         self.dispatcher_command:Dict[str,Callable] = {
             "subscribe_new_release":self.new_release,
-            "subscribe_free_games":self.free_games_now,
+            "subscribe_free_games_now":self.free_games_now,
             "subscribe_hot_discount_notificate":self.hot_discount_games,
             "subscribe_wishlist_notificate":self.wishlist_game_discount,
             "subscribe_steam_news":self.event_new,
@@ -89,6 +89,7 @@ class SubscribesService:
             self.logger.debug("Dispatcher Command: %s",func_name)
             return self.dispatcher_command[func_name](*args,**kwargs)
         except KeyError as e:
+            self.logger.warning(f"Dispatcher Command {func_name} not defined: {e}")
             raise KeyError(e)
         except Exception as e:
             self.logger.error(e)

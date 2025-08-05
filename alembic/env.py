@@ -17,6 +17,7 @@ from app.infrastructure.db.models import update_model
 # access to the values within the .ini file in use.
 config = context.config
 load_dotenv()
+
 config.set_main_option("sqlalchemy.url", os.getenv("ASYNC_DATABASE_URL"))
 
 

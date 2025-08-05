@@ -76,7 +76,6 @@ class SteamDetailsParser:
     def get_trailer_url(data:Optional[List])->str:
         logger.debug("Get Trailer URL")
         if data is None:
-            logger.debug("Get Trailer URL None")
             return ""
         for movie in data:
             if movie.get("name",{"name":None}) and movie['name'].lower().find("trailer")!=-1:
@@ -141,7 +140,7 @@ class SteamDetailsParser:
         day = int(date_split[0].replace(",",""))
         year = int(date_split[2])
         new_date = datetime.date(year=year,month=month_number,day=day)
-        logger.info(f"transform_date: %s",new_date)
+        logger.debug(f"transform_date: %s",new_date)
         return new_date
 
     def add_new_game(self,game,steam_appid):
@@ -199,7 +198,7 @@ class SteamDetailsParser:
                 self.add_new_game(game,steam_appid)
 
     @staticmethod
-    def __safe_sleep(min_delay=0.25, max_delay=0.5):
+    def __safe_sleep(min_delay:float=0.4, max_delay:float=0.7):
         time.sleep(random.uniform(min_delay, max_delay))
 
     def parse(self,game_list_appid):
@@ -228,7 +227,7 @@ class SteamDetailsParser:
             except Exception as e:
                 logger.info("Don`t parse game %s",i)
                 logger.warning("SteamDetailsParser error parse game: %s Game_appid = %s",e,appid)
-                time.sleep(5)
+                time.sleep(10)
 
 
         self.create_gamesdetails_model(new_list)

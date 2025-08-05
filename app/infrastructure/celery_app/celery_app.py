@@ -51,83 +51,121 @@ app.conf.beat_schedule = {
     # 🔄 Щоденне оновлення
     "update_every_night": {
         'task': 'app.infrastructure.celery_app.tasks.steam_tasks.update_steam_games',
-        'schedule': crontab(hour="7", minute="38")
+        'schedule': crontab(hour="0", minute="0")
     },
-
+    "get_games_new_released": {
+        'task': "app.infrastructure.celery_app.tasks.steam_tasks.get_games_new_released",
+        'schedule': crontab(hour="5", minute="10"),
+        'kwargs': {"type_task": "release"}
+    },
+    "get_games_details": {
+        'task': 'app.infrastructure.celery_app.tasks.steam_tasks.get_game_details',
+        'schedule': crontab(hour="5", minute="45")
+    },
+    "get_games_free": {
+        'task': "app.infrastructure.celery_app.tasks.steam_tasks.get_games_new_released",
+        'schedule': crontab(hour="20", minute="0"),
+        'kwargs': {"type_task":"free"}
+    },
+    "update_steam_events": {
+        'task': 'app.infrastructure.celery_app.tasks.news_tasks.update_steam_events',
+        'schedule': crontab(day_of_month="2")
+    },
     # 🔒 Токени
     "upgrade_tokens": {
         "task": "app.infrastructure.celery_app.tasks.users_tasks.upgrade_tokens",
-        "schedule": crontab(hour="12", minute="20")
+        "schedule": crontab(hour="7", minute="20")
     },
     "delete_refresh_tokens_by_time": {
         'task': 'app.infrastructure.celery_app.tasks.steam_tasks.delete_refresh_tokens_by_time',
-        'schedule': crontab(hour="3", minute="25")
+        'schedule': crontab(hour="7", minute="25")
     },
-
     # 🖼️ Іконки
     "update_game_icon_url": {
         'task': 'app.infrastructure.celery_app.tasks.steam_tasks.update_game_icon_url',
-        'schedule': crontab(hour="5", minute="0")
+        'schedule': crontab(hour="7", minute="28")
     },
-    # 📰 Новини (міксовані і рівномірні)
-    "news_free_games_now": {
-        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
-        "schedule": crontab(hour="12", minute="20"),
-        "kwargs": {"type_news": "news_free_games_now"}
-    },
+    # 📰 Новини (міксовані й рівномірні)
     "news_ganre_strategy": {
-        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_game_from_ganre",
-        "schedule": crontab(hour="12", minute="25"),
-        "kwargs": {"ganre_name": "Стратегії"}
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_game_from_type",
+        "schedule": crontab(hour="9", minute="0", day_of_week="mon,wed,fri,sun"),
+        "kwargs": {"name": "Стратегії"}
+    },
+    "news_categorie_coop": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_game_from_type",
+        "schedule": crontab(hour="10",minute="0",day_of_week="tue,thu,sat"),
+        "kwargs": {
+            "name": "Кооперативна гра",
+            "type": "categories"
+        }
     },
     "news_new_release": {
         "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
-        "schedule": crontab(hour="12", minute="30"),
+        "schedule": crontab(hour="11", minute="0"),
         "kwargs": {"type_news": "news_new_release"}
     },
     "news_ganre_fights": {
-        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_game_from_ganre",
-        "schedule": crontab(hour="12", minute="35"),
-        "kwargs": {"ganre_name": "Бойовики"}
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_game_from_type",
+        "schedule": crontab(hour="13", minute="0", day_of_week="mon,wed,fri,sun"),
+        "kwargs": {"name": "Бойовики"}
+    },
+    "news_categorie_collection_cards_steam": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_game_from_type",
+        "schedule": crontab(hour="13", minute="25", day_of_week="tue,thu,sat"),
+        "kwargs": {
+            "name": "Колекційні картки Steam",
+            "type": "categories"
+        }
     },
     "news_top_for_a_coins": {
         "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
-        "schedule": crontab(hour="12", minute="40"),
+        "schedule": crontab(hour="14", minute="0"),
         "kwargs": {"type_news": "news_top_for_a_coins"}
-    },
-    "news_ganre_adventure": {
-        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_game_from_ganre",
-        "schedule": crontab(hour="13", minute="42"),
-        "kwargs": {"ganre_name": "Пригоди"}
-    },
-    "news_event_history": {
-        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
-        "schedule": crontab(hour="12", minute="43"),
-        "kwargs": {"type_news": "news_event_history"}
     },
     "news_discounts_steam_now": {
         "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
-        "schedule": crontab(hour="12", minute="44"),
+        "schedule": crontab(hour="15", minute="0"),
         "kwargs": {"type_news": "news_discounts_steam_now"}
+    },
+    "news_ganre_adventure": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_game_from_type",
+        "schedule": crontab(hour="16", minute="0"),
+        "kwargs": {"name": "Пригоди"}
     },
     "news_random_game": {
         "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
-        "schedule": crontab(hour="12", minute="45"),
+        "schedule": crontab(hour="17", minute="0"),
         "kwargs": {"type_news": "news_random_game"}
     },
+    "news_event_history": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
+        "schedule": crontab(hour="18", minute="30"),
+        "kwargs": {"type_news": "news_event_history"}
+    },
+    "news_calendar_event_now": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
+        "schedule": crontab(hour="20", minute="15"),
+        "kwargs": {"type_news": "news_calendar_event_now"}
+    },
+    "news_free_games_now": {
+        "task": "app.infrastructure.celery_app.tasks.news_tasks.news_task_creator",
+        "schedule": crontab(hour="21", minute="0"),
+        "kwargs": {"type_news": "news_free_games_now"}
+    },
+    #Підписки
     "subscribe_new_release": {
         "task": "app.infrastructure.celery_app.tasks.subscribes_tasks.subscribes_task",
-        "schedule": crontab(hour="12", minute="47"),
+        "schedule": crontab(hour="10", minute="0"),
         "kwargs": {"sub_type": "subscribe_new_release"}
     },
     "subscribe_free_games": {
         "task": "app.infrastructure.celery_app.tasks.subscribes_tasks.subscribes_task",
-        "schedule": crontab(hour="12", minute="50"),
+        "schedule": crontab(hour="20", minute="33"),
         "kwargs": {"sub_type": "subscribe_free_games_now"}
     },
     "subscribe_hot_discount_notificate": {
         "task": "app.infrastructure.celery_app.tasks.subscribes_tasks.subscribes_task",
-        "schedule": crontab(hour="12", minute="53"),
+        "schedule": crontab(hour="15", minute="10"),
         "kwargs": {"sub_type": "subscribe_hot_discount_notificate"}
     },
     "subscribe_steam_news": {

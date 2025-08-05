@@ -35,7 +35,7 @@ class AnaliticRepository(IAnaliticsRepository):
         ).join(GanreToMany,GanreToMany.game_id==Game.steam_appid) \
         .join(Ganres,Ganres.ganres_id==GanreToMany.ganre_id) \
         .join(CategoryToMany, CategoryToMany.game_id == Game.steam_appid, isouter=True) \
-        .join(Category, Category.category_id == CategoryToMany.category_id, isouter=True).where(Game.steam_appid.notin_(steam_appids)) \
+        .join(Category, Category.category_id == CategoryToMany.category_id, isouter=True).where(Game.steam_appid.notin_(steam_appids),Game.recomendations >=4000) \
         .group_by(Game.name,Game.steam_appid,Game.img_url,Game.final_formatted_price,Game.discount,Game.short_description,Game.recomendations,Game.metacritic))
 
         subquery = query.subquery()
@@ -67,7 +67,7 @@ class AnaliticRepository(IAnaliticsRepository):
         ).join(GanreToMany,GanreToMany.game_id==Game.steam_appid) \
         .join(Ganres,Ganres.ganres_id==GanreToMany.ganre_id) \
         .join(CategoryToMany, CategoryToMany.game_id == Game.steam_appid, isouter=True) \
-        .join(Category, Category.category_id == CategoryToMany.category_id, isouter=True).where(and_(Game.steam_appid.notin_(steam_appids), Game.discount >= 70)) \
+        .join(Category, Category.category_id == CategoryToMany.category_id, isouter=True).where(and_(Game.steam_appid.notin_(steam_appids),Game.recomendations >=4000, Game.discount >= 70)) \
         .group_by(Game.name,Game.steam_appid,Game.img_url,Game.discount))
 
         subquery = query.subquery()

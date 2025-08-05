@@ -3,11 +3,12 @@ import json
 import pika
 
 from app.domain.logger import ILogger
+from app.utils.config import RABBITMQ_HOST
 
 
 class EventProducer:
     def __init__(self,logger: ILogger):
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=f'{RABBITMQ_HOST}'))
         self.channel = self.connection.channel()
         self.logger = logger
 
